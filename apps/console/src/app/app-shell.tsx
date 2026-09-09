@@ -77,6 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     staleTime: 30_000,
   })
   const isVoiceRoute = location.pathname.startsWith('/voice')
+  const isPersonaEditorRoute = /^\/voice\/personas\/(new|[^/]+\/edit)$/.test(location.pathname)
 
   return (
     <div className="app-shell">
@@ -102,7 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AccountMenu />
         </div>
       </header>
-      <main className="page-content">
+      <main className={`page-content${isPersonaEditorRoute ? ' persona-editor-shell' : ''}`}>
         {isVoiceRoute ? (
           <div className="voice-layout">
             <nav className="voice-subnav" aria-label="语音功能">

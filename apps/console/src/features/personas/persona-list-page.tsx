@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CircleUserRound, Pencil, Plus, ShieldCheck, Trash2 } from 'lucide-react'
+import { CircleUserRound, Plus, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { PersonaSummary } from '@guide/contracts'
 import { useConfirmModalController, useToastStackController } from '../../ui-adapters'
+import { PersonaActionsMenu } from './persona-actions-menu'
 import { deletePersona, listPersonas, personaQueryKey } from './personas-api'
 
 const personaDateFormatter = new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' })
@@ -114,23 +115,14 @@ export function PersonaListPage() {
                   <td className="guide-table-cell">{personaDateFormatter.format(new Date(persona.updatedAt))}</td>
                   <td className="guide-table-cell guide-table-cell-actions actions-cell" onClick={(event) => event.stopPropagation()}>
                     {!persona.isSystemDefault ? (
-                      <>
-                        <button className="guide-button guide-button-icon" type="button" title="编辑" aria-label={`编辑 ${persona.name}`} onClick={() => navigate(`/voice/personas/${persona.id}/edit`)}>
-                          <Pencil aria-hidden="true" size={16} strokeWidth={1.8} />
-                        </button>
-                        <button
-                          className="guide-button guide-button-icon persona-delete-icon"
-                          type="button"
-                          title="删除"
-                          aria-label={`删除 ${persona.name}`}
-                          onClick={(event) => {
-                            setDeleteTrigger(event.currentTarget)
-                            setPendingDelete(persona)
-                          }}
-                        >
-                          <Trash2 aria-hidden="true" size={16} strokeWidth={1.8} />
-                        </button>
-                      </>
+                      <PersonaActionsMenu
+                        personaName={persona.name}
+                        onEdit={() => navigate(`/voice/personas/${persona.id}/edit`)}
+                        onDelete={(trigger) => {
+                          setDeleteTrigger(trigger)
+                          setPendingDelete(persona)
+                        }}
+                      />
                     ) : <span className="persona-action-muted">只读</span>}
                   </td>
                 </tr>

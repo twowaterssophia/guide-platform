@@ -66,6 +66,8 @@ export interface ConfirmModalControllerOptions {
   title: string
   description?: string
   trigger?: HTMLElement | null
+  confirmLabel?: string
+  cancelLabel?: string
   onConfirm: () => void
   onCancel: () => void
 }
@@ -75,6 +77,8 @@ export function useConfirmModalController({
   title,
   description,
   trigger,
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
 }: ConfirmModalControllerOptions) {
@@ -88,6 +92,8 @@ export function useConfirmModalController({
       title,
       description,
       trigger: trigger ?? undefined,
+      confirmLabel,
+      cancelLabel,
       open: false,
       showClose: false,
       danger: true,

@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Pencil, ShieldCheck, Sparkles, Trash2 } from 'lucide-react'
+import { ArrowLeft, Pencil, ShieldCheck, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useConfirmModalController, useToastStackController } from '../../ui-adapters'
+import { PersonaActionsMenu } from './persona-actions-menu'
 import { deletePersona, getPersona, personaQueryKey } from './personas-api'
 
 export function PersonaDetailPage() {
@@ -63,13 +64,13 @@ export function PersonaDetailPage() {
               <Pencil aria-hidden="true" size={16} strokeWidth={1.8} />
               编辑
             </button>
-            <button className="guide-button guide-button-danger" type="button" onClick={(event) => {
-              setDeleteTrigger(event.currentTarget)
-              setConfirmingDelete(true)
-            }}>
-              <Trash2 aria-hidden="true" size={16} strokeWidth={1.8} />
-              删除人设
-            </button>
+            <PersonaActionsMenu
+              personaName={persona.name}
+              onDelete={(trigger) => {
+                setDeleteTrigger(trigger)
+                setConfirmingDelete(true)
+              }}
+            />
           </div>
         ) : null}
       </div>
