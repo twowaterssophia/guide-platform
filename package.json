@@ -11,10 +11,12 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "test:console:e2e": "playwright test"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",
+    "@playwright/test": "^1.63.0",
     "eslint": "^9.35.0",
     "globals": "^16.3.0",
     "typescript": "^5.9.3",

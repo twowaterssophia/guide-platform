@@ -89,10 +89,10 @@ export function useConfirmModalController({
       description,
       trigger: trigger ?? undefined,
       open: false,
-      showClose: true,
+      showClose: false,
       danger: true,
-      dismissOnBackdrop: true,
-      dismissOnEscape: true,
+      dismissOnBackdrop: false,
+      dismissOnEscape: false,
       onConfirm: () => callbacksRef.current.onConfirm(),
       onCancel: () => callbacksRef.current.onCancel(),
     })
@@ -112,7 +112,7 @@ export function useToastStackController() {
 
   useEffect(() => {
     const stack = createToastStack({
-      position: 'top-right',
+      position: 'top-center',
       maxVisible: 4,
       ariaLabel: '操作提示',
     })

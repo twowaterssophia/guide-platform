@@ -308,7 +308,7 @@ export function createConfirmModal({
   confirmAction,
   cancelAction,
   closeLabel = '关闭',
-  showClose = true,
+  showClose = false,
   open: initiallyOpen = false,
   trigger,
   ariaLabel,

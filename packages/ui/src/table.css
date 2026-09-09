@@ -8,7 +8,7 @@
   border-collapse: collapse;
   color: var(--guide-color-text);
   font-family: var(--guide-font-sans);
-  min-width: 100%;
+  min-width: 760px;
   width: 100%;
 }
 

@@ -14,6 +14,7 @@
   min-width: 0;
   padding: 0 18px;
   transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease, opacity 120ms ease;
+  white-space: nowrap;
 }
 
 .guide-button:focus-visible {
@@ -60,6 +61,7 @@
 .guide-button-danger {
   background: var(--guide-color-danger);
   color: var(--guide-color-page);
+  height: 38px;
 }
 
 .guide-button-danger:hover,

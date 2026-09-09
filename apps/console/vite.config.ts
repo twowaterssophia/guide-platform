@@ -13,5 +13,11 @@ export default defineConfig({
     fs: {
       allow: [fileURLToPath(new URL('../..', import.meta.url))],
     },
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+      },
+    },
   },
 })
