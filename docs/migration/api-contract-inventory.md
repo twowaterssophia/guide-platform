@@ -92,16 +92,17 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 | 方法 | 路径 | 请求 | 响应 | 规则 |
 | --- | --- | --- | --- | --- |
 | `GET` | `/tour-tasks` | 兼容现有；后续支持分页 | `TourTaskListPage` | 当前摘要接口保持可用。 |
-| `POST` | `/tour-tasks` | `TourTaskWriteInput` | `TourTaskDetail` | 契约与动作持久化已就绪，待 `MAP-001` / `TASK-003`；创建 DRAFT 并原子写入点位、路径和动作。 |
-| `GET` | `/tour-tasks/:taskId` | 无 | `TourTaskDetail` | 契约已定义，待 `MAP-001` / `TASK-003`；包含地图、人设、点位、路径、动作和版本。 |
-| `PATCH` | `/tour-tasks/:taskId` | `TourTaskUpdateInput` | `TourTaskDetail` | 契约已定义，待 `MAP-001` / `TASK-003`；校验版本和引用完整性。 |
+| `POST` | `/tour-tasks` | `TourTaskWriteInput` | `TourTaskDetail` | 已接入；创建 DRAFT 并在事务中原子写入点位、路径和动作，校验地图/人设归属与技能可用性。 |
+| `GET` | `/tour-tasks/:taskId` | 无 | `TourTaskDetail` | 已接入；包含地图、人设、点位、路径、动作和版本，按当前账号隔离。 |
+| `PATCH` | `/tour-tasks/:taskId` | `TourTaskUpdateInput` | `TourTaskDetail` | 已接入；使用 `expectedVersion` 做乐观并发控制，更新时重建编排结构。 |
+| `DELETE` | `/tour-tasks/:taskId` | 无 | `204 No Content` | 已接入；当前账号删除并由数据库级联清理点位、路径和动作。 |
 | `DELETE` | `/tour-tasks/:taskId` | 无 | `204` | 清理任务下属点位、路径、动作和下载记录。 |
 | `POST` | `/tour-tasks/:taskId/publish` | `expectedVersion` | `TourTaskDetail` | 仅完整编排可发布；递增版本。 |
 | `POST` | `/tour-tasks/:taskId/archive` | `expectedVersion` | `TourTaskDetail` | 已下载任务的 Agent 可继续执行已下载版本。 |
 
 `TourTaskWriteInput` 已表达 `name`、必填 `mapId`、可选 `personaId`、有序点位、连续路径和
 有序动作。输入点位使用请求内 `key`，路径引用相邻点位 key；`interactionPrompt` 已由
-`TASK-002` 持久化。任务写 API 仍等待 `MAP-001` 提供受当前用户保护的地图查询。
+`TASK-002` 持久化。任务写 API 已在 `TASK-003` 接入，并依赖 `MAP-001` 提供受当前用户保护的地图查询。
 
 ### Agent sync
 
