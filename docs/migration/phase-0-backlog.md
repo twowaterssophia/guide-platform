@@ -87,6 +87,9 @@ FND-001..005
 - [x] FND-002：Console 已通过工作区依赖从 `@guide/ui` 导入组件与样式，不再引用
   `packages/ui/src`。UI 包导出并在构建时复制 `styles.css` 及其依赖。验收：UI 与 Console
   的 `typecheck`、`lint`、`build` 均通过。
-- [ ] FND-003：Prisma migration 和数据库启动基线。
+- [ ] FND-003：已生成首个 Prisma migration，并为 API 增加本地环境模板与 `.env` 加载。
+  静态验收：`prisma generate`、`prisma validate`、API `typecheck`、`lint` 均通过。运行时
+  验收被 Docker Desktop 阻塞：残留的 `dockerInference` reparse point 无法由当前安全策略清理，
+  导致 Docker 引擎在启动时退出；尚未执行空库 `migrate` 与 `seed`。
 - [ ] FND-004：API 错误、当前用户与请求日志基础。
 - [ ] FND-005：测试基础。

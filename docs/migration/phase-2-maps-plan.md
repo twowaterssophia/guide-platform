@@ -1,6 +1,6 @@
 # 阶段二：地图资源迁移计划
 
-状态：已规划；实施阻塞于阶段一准入条件与地图文件产品参数。
+状态：执行中；FND-001、FND-002 已完成，FND-003 的运行时验收受 Docker Desktop 故障阻塞。
 
 ## 目标
 
@@ -21,13 +21,13 @@
 
 ## 硬性准入条件
 
-阶段二不能跳过以下基础项；当前全部未完成：
+阶段二不能跳过以下基础项：
 
 | Gate | 当前状态 | 为什么必须先完成 |
 | --- | --- | --- |
-| FND-001：拆分 Console 边界 | 未完成 | 地图不能继续堆入单一 `app.tsx`。 |
-| FND-002：正式使用 `@guide/ui` | 未完成 | 地图的 Modal、Table、Toast、Confirm Modal 需要稳定组件边界。 |
-| FND-003：Prisma migration 与可启动数据库 | 未完成 | 地图元数据不能只写到未迁移的 schema。 |
+| FND-001：拆分 Console 边界 | 已完成 | 地图不能继续堆入单一 `app.tsx`。 |
+| FND-002：正式使用 `@guide/ui` | 已完成 | 地图的 Modal、Table、Toast、Confirm Modal 需要稳定组件边界。 |
+| FND-003：Prisma migration 与可启动数据库 | 部分完成，运行时受阻 | 地图元数据不能只写到未迁移的 schema。 |
 | FND-004：当前用户与统一错误 | 未完成 | 地图必须按账号隔离，上传和引用错误必须稳定返回。 |
 | FND-005：测试基础 | 未完成 | 上传、删除保护和权限不能只靠手工验证。 |
 
@@ -43,7 +43,7 @@ PRD 仍有三个未定的产品参数，不能由工程侧任意填写：
 
 ### 2.0 完成准入基础（阶段一依赖）
 
-状态：进行前阻塞。
+状态：执行中；第 1、2 项已完成，第 3 项已生成 migration，但尚未通过空库运行时验收。
 
 1. 完成 FND-001：将 Console 拆为应用壳、路由、API client、业务 feature 和页面。
 2. 完成 FND-002：将 UI 引用收敛到 `@guide/ui` 的正式导出。
@@ -53,6 +53,10 @@ PRD 仍有三个未定的产品参数，不能由工程侧任意填写：
 
 退出条件：空数据库可迁移并 seed；Console/API 都有可重复运行的测试入口；业务服务
 不再自行硬编码 demo email。
+
+当前运行时阻塞：Docker Desktop 在启动 Inference manager 时无法清理
+`C:\Users\xxuuq\AppData\Local\Docker\run\dockerInference` 端点并退出。该端点是遗留
+reparse point，清理操作被当前本机安全策略拦截；修复 Docker 后需继续执行本节第 3 至 5 项。
 
 ### 2.1 定稿地图合同与存储 Provider
 

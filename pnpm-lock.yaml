@@ -101,6 +101,9 @@ importers:
       class-validator:
         specifier: ^0.14.2
         version: 0.14.4
+      dotenv:
+        specifier: 16.4.7
+        version: 16.4.7
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -1644,6 +1647,10 @@ packages:
   diff@4.0.4:
     resolution: {integrity: sha512-X07nttJQkwkfKfvTPG/KSnE2OMdcUCao6+eXF3wmnIQRn2aPAHH3VxDbDOdegkd6JbPsXqShpvEOHfAT+nCNwQ==}
     engines: {node: '>=0.3.1'}
+
+  dotenv@16.4.7:
+    resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
+    engines: {node: '>=12'}
 
   dotenv@16.6.1:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
@@ -4246,6 +4253,8 @@ snapshots:
   destr@2.0.5: {}
 
   diff@4.0.4: {}
+
+  dotenv@16.4.7: {}
 
   dotenv@16.6.1: {}
 
