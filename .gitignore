@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.vite/
+coverage/
+.codex-preview/
+_wbcheck/
+tmp/
+.env
+.env.*
+!.env.example
+*.log
+prisma/dev.db
+prisma/dev.db-journal

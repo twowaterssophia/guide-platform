@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TourTaskStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum TaskActionType {
+  SPEECH
+  SKILL
+  INTERACTION
+}
+
+enum PluginAuthType {
+  NONE
+  BEARER
+  API_KEY
+  BASIC
+}
+
+model User {
+  id             String      @id @default(cuid())
+  externalId     String?     @unique
+  email          String      @unique
+  displayName    String?
+  maps           MapAsset[]
+  tourTasks      TourTask[]
+  personas       Persona[]
+  mcpPlugins     McpPlugin[]
+  agentDownloads AgentDownload[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model MapAsset {
+  id               String     @id @default(cuid())
+  ownerId          String
+  owner            User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name             String
+  storageKey       String
+  originalFileName String
+  mediaType        String
+  sizeBytes        Int
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  tourTasks        TourTask[]
+
+  @@index([ownerId, createdAt])
+}
+
+model TourTask {
+  id            String         @id @default(cuid())
+  ownerId       String
+  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name          String
+  mapId         String
+  map           MapAsset       @relation(fields: [mapId], references: [id], onDelete: Restrict)
+  personaId     String?
+  persona       Persona?       @relation(fields: [personaId], references: [id], onDelete: SetNull)
+  status        TourTaskStatus @default(DRAFT)
+  version       Int            @default(1)
+  points        TourPoint[]
+  paths         TourPath[]
+  downloads     AgentDownload[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([ownerId, createdAt])
+  @@index([mapId])
+}
+
+model TourPoint {
+  id        String       @id @default(cuid())
+  taskId    String
+  task      TourTask     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  sequence  Int
+  name      String
+  x         Float
+  y         Float
+  angle     Float
+  actions   TaskAction[] @relation("PointActions")
+
+  @@unique([taskId, sequence])
+}
+
+model TourPath {
+  id          String       @id @default(cuid())
+  taskId      String
+  task        TourTask     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  fromPointId String
+  toPointId   String
+  sequence    Int
+  actions     TaskAction[] @relation("PathActions")
+
+  @@unique([taskId, sequence])
+}
+
+model TaskAction {
+  id          String         @id @default(cuid())
+  pointId     String?
+  point       TourPoint?     @relation("PointActions", fields: [pointId], references: [id], onDelete: Cascade)
+  pathId      String?
+  path        TourPath?      @relation("PathActions", fields: [pathId], references: [id], onDelete: Cascade)
+  sequence    Int
+  type        TaskActionType
+  narration   String?
+  skillId     String?
+  skillName   String?
+  createdAt   DateTime       @default(now())
+}
+
+model Persona {
+  id                  String          @id @default(cuid())
+  ownerId             String?
+  owner               User?           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name                String
+  voice               String
+  prompt              String           @default("")
+  isSystemDefault     Boolean          @default(false)
+  presetSkillsEnabled Boolean          @default(true)
+  pluginLinks         PersonaPlugin[]
+  tourTasks           TourTask[]
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([ownerId, createdAt])
+}
+
+model McpPlugin {
+  id                     String          @id @default(cuid())
+  ownerId                String
+  owner                  User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name                   String
+  description            String
+  examples               String
+  serviceUrl             String
+  authType               PluginAuthType  @default(NONE)
+  encryptedConfiguration String?
+  customHeaders          Json?
+  tools                  Json?
+  lastRefreshedAt        DateTime?
+  personaLinks           PersonaPlugin[]
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+
+  @@index([ownerId, createdAt])
+}
+
+model PersonaPlugin {
+  personaId String
+  pluginId  String
+  persona   Persona   @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  plugin    McpPlugin @relation(fields: [pluginId], references: [id], onDelete: Cascade)
+
+  @@id([personaId, pluginId])
+}
+
+model AgentDownload {
+  id              String   @id @default(cuid())
+  ownerId         String
+  owner           User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  deviceId        String
+  tourTaskId      String
+  tourTask        TourTask @relation(fields: [tourTaskId], references: [id], onDelete: Cascade)
+  downloadedVersion Int
+  downloadedAt    DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([deviceId, tourTaskId])
+  @@index([ownerId, deviceId])
+}

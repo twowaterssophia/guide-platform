@@ -1,0 +1,53 @@
+.guide-empty {
+  align-items: center;
+  background: linear-gradient(135deg, var(--guide-color-empty-start), var(--guide-color-empty-end));
+  border: var(--guide-border-width) solid var(--guide-color-border);
+  border-radius: var(--guide-radius-lg);
+  color: var(--guide-color-text);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 430px;
+  padding: var(--guide-space-8);
+  text-align: center;
+}
+
+.guide-empty-icon {
+  align-items: center;
+  color: var(--guide-color-text-tertiary);
+  display: flex;
+  justify-content: center;
+  margin-bottom: 26px;
+  max-width: 100%;
+}
+
+.guide-empty-title {
+  color: var(--guide-color-text);
+  font-size: var(--guide-type-section-title-size);
+  font-weight: var(--guide-type-section-title-weight);
+  line-height: var(--guide-type-section-title-line-height);
+  margin: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.guide-empty-description {
+  color: var(--guide-color-text-placeholder);
+  font-size: var(--guide-type-body-size);
+  line-height: var(--guide-type-body-line-height);
+  margin: 10px 0 0;
+  max-width: 560px;
+  overflow-wrap: anywhere;
+}
+
+.guide-empty-action {
+  margin-top: 28px;
+  max-width: 100%;
+}
+
+@media (max-width: 480px) {
+  .guide-empty {
+    min-height: 360px;
+    padding: var(--guide-space-6) var(--guide-space-4);
+  }
+}

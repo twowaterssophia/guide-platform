@@ -1,0 +1,90 @@
+:root {
+  /* Hi Chat Design -> 导览后台：design-spec.md v1.1 */
+
+  /* Color */
+  --guide-color-page: #ffffff;
+  --guide-color-canvas: var(--guide-color-page);
+  --guide-color-empty-start: #f5f5f5;
+  --guide-color-empty-end: #f9feff;
+  --guide-color-persona-start: #f5f7ff;
+  --guide-color-persona-end: #fafeff;
+  --guide-color-text-strong: #161616;
+  --guide-color-text: #303030;
+  --guide-color-text-muted: #777777;
+  --guide-color-text-placeholder: #8a8a8a;
+  --guide-color-text-secondary: var(--guide-color-text-muted);
+  --guide-color-text-tertiary: var(--guide-color-text-placeholder);
+  --guide-color-border-strong: rgb(188 188 188 / 16%);
+  --guide-color-border: #d5d5d5;
+  --guide-color-divider: #ededed;
+  --guide-color-surface-subtle: #f8f8f8;
+  --guide-color-surface-hover: #f3f3f3;
+  --guide-color-accent: #6e63ff;
+  --guide-color-accent-soft: rgb(110 99 255 / 15%);
+  --guide-color-primary: var(--guide-color-accent);
+  --guide-color-primary-hover: #5b52e8;
+  --guide-color-primary-soft: var(--guide-color-accent-soft);
+  --guide-color-focus: var(--guide-color-accent);
+  --guide-color-danger: #b42318;
+  --guide-color-danger-hover: #8f1d14;
+  --guide-color-success: #2f7d4a;
+  --guide-color-disabled: #999999;
+  --guide-color-disabled-surface: #e5e5e5;
+  --guide-color-backdrop: rgb(0 0 0 / 32%);
+
+  /* Typography */
+  --guide-font-sans: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --guide-type-page-title-size: 26px;
+  --guide-type-page-title-weight: 650;
+  --guide-type-page-title-line-height: 1.25;
+  --guide-type-section-title-size: 18px;
+  --guide-type-section-title-weight: 600;
+  --guide-type-section-title-line-height: 1.4;
+  --guide-type-subsection-size: 14px;
+  --guide-type-subsection-weight: 600;
+  --guide-type-subsection-line-height: 1.4;
+  --guide-type-body-size: 13px;
+  --guide-type-body-weight: 400;
+  --guide-type-body-line-height: 1.55;
+  --guide-type-body-strong-size: 13px;
+  --guide-type-body-strong-weight: 600;
+  --guide-type-body-strong-line-height: 1.5;
+  --guide-type-label-size: 13px;
+  --guide-type-label-weight: 600;
+  --guide-type-label-line-height: 1.4;
+  --guide-type-caption-size: 12px;
+  --guide-type-caption-weight: 400;
+  --guide-type-caption-line-height: 1.5;
+  --guide-type-button-size: 13px;
+  --guide-type-button-weight: 600;
+  --guide-type-button-line-height: 1;
+
+  /* Spacing */
+  --guide-space-1: 4px;
+  --guide-space-2: 8px;
+  --guide-space-3: 12px;
+  --guide-space-4: 16px;
+  --guide-space-5: 20px;
+  --guide-space-6: 24px;
+  --guide-space-7: 28px;
+  --guide-space-8: 32px;
+  --guide-space-10: 40px;
+  --guide-space-12: 48px;
+  --guide-space-16: 64px;
+  --guide-page-gutter: var(--guide-space-12);
+  --guide-action-bar-height: 72px;
+
+  /* Radius and border */
+  --guide-radius-sm: 3px;
+  --guide-radius-md: 4px;
+  --guide-radius-lg: 6px;
+  --guide-radius-round: 50%;
+  --guide-border-width: 1px;
+  --guide-border-width-table: 0.5px;
+  --guide-focus-outline-width: 2px;
+
+  /* Elevation */
+  --guide-shadow-popover: 0 10px 24px rgb(0 0 0 / 10%);
+  --guide-shadow-modal: 0 20px 60px rgb(0 0 0 / 12%);
+  --guide-shadow-toast: 0 10px 30px rgb(0 0 0 / 12%);
+}

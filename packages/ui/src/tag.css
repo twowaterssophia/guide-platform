@@ -1,0 +1,45 @@
+.guide-tag {
+  align-items: center;
+  background: var(--guide-color-surface-subtle);
+  border: 1px solid #dedede;
+  border-radius: var(--guide-radius-sm);
+  color: #565656;
+  display: inline-flex;
+  font-family: var(--guide-font-sans);
+  font-size: var(--guide-type-caption-size);
+  font-weight: var(--guide-type-caption-weight);
+  height: 26px;
+  line-height: var(--guide-type-caption-line-height);
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 var(--guide-space-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.guide-tag-default {
+  background: var(--guide-color-surface-subtle);
+  color: #565656;
+}
+
+.guide-tag-success {
+  background: rgb(47 125 74 / 12%);
+  color: var(--guide-color-success);
+}
+
+.guide-tag-warning {
+  background: #fff7e6;
+  color: #8a4b08;
+}
+
+.guide-tag-danger {
+  background: #fef3f2;
+  color: var(--guide-color-danger);
+}
+
+.guide-tag-info {
+  background: #eff8ff;
+  color: #175cd3;
+}

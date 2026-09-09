@@ -1,0 +1,112 @@
+.guide-button {
+  align-items: center;
+  border: var(--guide-border-width) solid transparent;
+  border-radius: var(--guide-radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: var(--guide-font-sans);
+  font-size: var(--guide-type-button-size);
+  font-weight: var(--guide-type-button-weight);
+  gap: var(--guide-space-3);
+  height: 44px;
+  justify-content: center;
+  line-height: var(--guide-type-button-line-height);
+  min-width: 0;
+  padding: 0 18px;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease, opacity 120ms ease;
+}
+
+.guide-button:focus-visible {
+  outline: var(--guide-focus-outline-width) solid var(--guide-color-focus);
+  outline-offset: 2px;
+}
+
+.guide-button:disabled,
+.guide-button.is-loading {
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.guide-button:disabled:not(.is-loading) {
+  background: var(--guide-color-disabled-surface);
+  border-color: var(--guide-color-disabled-surface);
+  color: var(--guide-color-disabled);
+}
+
+.guide-button.is-loading {
+  pointer-events: none;
+}
+
+.guide-button.is-loading::after {
+  animation: guide-button-spin 800ms linear infinite;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--guide-radius-round);
+  content: '';
+  height: 12px;
+  width: 12px;
+}
+
+.guide-button-primary {
+  background: var(--guide-color-primary);
+  color: var(--guide-color-page);
+}
+
+.guide-button-primary:hover,
+.guide-button-primary:focus-visible {
+  background: var(--guide-color-primary-hover);
+}
+
+.guide-button-danger {
+  background: var(--guide-color-danger);
+  color: var(--guide-color-page);
+}
+
+.guide-button-danger:hover,
+.guide-button-danger:focus-visible {
+  background: var(--guide-color-danger-hover);
+}
+
+.guide-button-secondary {
+  background: var(--guide-color-page);
+  border-color: var(--guide-color-border);
+  color: var(--guide-color-text);
+  height: 38px;
+}
+
+.guide-button-secondary:hover {
+  background: var(--guide-color-surface-subtle);
+  border-color: var(--guide-color-text-muted);
+}
+
+.guide-button-text,
+.guide-button-icon {
+  background: transparent;
+  color: var(--guide-color-text-muted);
+  height: 30px;
+}
+
+.guide-button-text {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.guide-button-icon {
+  padding: 0;
+  width: 30px;
+}
+
+.guide-button-text:hover,
+.guide-button-icon:hover {
+  color: var(--guide-color-text-strong);
+}
+
+.guide-button-text:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+@keyframes guide-button-spin {
+  to { transform: rotate(360deg); }
+}

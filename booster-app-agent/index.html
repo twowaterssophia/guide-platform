@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101316" />
+    <title>Booster App - 导览</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-viewport">
+    <main class="app-stage" aria-label="Booster App 导览 Agent 固定界面">
+      <img class="camera-placeholder" src="assets/camera-placeholder.svg" alt="实时相机画面占位图" />
+      <div class="camera-shade" aria-hidden="true"></div>
+
+      <header class="system-header">
+        <button class="agent-switcher" type="button" aria-label="切换 Agent">
+          <span class="agent-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 19.5V8.8a7 7 0 0 1 14 0v10.7" />
+              <path d="M8.2 19.5v-5.6a3.8 3.8 0 0 1 7.6 0v5.6" />
+              <path d="M12 4.5v4.1" />
+              <path d="M10.1 15.5h.01M13.9 15.5h.01" />
+            </svg>
+          </span>
+          <span class="agent-name">导览</span>
+          <span class="agent-separator" aria-hidden="true"></span>
+          <span class="switch-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M5 7h8M17 7h2M5 17h2M11 17h8" />
+              <circle cx="15" cy="7" r="2" />
+              <circle cx="9" cy="17" r="2" />
+            </svg>
+          </span>
+        </button>
+
+        <div class="system-status" aria-label="机器人状态">
+          <span class="emergency-status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="8" />
+              <path d="m4.5 4.5 15 15" />
+            </svg>
+            急停
+          </span>
+          <span class="battery-status">97</span>
+          <span class="system-icon" aria-label="机器人状态正常">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 13.5 8.1 9l3 3 4.8-6 4.1 7.5" />
+              <path d="M4 18h16" />
+            </svg>
+          </span>
+          <span class="status-divider" aria-hidden="true"></span>
+          <span class="system-icon" aria-label="设置">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3.2" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.2 2.2-.1-.1a1.7 1.7 0 0 0-1.9-.3l-.6.3a1.7 1.7 0 0 0-1 1.5v.2h-3v-.2a1.7 1.7 0 0 0-1-1.5l-.6-.3a1.7 1.7 0 0 0-1.9.3l-.1.1-2.2-2.2.1-.1a1.7 1.7 0 0 0 .3-1.9l-.3-.6a1.7 1.7 0 0 0-1.5-1H3.6v-3h.2a1.7 1.7 0 0 0 1.5-1l.3-.6a1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.2-2.2.1.1a1.7 1.7 0 0 0 1.9.3l.6-.3a1.7 1.7 0 0 0 1-1.5v-.2h3v.2a1.7 1.7 0 0 0 1 1.5l.6.3a1.7 1.7 0 0 0 1.9-.3l.1-.1 2.2 2.2-.1.1a1.7 1.7 0 0 0-.3 1.9l.3.6a1.7 1.7 0 0 0 1.5 1h.2v3h-.2a1.7 1.7 0 0 0-1.5 1Z" />
+            </svg>
+          </span>
+          <span class="system-icon close-icon" aria-label="关闭">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+              <path d="M5 5 19 19M19 5 5 19" />
+            </svg>
+          </span>
+        </div>
+      </header>
+
+      <section class="mode-control" aria-label="机器人模式">
+        <button class="mode-button" type="button">准备</button>
+        <button class="mode-button mode-active" type="button">行走</button>
+      </section>
+
+      <div class="joystick joystick-camera" aria-label="固定相机操作杆">
+        <span class="direction direction-up" aria-hidden="true"></span>
+        <span class="direction direction-right" aria-hidden="true"></span>
+        <span class="direction direction-down" aria-hidden="true"></span>
+        <span class="direction direction-left" aria-hidden="true"></span>
+        <span class="joystick-core" aria-hidden="true"></span>
+      </div>
+      <div class="joystick joystick-left" aria-label="固定移动操作杆">
+        <span class="direction direction-up" aria-hidden="true"></span>
+        <span class="direction direction-right" aria-hidden="true"></span>
+        <span class="direction direction-down" aria-hidden="true"></span>
+        <span class="direction direction-left" aria-hidden="true"></span>
+        <span class="joystick-core" aria-hidden="true"></span>
+      </div>
+      <div class="joystick joystick-right" aria-label="固定视角操作杆">
+        <span class="direction direction-up" aria-hidden="true"></span>
+        <span class="direction direction-right" aria-hidden="true"></span>
+        <span class="direction direction-down" aria-hidden="true"></span>
+        <span class="direction direction-left" aria-hidden="true"></span>
+        <span class="joystick-core" aria-hidden="true"></span>
+      </div>
+
+      <section class="agent-action-dock" aria-label="Agent 动作区域">
+        <button class="agent-action agent-action-control" id="pause-guide-task" type="button" aria-label="暂停" hidden>
+          <span class="agent-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 5v14M16 5v14" />
+            </svg>
+          </span>
+          <span>暂停</span>
+        </button>
+        <button class="agent-action agent-action-control" id="next-guide-task" type="button" aria-label="下个环节" hidden>
+          <span class="agent-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m5 5 8 7-8 7V5Z" />
+              <path d="M19 5v14" />
+            </svg>
+          </span>
+          <span>下个环节</span>
+        </button>
+        <button class="agent-action agent-action-stop" id="stop-guide-task" type="button" aria-label="结束" hidden>
+          <span class="agent-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="7" y="7" width="10" height="10" rx="1" />
+            </svg>
+          </span>
+          <span>结束</span>
+        </button>
+        <div class="guide-task-actions" id="guide-task-actions" aria-label="已获取导览任务"></div>
+        <button class="agent-action agent-action-primary" id="open-task-download-home" type="button" aria-label="添加导览任务">
+          <span class="agent-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </span>
+          <span>添加导览任务</span>
+        </button>
+      </section>
+
+      <section class="web-page guide-settings-page" id="guide-settings-page" aria-labelledby="guide-settings-title" hidden>
+        <header class="web-page-header">
+          <button class="web-page-close" id="close-guide-settings" type="button" aria-label="返回首页">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+              <path d="M5 5 19 19M19 5 5 19" />
+            </svg>
+          </button>
+          <h1 id="guide-settings-title">导览设置</h1>
+        </header>
+        <main class="settings-page-body">
+          <div class="settings-option-list" role="list">
+            <button class="settings-option" id="open-map-upload" type="button" aria-label="上传地图">
+              <span class="settings-step-number" aria-hidden="true">1</span>
+              <span class="settings-option-copy">
+                <strong>上传地图</strong>
+                <small>将机器人本地地图上传到导览后台</small>
+              </span>
+              <span class="settings-option-arrow" aria-hidden="true">›</span>
+            </button>
+            <div class="settings-option settings-option-info" role="listitem">
+              <span class="settings-step-number" aria-hidden="true">2</span>
+              <span class="settings-option-copy">
+                <strong>创建导览任务</strong>
+                <small>在电脑端导览后台创建导览任务</small>
+              </span>
+            </div>
+            <button class="settings-option" id="open-task-download" type="button" aria-label="添加导览任务">
+              <span class="settings-step-number" aria-hidden="true">3</span>
+              <span class="settings-option-copy">
+                <strong>添加导览任务</strong>
+                <small>将导览后台的任务添加到机器人本地</small>
+              </span>
+              <span class="settings-option-arrow" aria-hidden="true">›</span>
+            </button>
+          </div>
+          <a class="settings-help-link" href="https://booster.feishu.cn/wiki/T8uaws69pi6dEbkU2L6cUNhonbc" target="_blank" rel="noreferrer">查看操作说明</a>
+        </main>
+      </section>
+
+      <section class="web-page" id="map-upload-page" aria-labelledby="map-upload-title" hidden>
+        <header class="web-page-header">
+          <button class="web-page-close" id="close-map-upload" type="button" aria-label="返回导览设置">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+              <path d="m14.5 5-7 7 7 7M7.5 12h11" />
+            </svg>
+          </button>
+          <h1 id="map-upload-title">上传地图</h1>
+        </header>
+
+        <main class="web-page-body">
+          <section class="resource-list" id="map-resource-list" aria-label="本地地图列表">
+            <article class="resource-row" data-map-name="物联智谷地铁站">
+              <span class="resource-icon" aria-hidden="true">
+                <svg viewBox="0 0 144 144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m28 40 29-13 31 13 28-13v77l-28 13-31-13-29 13V40Z" stroke-width="5" />
+                  <path d="M57 27v77m31-64v77" stroke-width="4" />
+                  <path d="M70 52c-7 0-12 5-12 12 0 9 12 22 12 22s12-13 12-22c0-7-5-12-12-12Z" stroke-width="4" />
+                  <circle cx="70" cy="64" r="3" fill="currentColor" stroke="none" />
+                </svg>
+              </span>
+              <strong class="resource-name">物联智谷地铁站</strong>
+              <button class="resource-button" type="button">上传</button>
+            </article>
+            <article class="resource-row" data-map-name="展厅一层" data-cloud-exists="true">
+              <span class="resource-icon" aria-hidden="true">
+                <svg viewBox="0 0 144 144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m28 40 29-13 31 13 28-13v77l-28 13-31-13-29 13V40Z" stroke-width="5" />
+                  <path d="M57 27v77m31-64v77" stroke-width="4" />
+                  <path d="M70 52c-7 0-12 5-12 12 0 9 12 22 12 22s12-13 12-22c0-7-5-12-12-12Z" stroke-width="4" />
+                  <circle cx="70" cy="64" r="3" fill="currentColor" stroke="none" />
+                </svg>
+              </span>
+              <strong class="resource-name">展厅一层</strong>
+              <button class="resource-button" type="button">上传</button>
+            </article>
+          </section>
+
+          <section class="resource-empty" id="map-resource-empty" aria-label="本地暂无地图" hidden>
+            <span class="resource-empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4.5 5.5 9 3l6 2.5 4.5-2.1v14.9L15 20.8l-6-2.5-4.5 2.1V5.5Z" />
+                <path d="M9 3v15.3M15 5.5v15.3" />
+              </svg>
+            </span>
+            <p>本地暂无地图，请先建图</p>
+            <a href="https://booster.feishu.cn/wiki/T8uaws69pi6dEbkU2L6cUNhonbc" target="_blank" rel="noreferrer">查看操作说明</a>
+          </section>
+        </main>
+      </section>
+
+      <section class="web-page" id="task-download-page" data-network-state="online" data-cloud-state="online" aria-labelledby="task-download-title" hidden>
+        <header class="web-page-header">
+          <button class="web-page-close" id="close-task-download" type="button" aria-label="返回首页">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+              <path d="m14.5 5-7 7 7 7M7.5 12h11" />
+            </svg>
+          </button>
+          <h1 id="task-download-title">添加导览任务</h1>
+        </header>
+
+        <main class="web-page-body">
+          <section class="resource-list" id="task-resource-list" aria-label="云端导览任务列表">
+            <article class="resource-row task-resource-row" data-task-name="物联智谷导览" data-map-name="物联智谷地铁站" data-map-downloaded="true" data-cloud-version="1">
+              <span class="resource-icon task-resource-icon" aria-hidden="true">
+                <svg viewBox="0 0 144 144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M27 35h35l16 15h39v59H78L62 94H27V35Z" stroke-width="5" />
+                  <path d="M50 58h41M50 77h30" stroke-width="4" />
+                  <circle cx="45" cy="58" r="4" fill="currentColor" stroke="none" />
+                  <circle cx="45" cy="77" r="4" fill="currentColor" stroke="none" />
+                  <path d="M92 92h17m-8.5-8.5v17" stroke-width="4" />
+                </svg>
+              </span>
+              <strong class="resource-name">物联智谷导览</strong>
+              <div class="task-resource-actions">
+                <button class="resource-button task-download-button" type="button">添加</button>
+                <button class="task-more-button" type="button" aria-label="更多操作" aria-expanded="false" hidden>···</button>
+                <div class="task-actions-menu" role="menu" hidden>
+                  <button class="task-delete-button" type="button" role="menuitem">删除</button>
+                </div>
+              </div>
+            </article>
+            <article class="resource-row task-resource-row" data-task-name="展厅接待导览" data-map-name="展厅一层" data-map-downloaded="false" data-cloud-version="1">
+              <span class="resource-icon task-resource-icon" aria-hidden="true">
+                <svg viewBox="0 0 144 144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M27 35h35l16 15h39v59H78L62 94H27V35Z" stroke-width="5" />
+                  <path d="M50 58h41M50 77h30" stroke-width="4" />
+                  <circle cx="45" cy="58" r="4" fill="currentColor" stroke="none" />
+                  <circle cx="45" cy="77" r="4" fill="currentColor" stroke="none" />
+                  <path d="M92 92h17m-8.5-8.5v17" stroke-width="4" />
+                </svg>
+              </span>
+              <strong class="resource-name">展厅接待导览</strong>
+              <div class="task-resource-actions">
+                <button class="resource-button task-download-button" type="button">添加</button>
+                <button class="task-more-button" type="button" aria-label="更多操作" aria-expanded="false" hidden>···</button>
+                <div class="task-actions-menu" role="menu" hidden>
+                  <button class="task-delete-button" type="button" role="menuitem">删除</button>
+                </div>
+              </div>
+            </article>
+            <article class="resource-row task-resource-row" data-task-name="园区互动导览" data-map-name="展厅一层" data-map-downloaded="false" data-cloud-version="2">
+              <span class="resource-icon task-resource-icon" aria-hidden="true">
+                <svg viewBox="0 0 144 144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M27 35h35l16 15h39v59H78L62 94H27V35Z" stroke-width="5" />
+                  <path d="M50 58h41M50 77h30" stroke-width="4" />
+                  <circle cx="45" cy="58" r="4" fill="currentColor" stroke="none" />
+                  <circle cx="45" cy="77" r="4" fill="currentColor" stroke="none" />
+                  <path d="M92 92h17m-8.5-8.5v17" stroke-width="4" />
+                </svg>
+              </span>
+              <strong class="resource-name">园区互动导览</strong>
+              <div class="task-resource-actions">
+                <button class="resource-button task-download-button" type="button">添加</button>
+                <button class="task-more-button" type="button" aria-label="更多操作" aria-expanded="false" hidden>···</button>
+                <div class="task-actions-menu" role="menu" hidden>
+                  <button class="task-delete-button" type="button" role="menuitem">删除</button>
+                </div>
+              </div>
+            </article>
+          </section>
+          <section class="resource-empty task-cloud-empty" id="task-cloud-empty" aria-label="云端暂无可添加的导览任务" hidden>
+            <span class="resource-empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 4.5h9l5 5v10H5v-15Z" />
+                <path d="M14 4.5v5h5M8 13h8M8 16h5" />
+              </svg>
+            </span>
+            <p>暂无可添加的导览任务，请先在导览后台创建</p>
+            <a href="https://booster.feishu.cn/wiki/T8uaws69pi6dEbkU2L6cUNhonbc" target="_blank" rel="noreferrer">查看说明</a>
+          </section>
+          <section class="resource-empty network-empty" id="task-network-empty" aria-label="无网络连接" hidden>
+            <span class="resource-empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9.5a12 12 0 0 1 16 0M7 13a7.5 7.5 0 0 1 10 0M10.2 16.4a3 3 0 0 1 3.6 0" />
+                <circle cx="12" cy="19.2" r="1" fill="currentColor" stroke="none" />
+                <path d="m4 4 16 16" />
+              </svg>
+            </span>
+            <p>无网络连接，请联网后重试</p>
+          </section>
+        </main>
+      </section>
+      <div class="app-toast" id="task-download-toast" role="status" aria-live="polite" hidden></div>
+      <section class="confirm-dialog-backdrop" id="task-delete-confirm" role="dialog" aria-modal="true" aria-labelledby="task-delete-confirm-title" hidden>
+        <div class="confirm-dialog">
+          <h2 id="task-delete-confirm-title">删除导览任务</h2>
+          <p id="task-delete-confirm-message">确定删除这个导览任务吗？</p>
+          <div class="confirm-dialog-actions">
+            <button class="confirm-dialog-button confirm-dialog-cancel" id="task-delete-cancel" type="button">取消</button>
+            <button class="confirm-dialog-button confirm-dialog-confirm" id="task-delete-confirm-button" type="button">确定删除</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

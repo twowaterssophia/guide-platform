@@ -1,0 +1,73 @@
+.guide-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.guide-table {
+  border-collapse: collapse;
+  color: var(--guide-color-text);
+  font-family: var(--guide-font-sans);
+  min-width: 100%;
+  width: 100%;
+}
+
+.guide-table-head .guide-table-row {
+  height: 42px;
+}
+
+.guide-table-body .guide-table-row {
+  height: 64px;
+}
+
+.guide-table-header-cell,
+.guide-table-cell {
+  border-bottom: var(--guide-border-width-table) solid var(--guide-color-border-strong);
+  padding: 0 var(--guide-space-4);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.guide-table-header-cell {
+  color: var(--guide-color-text-muted);
+  font-size: var(--guide-type-caption-size);
+  font-weight: 500;
+  line-height: var(--guide-type-caption-line-height);
+}
+
+.guide-table-cell {
+  color: var(--guide-color-text);
+  font-size: var(--guide-type-body-size);
+  font-weight: var(--guide-type-body-weight);
+  line-height: var(--guide-type-body-line-height);
+}
+
+.guide-table-cell-name {
+  font-weight: var(--guide-type-body-strong-weight);
+}
+
+.guide-table-header-cell-center,
+.guide-table-cell-center {
+  text-align: center;
+}
+
+.guide-table-header-cell-end,
+.guide-table-cell-end,
+.guide-table-cell-actions,
+.guide-table-header-cell-actions {
+  text-align: right;
+}
+
+.guide-table-body .guide-table-row:hover {
+  background: #fafafa;
+}
+
+.guide-table-row-interactive {
+  cursor: pointer;
+}
+
+.guide-table-row-interactive:focus-visible {
+  background: #fafafa;
+  outline: var(--guide-focus-outline-width) solid var(--guide-color-focus);
+  outline-offset: -2px;
+}
