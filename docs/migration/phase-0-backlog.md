@@ -79,3 +79,12 @@ FND-001..005
 
 阶段 1 从 `FND-001` 开始。每项完成时必须更新本文件的状态、补充对应验收证据，
 并提交可独立回滚的代码变更。
+
+## 当前执行状态
+
+- [x] FND-001：Console 已拆分为应用壳、路由、API client、功能页与通用页面；原有路由
+  行为保留。验收：`pnpm --filter @guide/console typecheck`、`lint`、`build` 均通过。
+- [ ] FND-002：规范化 `@guide/ui` 使用。
+- [ ] FND-003：Prisma migration 和数据库启动基线。
+- [ ] FND-004：API 错误、当前用户与请求日志基础。
+- [ ] FND-005：测试基础。
