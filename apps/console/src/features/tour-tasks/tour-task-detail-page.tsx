@@ -63,7 +63,7 @@ export function TourTaskDetailPage() {
           <p className="page-summary">创建于 {taskDateFormatter.format(new Date(task.createdAt))} · 更新于 {taskDateFormatter.format(new Date(task.updatedAt))}</p>
         </div>
         <div className="persona-detail-actions">
-          <button className="guide-button guide-button-secondary" type="button" onClick={() => navigate('/tour-tasks/new', { state: { mode: 'edit', taskId: task.id } })}><Pencil aria-hidden="true" size={16} strokeWidth={1.8} />编辑任务</button>
+          <button className="guide-button guide-button-secondary" type="button" onClick={() => navigate(`/tour-tasks/${task.id}/edit`)}><Pencil aria-hidden="true" size={16} strokeWidth={1.8} />编辑任务</button>
           <button className="guide-button guide-button-danger-outline" type="button" onClick={(event) => { setDeleteTrigger(event.currentTarget); setConfirmingDelete(true) }}><Trash2 aria-hidden="true" size={16} strokeWidth={1.8} />删除</button>
         </div>
       </div>

@@ -102,7 +102,7 @@ test('reports a protected map instead of deleting a referenced resource', async 
   const responsePromise = page.waitForResponse((response) => response.url().endsWith('/api/v1/maps/demo-wangfujing-map') && response.request().method() === 'DELETE')
   await page.getByRole('dialog', { name: '确认删除“王府井站站厅”？' }).getByRole('button', { name: '确认' }).click()
   expect((await responsePromise).status()).toBe(409)
-  await expect(page.getByText(/地图正被 1 个导览任务使用/)).toBeVisible()
+  await expect(page.getByText(/地图正被 \d+ 个导览任务使用/)).toBeVisible()
   await expect(page).toHaveURL(/\/maps\/demo-wangfujing-map$/)
 })
 

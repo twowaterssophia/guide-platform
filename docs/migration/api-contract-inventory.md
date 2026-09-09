@@ -104,6 +104,10 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 有序动作。输入点位使用请求内 `key`，路径引用相邻点位 key；`interactionPrompt` 已由
 `TASK-002` 持久化。任务写 API 已在 `TASK-003` 接入，并依赖 `MAP-001` 提供受当前用户保护的地图查询。
 
+`TASK-004` 已完成 Console 适配：新建页调用 `POST /tour-tasks`，编辑页调用带
+`expectedVersion` 的 `PATCH /tour-tasks/:taskId`；前端保持点位和动作数组顺序，并在保存前执行名称、
+点位和动作必填校验。发布/归档端点仍由 `TASK-005` 实现，当前 DRAFT 任务不会被前端误标记为已发布。
+
 ### Agent sync
 
 | 方法 | 路径 | 请求 | 响应 | 规则 |

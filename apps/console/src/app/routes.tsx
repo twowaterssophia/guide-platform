@@ -15,6 +15,7 @@ export function AppRoutes() {
     <Routes>
       <Route path="/tour-tasks" element={<TourTaskListPage />} />
       <Route path="/tour-tasks/new" element={<NewTaskPage />} />
+      <Route path="/tour-tasks/:taskId/edit" element={<NewTaskPage />} />
       <Route path="/tour-tasks/:taskId" element={<TourTaskDetailPage />} />
       <Route path="/maps" element={<MapListPage />} />
       <Route path="/maps/:mapId" element={<MapDetailPage />} />

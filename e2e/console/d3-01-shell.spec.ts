@@ -24,7 +24,7 @@ test('account popover closes with Escape and restores focus', async ({ page }) =
 test('dangerous task deletion cannot be dismissed with Escape', async ({ page }) => {
   await page.goto('/tour-tasks')
 
-  await page.getByRole('button', { name: /更多操作：/ }).click()
+  await page.getByRole('button', { name: '更多操作：王府井站站厅巡检' }).click()
   await page.getByRole('menuitem', { name: '删除' }).click()
 
   const dialog = page.getByRole('dialog')
