@@ -95,4 +95,9 @@ FND-001..005
   `onRequest` request ID、响应头、请求日志与全局异常过滤器。验收：`/tour-tasks` 保持成功响应，
   自带及客户端提供的 `X-Request-Id` 均在响应头和错误体一致返回；未知路径返回符合
   `apiErrorSchema` 的 `404`。
-- [ ] FND-005：测试基础。
+- [x] FND-005：已为 `@guide/contracts`、`@guide/api` 和 `@guide/console` 添加实际断言的测试；
+  contracts 校验 Zod 数据与必填 request ID，API 校验 request ID 与异常归一化，Console 校验
+  API client 的成功和非成功响应。验收：三个包的测试共 8 项均通过。
+
+迁移阶段一完成。下一步为阶段二的地图资源迁移；开始 `2.1` 前仍需产品方定稿 OMap 文件限制
+和二维预览来源。

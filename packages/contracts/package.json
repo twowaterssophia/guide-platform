@@ -16,7 +16,7 @@
     "dev": "tsc -p tsconfig.json --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src",
-    "test": "node --test"
+    "test": "pnpm build && node --test"
   },
   "dependencies": {
     "zod": "^3.24.4"
