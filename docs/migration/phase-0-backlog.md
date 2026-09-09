@@ -91,5 +91,8 @@ FND-001..005
   验收：Docker Desktop 引擎已恢复；`pnpm --filter @guide/api db:migrate` 成功应用
   `20260909000000_init`，`db:seed` 成功写入 1 个用户、1 个地图和 1 个任务；API 的
   `typecheck`、`lint`、`build` 以及 `/health`、`/tour-tasks` 冒烟检查均通过。
-- [ ] FND-004：API 错误、当前用户与请求日志基础。
+- [x] FND-004：已新增 `CurrentUserService`，业务服务不再自行硬编码 demo 邮箱；新增 Fastify
+  `onRequest` request ID、响应头、请求日志与全局异常过滤器。验收：`/tour-tasks` 保持成功响应，
+  自带及客户端提供的 `X-Request-Id` 均在响应头和错误体一致返回；未知路径返回符合
+  `apiErrorSchema` 的 `404`。
 - [ ] FND-005：测试基础。

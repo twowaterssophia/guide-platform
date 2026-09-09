@@ -1,10 +1,13 @@
 import 'dotenv/config'
-import { ValidationPipe } from '@nestjs/common'
+import { Logger, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter } from '@nestjs/platform-fastify'
 import type { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { AppModule } from './app.module'
+import { ApiExceptionFilter } from './errors/api-exception.filter'
+import { attachRequestId } from './request-context/request-id.interceptor'
+import type { RequestWithContext } from './request-context/request-id.interceptor'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -13,10 +16,30 @@ async function bootstrap() {
   )
   const consoleOrigin = process.env.CONSOLE_ORIGIN ?? 'http://127.0.0.1:5173'
   const agentOrigin = process.env.AGENT_ORIGIN ?? 'http://127.0.0.1:5174'
+  const requestLogger = new Logger('Request')
+  const requestStartedAt = new WeakMap<object, number>()
+
+  app.getHttpAdapter().getInstance().addHook('onRequest', (request, response, done) => {
+    attachRequestId(request, response)
+    requestStartedAt.set(request, Date.now())
+    done()
+  })
+  app.getHttpAdapter().getInstance().addHook('onResponse', (request, response, done) => {
+    const requestId = (request as RequestWithContext).requestId
+    requestLogger.log(JSON.stringify({
+      requestId,
+      method: request.method,
+      url: request.url,
+      status: response.statusCode,
+      durationMs: Date.now() - (requestStartedAt.get(request) ?? Date.now()),
+    }))
+    done()
+  })
 
   app.enableCors({ origin: [consoleOrigin, agentOrigin] })
   app.setGlobalPrefix('api/v1')
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }))
+  app.useGlobalFilters(new ApiExceptionFilter())
 
   const config = new DocumentBuilder()
     .setTitle('Guide Platform API')

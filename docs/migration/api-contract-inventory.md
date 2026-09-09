@@ -12,10 +12,10 @@ API 前缀为 `/api/v1`，由 NestJS/Fastify 在 `127.0.0.1:3000` 提供。
 | --- | --- | --- | --- | --- |
 | `GET` | `/health` | 已实现 | `healthResponseSchema` | 返回服务状态和 ISO 时间。 |
 | `GET` | `/runtime` | 已实现 | `runtimeInfoSchema` | 返回 identity/skill provider 的 `demo`、`sandbox` 或 `production` 模式。 |
-| `GET` | `/tour-tasks` | 已实现 | `tourTaskListSchema` | 使用固定 demo 用户返回按创建时间倒序的任务摘要。 |
+| `GET` | `/tour-tasks` | 已实现 | `tourTaskListSchema` | 使用 server-side 当前用户返回按创建时间倒序的任务摘要；demo 模式由 `DEMO_USER_EMAIL` 配置。 |
 
-Swagger 文档在 API 启动后位于 `/api-docs`。目前 API 没有全局异常转换器，
-`apiErrorSchema` 是目标规范而非所有错误的现状保证。
+Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过滤器强制输出
+`apiErrorSchema`，并在每个响应的 `X-Request-Id` 头和错误体中返回相同的 request ID。
 
 ## 共同约定
 
@@ -23,10 +23,10 @@ Swagger 文档在 API 启动后位于 `/api-docs`。目前 API 没有全局异�
 
 | 主题 | 目标约定 |
 | --- | --- |
-| 身份 | demo 模式从 server-side demo identity 解析；sandbox/production 从身份 Provider 解析，客户端不传任意 owner ID。 |
+| 身份 | demo 模式从 `CurrentUserService` 解析 server-side demo identity；sandbox/production 从身份 Provider 解析，客户端不传任意 owner ID。 |
 | 时间 | 统一使用 ISO 8601 UTC 字符串。 |
 | ID | API 将 ID 视为不透明字符串；客户端不得假设 cuid 格式。 |
-| 错误 | 统一 `{ code, message, requestId? }`，对应 `apiErrorSchema`；认证、校验、冲突、找不到和外部 Provider 错误需有稳定 code。 |
+| 错误 | 已统一 `{ code, message, requestId }`，对应 `apiErrorSchema`；认证、校验、冲突、找不到和外部 Provider 错误需有稳定 code。 |
 | 分页 | 新列表接口默认 cursor 分页，返回 `{ items, nextCursor? }`；当前任务列表可在兼容窗口内保留数组响应。 |
 | 并发 | 任务和可编辑资源更新需要 `expectedVersion` 或 `If-Match`；冲突返回 `409 VERSION_CONFLICT`。 |
 | 删除 | 返回 `204`；被引用资源返回 `409 RESOURCE_IN_USE`，而非级联删除。 |
@@ -40,7 +40,7 @@ Swagger 文档在 API 启动后位于 `/api-docs`。目前 API 没有全局异�
 | Provider、health、runtime | 已定义 | 保持兼容。 |
 | Task summary | 已定义 | 增加详情、写入 payload、版本冲突和发布状态。 |
 | Skill summary | 已定义但无 API 使用 | 作为技能目录 API 的列表项。 |
-| API error | 已定义但未全局应用 | API 增加异常过滤器后强制使用。 |
+| API error | 已定义并全局应用 | 后续资源模块补充业务级稳定错误 code。 |
 | Map、Persona、Plugin、Agent | 未定义 | 每个业务 API 前补 Zod schema、输入/输出类型和 fixture。 |
 
 ## 提议接口

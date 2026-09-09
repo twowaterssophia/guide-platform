@@ -16,6 +16,7 @@
   "dependencies": {
     "@fastify/cors": "^11.1.0",
     "@fastify/static": "10.1.2",
+    "@guide/contracts": "workspace:*",
     "@nestjs/common": "^11.1.6",
     "@nestjs/core": "^11.1.6",
     "@nestjs/platform-fastify": "^11.1.6",

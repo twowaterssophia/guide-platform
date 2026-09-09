@@ -1,17 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { PrismaService } from '../database/prisma.service'
-
-const demoUserEmail = 'guide@booster.tech'
+import { CurrentUserService } from '../identity/current-user.service'
 
 @Injectable()
 export class TourTasksService {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(CurrentUserService) private readonly currentUser: CurrentUserService,
+  ) {}
 
-  async listForDemoUser() {
-    const user = await this.prisma.user.findUniqueOrThrow({
-      where: { email: demoUserEmail },
-      select: { id: true },
-    })
+  async listForCurrentUser() {
+    const user = await this.currentUser.getCurrentUser()
 
     const tasks = await this.prisma.tourTask.findMany({
       where: { ownerId: user.id },

@@ -1,10 +1,11 @@
 import { PrismaClient, TourTaskStatus } from '@prisma/client'
 
 const prisma = new PrismaClient()
+const demoUserEmail = process.env.DEMO_USER_EMAIL ?? 'guide@booster.tech'
 
 async function main() {
   const user = await prisma.user.upsert({
-    where: { email: 'guide@booster.tech' },
+    where: { email: demoUserEmail },
     update: {},
     create: {
       externalId: 'demo-guide-user',

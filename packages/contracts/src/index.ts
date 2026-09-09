@@ -43,6 +43,6 @@ export type TourTaskList = z.infer<typeof tourTaskListSchema>
 export const apiErrorSchema = z.object({
   code: z.string(),
   message: z.string(),
-  requestId: z.string().optional(),
+  requestId: z.string().min(1),
 })
 export type ApiError = z.infer<typeof apiErrorSchema>

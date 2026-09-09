@@ -11,6 +11,6 @@ export class TourTasksController {
   @ApiOperation({ summary: '列出当前账号的导览任务' })
   @ApiOkResponse({ description: '按创建时间倒序排列的导览任务摘要。' })
   list() {
-    return this.tourTasksService.listForDemoUser()
+    return this.tourTasksService.listForCurrentUser()
   }
 }
