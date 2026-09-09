@@ -4,19 +4,19 @@ Last updated: 2026-09-09
 
 ## Current Status
 
-Phase 0 is in progress. Step 0.1, which establishes the migration baseline,
-is complete. The remaining Phase 0 work documents the existing behavior,
-data, API surface, acceptance criteria, and prioritized migration backlog.
+Phase 0 is complete. It establishes the reproducible baseline, documents the
+current behavior and data, defines the target API surface and acceptance
+criteria, and freezes the dependency-ordered migration backlog.
 
 | Step | Status | Outcome |
 | --- | --- | --- |
 | 0.1 Establish the current baseline | Complete | Repository, build baseline, local configuration, and known gaps recorded. |
-| 0.2 Inventory applications and code boundaries | Not started | Identify the ownership and future of each code area. |
-| 0.3 Inventory screens, routes, and user flows | Not started | Use the legacy applications as the behavior reference. |
-| 0.4 Map legacy data to Prisma | Not started | Define a safe path from `guide.appData` to the database. |
-| 0.5 Inventory API contracts | Not started | Specify the API and shared-contract gap by business domain. |
-| 0.6 Define migration acceptance criteria | Not started | Define verifiable P0 end-to-end flows. |
-| 0.7 Freeze scope and create the backlog | Not started | Prioritize work and record externally blocked items. |
+| 0.2 Inventory applications and code boundaries | Complete | Ownership, target landing zones, and boundary violations documented. |
+| 0.3 Inventory screens, routes, and user flows | Complete | Legacy behavior and current Console coverage documented. |
+| 0.4 Map legacy data to Prisma | Complete | Field mapping, import rules, and model gaps documented. |
+| 0.5 Inventory API contracts | Complete | Implemented API and proposed endpoint families documented. |
+| 0.6 Define migration acceptance criteria | Complete | P0 flows and cross-cutting quality checks documented. |
+| 0.7 Freeze scope and create the backlog | Complete | Prioritized backlog, scope rules, and external blockers documented. |
 
 ## Migration Sequence
 
@@ -110,11 +110,12 @@ require the unfinished product to have complete automated test coverage.
 
 ### 0.2 Inventory Applications and Code Boundaries
 
-Status: Not started
+Status: Complete
 
-Create `docs/migration/code-boundaries.md` with the current responsibility,
-owner, migration destination, and retirement decision for each of the
-following areas:
+Artifact: [`code-boundaries.md`](code-boundaries.md). It records the current
+responsibility, data ownership, migration destination, retirement decision,
+runtime dependency direction, and known boundary violations for the following
+areas:
 
 | Area | Current location | Current role |
 | --- | --- | --- |
@@ -132,10 +133,10 @@ Record the architecture-plan mismatch: `docs/architecture.md` describes an
 
 ### 0.3 Inventory Screens, Routes, and User Flows
 
-Status: Not started
+Status: Complete
 
-Create `docs/migration/feature-inventory.md`. Use `src/app.js` and
-`booster-app-agent/app.js` as the behavior reference, then record for every
+Artifact: [`feature-inventory.md`](feature-inventory.md). It uses `src/app.js`
+and `booster-app-agent/app.js` as the behavior reference and records for every
 screen:
 
 - Legacy entry route or trigger.
@@ -150,10 +151,11 @@ toasts, popovers, empty states, and validation errors.
 
 ### 0.4 Map Legacy Data to Prisma
 
-Status: Not started
+Status: Complete
 
-Create `docs/migration/data-mapping.md`. Treat the legacy `guide.appData`
-localStorage payload as the source shape and map it to the Prisma models:
+Artifact: [`data-mapping.md`](data-mapping.md). It treats the legacy
+`guide.appData` localStorage payload as the source shape and maps it to the
+Prisma models:
 
 | Legacy concept | Prisma destination |
 | --- | --- |
@@ -172,10 +174,10 @@ or export behavior.
 
 ### 0.5 Inventory API Contracts
 
-Status: Not started
+Status: Complete
 
-Create `docs/migration/api-contract-inventory.md`. Start with the implemented
-API surface:
+Artifact: [`api-contract-inventory.md`](api-contract-inventory.md). It starts
+with the implemented API surface:
 
 ```text
 GET /api/v1/health
@@ -191,9 +193,10 @@ pagination needs, and version/concurrency behavior. Shared schemas belong in
 
 ### 0.6 Define Migration Acceptance Criteria
 
-Status: Not started
+Status: Complete
 
-Create `docs/migration/acceptance-checklist.md`. Define P0 verification for:
+Artifact: [`acceptance-checklist.md`](acceptance-checklist.md). It defines P0
+verification for:
 
 ```text
 Create map
@@ -211,9 +214,10 @@ data refresh, and persistence behavior.
 
 ### 0.7 Freeze Scope and Create the Migration Backlog
 
-Status: Not started
+Status: Complete
 
-Create `docs/migration/phase-0-backlog.md` and prioritize work by dependency:
+Artifact: [`phase-0-backlog.md`](phase-0-backlog.md) prioritizes work by
+dependency:
 
 | Priority | Initial items |
 | --- | --- |
@@ -231,8 +235,8 @@ Record these scope rules:
 
 ## Phase 0 Completion Criteria
 
-Phase 0 is complete only when all seven steps are complete and the following
-artifacts exist:
+Phase 0 is complete: all seven steps are complete and the following artifacts
+exist:
 
 ```text
 docs/migration/phase-0-plan.md
@@ -246,6 +250,7 @@ docs/migration/phase-0-backlog.md
 
 ## Next Action
 
-Proceed with step 0.2: inventory applications and code boundaries. This work
-should not change product behavior; it should turn the current architecture and
-code ownership into a concrete migration map.
+Proceed with Phase 1, beginning with `FND-001` in
+[`phase-0-backlog.md`](phase-0-backlog.md): split the Console application into
+clear shell, route, API client, page, and feature boundaries without changing
+the current user-visible behavior.
