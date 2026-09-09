@@ -102,6 +102,180 @@ export type TourTaskSummary = z.infer<typeof tourTaskSummarySchema>
 export const tourTaskListSchema = z.array(tourTaskSummarySchema)
 export type TourTaskList = z.infer<typeof tourTaskListSchema>
 
+export const tourTaskStatusSchema = z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'])
+export type TourTaskStatus = z.infer<typeof tourTaskStatusSchema>
+
+export const taskActionTypeSchema = z.enum(['SPEECH', 'SKILL', 'INTERACTION'])
+export type TaskActionType = z.infer<typeof taskActionTypeSchema>
+
+export const tourTaskMapRefSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+})
+export type TourTaskMapRef = z.infer<typeof tourTaskMapRefSchema>
+
+export const tourTaskPersonaRefSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  isSystemDefault: z.boolean(),
+})
+export type TourTaskPersonaRef = z.infer<typeof tourTaskPersonaRefSchema>
+
+const speechTaskActionSchema = z.object({
+  id: z.string(),
+  sequence: z.number().int().positive(),
+  type: z.literal('SPEECH'),
+  narration: z.string(),
+})
+
+const skillTaskActionSchema = z.object({
+  id: z.string(),
+  sequence: z.number().int().positive(),
+  type: z.literal('SKILL'),
+  skillId: z.string(),
+  skillName: z.string(),
+})
+
+const interactionTaskActionSchema = z.object({
+  id: z.string(),
+  sequence: z.number().int().positive(),
+  type: z.literal('INTERACTION'),
+  interactionPrompt: z.string().nullable(),
+})
+
+export const taskActionSchema = z.discriminatedUnion('type', [
+  speechTaskActionSchema,
+  skillTaskActionSchema,
+  interactionTaskActionSchema,
+])
+export type TaskAction = z.infer<typeof taskActionSchema>
+
+export const pathTaskActionSchema = z.discriminatedUnion('type', [
+  speechTaskActionSchema,
+  interactionTaskActionSchema,
+])
+export type PathTaskAction = z.infer<typeof pathTaskActionSchema>
+
+export const tourPointSchema = z.object({
+  id: z.string(),
+  sequence: z.number().int().positive(),
+  name: z.string(),
+  x: z.number().finite(),
+  y: z.number().finite(),
+  angle: z.number().finite(),
+  actions: z.array(taskActionSchema),
+})
+export type TourPoint = z.infer<typeof tourPointSchema>
+
+export const tourPathSchema = z.object({
+  id: z.string(),
+  sequence: z.number().int().positive(),
+  fromPointId: z.string(),
+  toPointId: z.string(),
+  actions: z.array(pathTaskActionSchema),
+})
+export type TourPath = z.infer<typeof tourPathSchema>
+
+export const tourTaskDetailSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  map: tourTaskMapRefSchema,
+  persona: tourTaskPersonaRefSchema.nullable(),
+  status: tourTaskStatusSchema,
+  version: z.number().int().positive(),
+  points: z.array(tourPointSchema),
+  paths: z.array(tourPathSchema),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+})
+export type TourTaskDetail = z.infer<typeof tourTaskDetailSchema>
+
+const taskActionWriteBaseSchema = z.object({
+  type: taskActionTypeSchema,
+})
+
+export const pointTaskActionWriteSchema = z.discriminatedUnion('type', [
+  taskActionWriteBaseSchema.extend({
+    type: z.literal('SPEECH'),
+    narration: z.string().trim().min(1).max(4_000),
+  }),
+  taskActionWriteBaseSchema.extend({
+    type: z.literal('SKILL'),
+    skillId: z.string().trim().min(1),
+  }),
+  taskActionWriteBaseSchema.extend({
+    type: z.literal('INTERACTION'),
+    interactionPrompt: z.string().trim().max(4_000).optional(),
+  }),
+])
+export type PointTaskActionWrite = z.infer<typeof pointTaskActionWriteSchema>
+
+export const pathTaskActionWriteSchema = z.discriminatedUnion('type', [
+  taskActionWriteBaseSchema.extend({
+    type: z.literal('SPEECH'),
+    narration: z.string().trim().min(1).max(4_000),
+  }),
+  taskActionWriteBaseSchema.extend({
+    type: z.literal('INTERACTION'),
+    interactionPrompt: z.string().trim().max(4_000).optional(),
+  }),
+])
+export type PathTaskActionWrite = z.infer<typeof pathTaskActionWriteSchema>
+
+export const tourPointWriteSchema = z.object({
+  key: z.string().trim().min(1).max(80),
+  name: z.string().trim().min(1).max(120),
+  x: z.number().finite(),
+  y: z.number().finite(),
+  angle: z.number().finite(),
+  actions: z.array(pointTaskActionWriteSchema).max(50),
+})
+export type TourPointWrite = z.infer<typeof tourPointWriteSchema>
+
+export const tourPathWriteSchema = z.object({
+  fromPointKey: z.string().trim().min(1).max(80),
+  toPointKey: z.string().trim().min(1).max(80),
+  actions: z.array(pathTaskActionWriteSchema).max(50),
+})
+export type TourPathWrite = z.infer<typeof tourPathWriteSchema>
+
+const tourTaskWriteBaseSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  mapId: z.string().trim().min(1),
+  personaId: z.string().trim().min(1).nullable(),
+  points: z.array(tourPointWriteSchema).min(1).max(200),
+  paths: z.array(tourPathWriteSchema).max(199),
+})
+
+const validateTourTaskWrite = (
+  input: z.infer<typeof tourTaskWriteBaseSchema>,
+  context: z.RefinementCtx,
+) => {
+  const keys = input.points.map((point) => point.key)
+  const duplicateKey = keys.find((key, index) => keys.indexOf(key) !== index)
+  if (duplicateKey) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['points'], message: `点位标识 ${duplicateKey} 重复` })
+  }
+  if (input.paths.length !== Math.max(0, input.points.length - 1)) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['paths'], message: '路径数量必须与相邻点位连接数量一致' })
+  }
+  input.paths.forEach((path, index) => {
+    const fromPoint = input.points[index]
+    const toPoint = input.points[index + 1]
+    if (!fromPoint || !toPoint || path.fromPointKey !== fromPoint.key || path.toPointKey !== toPoint.key) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ['paths', index], message: '路径必须按点位顺序连续连接' })
+    }
+  })
+}
+
+export const tourTaskWriteInputSchema = tourTaskWriteBaseSchema.superRefine(validateTourTaskWrite)
+export type TourTaskWriteInput = z.infer<typeof tourTaskWriteInputSchema>
+
+export const tourTaskUpdateInputSchema = tourTaskWriteBaseSchema
+  .extend({ expectedVersion: z.number().int().positive() })
+  .superRefine(validateTourTaskWrite)
+export type TourTaskUpdateInput = z.infer<typeof tourTaskUpdateInputSchema>
+
 export const apiErrorSchema = z.object({
   code: z.string(),
   message: z.string(),

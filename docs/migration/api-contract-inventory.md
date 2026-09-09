@@ -44,7 +44,7 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 | 契约区域 | 当前状态 | 下一步 |
 | --- | --- | --- |
 | Provider、health、runtime | 已定义 | 保持兼容。 |
-| Task summary | 已定义 | 增加详情、写入 payload、版本冲突和发布状态。 |
+| Task summary/detail/write | 已定义 | `TASK-002` 解决交互动作持久化后实现写入 API。 |
 | Skill summary/list | 已定义并由 `/skills` 使用 | 真实云端接入后保持相同摘要合同。 |
 | Personas | 已定义并由 `/personas` 使用 | Console 接入进行中；插件绑定由 MCP 模块后续补齐。 |
 | API error | 已定义并全局应用 | 后续资源模块补充业务级稳定错误 code。 |
@@ -90,15 +90,16 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 | 方法 | 路径 | 请求 | 响应 | 规则 |
 | --- | --- | --- | --- | --- |
 | `GET` | `/tour-tasks` | 兼容现有；后续支持分页 | `TourTaskListPage` | 当前摘要接口保持可用。 |
-| `POST` | `/tour-tasks` | `TourTaskWriteInput` | `TourTaskDetail` | 创建 `DRAFT`，原子写入点位、路径和动作。 |
-| `GET` | `/tour-tasks/:taskId` | 无 | `TourTaskDetail` | 包含地图、人设、点位、路径、动作和版本。 |
-| `PATCH` | `/tour-tasks/:taskId` | `TourTaskWriteInput` + 版本 | `TourTaskDetail` | 事务替换或差量更新编排；校验引用完整性。 |
+| `POST` | `/tour-tasks` | `TourTaskWriteInput` | `TourTaskDetail` | 契约已定义，待 `TASK-002` 后实现；创建 DRAFT 并原子写入点位、路径和动作。 |
+| `GET` | `/tour-tasks/:taskId` | 无 | `TourTaskDetail` | 契约已定义，待 `TASK-003` 实现；包含地图、人设、点位、路径、动作和版本。 |
+| `PATCH` | `/tour-tasks/:taskId` | `TourTaskUpdateInput` | `TourTaskDetail` | 契约已定义，待 `TASK-003` 实现；校验版本和引用完整性。 |
 | `DELETE` | `/tour-tasks/:taskId` | 无 | `204` | 清理任务下属点位、路径、动作和下载记录。 |
 | `POST` | `/tour-tasks/:taskId/publish` | `expectedVersion` | `TourTaskDetail` | 仅完整编排可发布；递增版本。 |
 | `POST` | `/tour-tasks/:taskId/archive` | `expectedVersion` | `TourTaskDetail` | 已下载任务的 Agent 可继续执行已下载版本。 |
 
-`TourTaskWriteInput` 必须表达 `name`、`mapId`、可选 `personaId`、有序点位、连续路径和
-有序动作。实现前需先解决交互动作 `prompt` 的持久化模型。
+`TourTaskWriteInput` 已表达 `name`、必填 `mapId`、可选 `personaId`、有序点位、连续路径和
+有序动作。输入点位使用请求内 `key`，路径引用相邻点位 key；写入前仍需由 `TASK-002` 解决
+交互动作 `interactionPrompt` 的持久化模型。
 
 ### Agent sync
 
