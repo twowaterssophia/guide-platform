@@ -122,5 +122,6 @@ FND-001..005 (completed)
   已写入 PostgreSQL；全仓测试、类型检查、lint 和构建通过。
 - [x] SKILL-001：已实现可替换的 Demo Skill Catalog Provider 与 `GET /skills`；支持来源和兼容性
   过滤，并有共享契约和 Provider 测试。真实云端 Provider 仍由 `EXT-002` 阻塞。
-- [ ] PER-002A：进行中；仅包含人设 CRUD、默认人设和自定义技能，插件绑定后置。
+- [ ] PER-002A：进行中；API 已完成当前账号隔离、系统默认只读、技能解析、版本冲突和删除时的
+  任务默认人设回退，Console 正在实现。插件绑定后置。
 - [ ] TASK-001、TASK-002：等待人设/技能基础完成；最终任务合同仍保持地图必填。

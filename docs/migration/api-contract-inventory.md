@@ -14,6 +14,11 @@ API 前缀为 `/api/v1`，由 NestJS/Fastify 在 `127.0.0.1:3000` 提供。
 | `GET` | `/runtime` | 已实现 | `runtimeInfoSchema` | 返回 identity/skill provider 的 `demo`、`sandbox` 或 `production` 模式。 |
 | `GET` | `/tour-tasks` | 已实现 | `tourTaskListSchema` | 使用 server-side 当前用户返回按创建时间倒序的任务摘要；demo 模式由 `DEMO_USER_EMAIL` 配置。 |
 | `GET` | `/skills` | 已实现 | `skillListSchema` | Demo Provider 返回稳定技能目录；支持 `source` 和 `compatible` 过滤。 |
+| `GET` | `/personas` | 已实现 | `personaListPageSchema` | 返回系统默认人设与当前账号人设，支持 cursor 分页。 |
+| `POST` | `/personas` | 已实现 | `personaDetailSchema` | 创建当前账号人设；自定义技能必须来自可用且兼容的目录项。 |
+| `GET` | `/personas/:personaId` | 已实现 | `personaDetailSchema` | 读取系统默认或当前账号人设。 |
+| `PATCH` | `/personas/:personaId` | 已实现 | `personaDetailSchema` | 仅可更新当前账号人设；`expectedVersion` 不匹配时返回 `409 VERSION_CONFLICT`。 |
+| `DELETE` | `/personas/:personaId` | 已实现 | `204` | 系统默认人设不可删除；删除用户人设时，关联任务回退到系统默认人设。 |
 
 Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过滤器强制输出
 `apiErrorSchema`，并在每个响应的 `X-Request-Id` 头和错误体中返回相同的 request ID。
@@ -41,6 +46,7 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 | Provider、health、runtime | 已定义 | 保持兼容。 |
 | Task summary | 已定义 | 增加详情、写入 payload、版本冲突和发布状态。 |
 | Skill summary/list | 已定义并由 `/skills` 使用 | 真实云端接入后保持相同摘要合同。 |
+| Personas | 已定义并由 `/personas` 使用 | Console 接入进行中；插件绑定由 MCP 模块后续补齐。 |
 | API error | 已定义并全局应用 | 后续资源模块补充业务级稳定错误 code。 |
 | Map、Persona、Plugin、Agent | 未定义 | 每个业务 API 前补 Zod schema、输入/输出类型和 fixture。 |
 
@@ -60,11 +66,11 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 
 | 方法 | 路径 | 请求 | 响应 | 规则 |
 | --- | --- | --- | --- | --- |
-| `GET` | `/personas` | `cursor?`、`limit?` | `PersonaListPage` | 系统默认人设和当前用户人设可见。 |
-| `POST` | `/personas` | `PersonaWriteInput` | `PersonaDetail` | 校验音色、插件、技能引用和自定义技能字段。 |
-| `GET` | `/personas/:personaId` | 无 | `PersonaDetail` | 返回绑定的插件和技能元数据，不返回插件密钥。 |
-| `PATCH` | `/personas/:personaId` | `PersonaWriteInput` + 版本 | `PersonaDetail` | 系统默认人设的可编辑范围要单独定义。 |
-| `DELETE` | `/personas/:personaId` | 无 | `204` | 拒绝删除系统默认人设；其他被任务引用时按已确认的回退规则处理。 |
+| `GET` | `/personas` | `cursor?`、`limit?` | `PersonaListPage` | 已实现；系统默认人设和当前用户人设可见。 |
+| `POST` | `/personas` | `PersonaWriteInput` | `PersonaDetail` | 已实现；校验可用且兼容的自定义技能。插件绑定后置。 |
+| `GET` | `/personas/:personaId` | 无 | `PersonaDetail` | 已实现；返回自定义技能元数据，不含插件密钥。 |
+| `PATCH` | `/personas/:personaId` | `PersonaUpdateInput` | `PersonaDetail` | 已实现；系统默认人设不可编辑，更新需传版本。 |
+| `DELETE` | `/personas/:personaId` | 无 | `204` | 已实现；拒绝删除系统默认人设，其他人设的任务引用回退默认人设。 |
 
 ### MCP 插件和技能
 

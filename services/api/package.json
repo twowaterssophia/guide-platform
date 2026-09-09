@@ -8,7 +8,7 @@
     "start": "node dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src prisma",
-    "test": "tsx --test test/request-id.test.ts test/api-exception.filter.test.ts test/demo-skill-catalog.provider.test.ts",
+    "test": "tsx --test test/request-id.test.ts test/api-exception.filter.test.ts test/demo-skill-catalog.provider.test.ts test/personas.service.test.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed"

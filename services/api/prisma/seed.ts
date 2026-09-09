@@ -9,7 +9,7 @@ async function main() {
     update: {},
     create: {
       externalId: 'demo-guide-user',
-      email: 'guide@booster.tech',
+      email: demoUserEmail,
       displayName: '导览演示账号',
     },
   })
