@@ -16,14 +16,20 @@ export const runtimeInfoSchema = z.object({
 })
 export type RuntimeInfo = z.infer<typeof runtimeInfoSchema>
 
+export const skillSourceSchema = z.enum(['official', 'cloud'])
+export type SkillSource = z.infer<typeof skillSourceSchema>
+
 export const skillSummarySchema = z.object({
   id: z.string(),
   name: z.string(),
-  source: z.enum(['official', 'cloud']),
+  source: skillSourceSchema,
   version: z.string(),
   compatible: z.boolean(),
 })
 export type SkillSummary = z.infer<typeof skillSummarySchema>
+
+export const skillListSchema = z.array(skillSummarySchema)
+export type SkillList = z.infer<typeof skillListSchema>
 
 export const tourTaskSummarySchema = z.object({
   id: z.string(),

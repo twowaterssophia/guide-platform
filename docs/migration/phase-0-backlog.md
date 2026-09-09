@@ -120,6 +120,7 @@ FND-001..005 (completed)
 - [x] PER-001：采用独立 `PersonaCustomSkill` 模型而非 JSON，并在 seed 中建立稳定的系统默认
   人设。验收：`20260909010000_persona_custom_skills` 已应用，migration 状态同步，系统默认人设
   已写入 PostgreSQL；全仓测试、类型检查、lint 和构建通过。
-- [ ] SKILL-001：进行中。
-- [ ] PER-002A：等待 SKILL-001；仅包含人设 CRUD、默认人设和自定义技能，插件绑定后置。
+- [x] SKILL-001：已实现可替换的 Demo Skill Catalog Provider 与 `GET /skills`；支持来源和兼容性
+  过滤，并有共享契约和 Provider 测试。真实云端 Provider 仍由 `EXT-002` 阻塞。
+- [ ] PER-002A：进行中；仅包含人设 CRUD、默认人设和自定义技能，插件绑定后置。
 - [ ] TASK-001、TASK-002：等待人设/技能基础完成；最终任务合同仍保持地图必填。

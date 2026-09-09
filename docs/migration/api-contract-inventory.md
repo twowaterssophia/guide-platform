@@ -13,6 +13,7 @@ API 前缀为 `/api/v1`，由 NestJS/Fastify 在 `127.0.0.1:3000` 提供。
 | `GET` | `/health` | 已实现 | `healthResponseSchema` | 返回服务状态和 ISO 时间。 |
 | `GET` | `/runtime` | 已实现 | `runtimeInfoSchema` | 返回 identity/skill provider 的 `demo`、`sandbox` 或 `production` 模式。 |
 | `GET` | `/tour-tasks` | 已实现 | `tourTaskListSchema` | 使用 server-side 当前用户返回按创建时间倒序的任务摘要；demo 模式由 `DEMO_USER_EMAIL` 配置。 |
+| `GET` | `/skills` | 已实现 | `skillListSchema` | Demo Provider 返回稳定技能目录；支持 `source` 和 `compatible` 过滤。 |
 
 Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过滤器强制输出
 `apiErrorSchema`，并在每个响应的 `X-Request-Id` 头和错误体中返回相同的 request ID。
@@ -39,7 +40,7 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 | --- | --- | --- |
 | Provider、health、runtime | 已定义 | 保持兼容。 |
 | Task summary | 已定义 | 增加详情、写入 payload、版本冲突和发布状态。 |
-| Skill summary | 已定义但无 API 使用 | 作为技能目录 API 的列表项。 |
+| Skill summary/list | 已定义并由 `/skills` 使用 | 真实云端接入后保持相同摘要合同。 |
 | API error | 已定义并全局应用 | 后续资源模块补充业务级稳定错误 code。 |
 | Map、Persona、Plugin、Agent | 未定义 | 每个业务 API 前补 Zod schema、输入/输出类型和 fixture。 |
 
@@ -75,7 +76,7 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 | `PATCH` | `/mcp-plugins/:pluginId` | `McpPluginWriteInput` + 版本 | `McpPluginDetail` | 认证字段省略表示保留，显式清空才删除。 |
 | `DELETE` | `/mcp-plugins/:pluginId` | 无 | `204` | 先解除 PersonaPlugin 或返回受影响人设信息。 |
 | `POST` | `/mcp-plugins/:pluginId/refresh-tools` | 无 | `McpPluginDetail` | 调用 Provider；失败保留旧工具并返回外部错误。 |
-| `GET` | `/skills` | `source?`、`compatible?`、分页 | `SkillListPage` | 由 demo/sandbox/production catalog Provider 提供。 |
+| `GET` | `/skills` | `source?`、`compatible?` | `SkillList` | Demo Provider 已实现；sandbox/production Provider 待外部协议。 |
 | `GET` | `/skills/:skillId` | 无 | `SkillDetail` | 返回当前身份可见的技能详情。 |
 
 ### Tour tasks

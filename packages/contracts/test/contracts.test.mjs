@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { apiErrorSchema, tourTaskListSchema } from '../dist/index.js'
+import { apiErrorSchema, skillListSchema, tourTaskListSchema } from '../dist/index.js'
 
 test('accepts a valid tour task list', () => {
   const result = tourTaskListSchema.safeParse([{
@@ -24,4 +24,13 @@ test('requires a request ID in API errors', () => {
   })
 
   assert.equal(result.success, false)
+})
+
+test('accepts official and cloud skills', () => {
+  const result = skillListSchema.safeParse([
+    { id: 'official-greeting', name: '打招呼', source: 'official', version: '1.0.0', compatible: true },
+    { id: 'cloud-turn-head', name: '转动头部', source: 'cloud', version: '2.1.0', compatible: false },
+  ])
+
+  assert.equal(result.success, true)
 })

@@ -1,6 +1,6 @@
 # 重排后的迁移执行计划
 
-状态：执行中；当前工作项为 `SKILL-001`。
+状态：执行中；当前工作项为 `PER-002A`。
 
 ## 重排原因
 
@@ -17,8 +17,8 @@
 | 1 | 迁移阶段一：FND-001 至 FND-005 | 完成 | 工程边界、数据库、当前用户、错误处理和测试基线均已验证。 |
 | 2 | 地图文件支线：MAP-001 至 MAP-004 | 阻塞 | 等待 OMap 扩展名、单文件上限和预览来源；不实现上传、预览或存储协议。 |
 | 3.1 | PER-001：人设自定义技能模型 | 完成 | 建立可查询关联模型和 migration，seed 稳定系统默认人设。 |
-| 3.2 | SKILL-001：Demo Skill Catalog Provider | 进行中 | 提供稳定的官方/云端技能目录与兼容性，不伪造生产云端接入。 |
-| 3.3 | PER-002A：人设基础 API 与 Console | 待开始 | 完成人设 CRUD、系统默认人设和自定义技能；插件绑定留给 MCP 模块。 |
+| 3.2 | SKILL-001：Demo Skill Catalog Provider | 完成 | 提供稳定的官方/云端技能目录与兼容性，不伪造生产云端接入。 |
+| 3.3 | PER-002A：人设基础 API 与 Console | 进行中 | 完成人设 CRUD、系统默认人设和自定义技能；插件绑定留给 MCP 模块。 |
 | 4.1 | TASK-001：任务详情与写入合同 | 待开始 | 定义地图必填的最终任务 payload、点位、路径、动作和版本。 |
 | 4.2 | TASK-002：任务动作模型 | 待开始 | 解决 `interaction.prompt` 的持久化与动作归属约束。 |
 | 5 | 回到地图文件支线 | 等待产品参数 | 完成文件上传与预览后，再推进地图选择、任务 CRUD、点位画布、发布和 Agent 同步。 |
@@ -48,3 +48,5 @@
   数据库与 schema 同步。
 - `db:seed` 已创建 `__system_default__` 人设，名称为“默认”，并启用预置技能。
 - `pnpm test`、`pnpm typecheck`、`pnpm lint` 和 `pnpm build` 均已通过。
+- `GET /api/v1/skills` 已提供 Demo 技能目录，支持 `source` 与 `compatible` 过滤；非法来源
+  返回统一的 `VALIDATION_ERROR`，Provider 与共享契约测试通过。
