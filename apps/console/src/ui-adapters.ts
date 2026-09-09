@@ -1,10 +1,6 @@
 import { createElement, useCallback, useEffect, useRef } from 'react'
-import { createConfirmModal } from '../../../packages/ui/src/modal'
-import type { ConfirmModalElement } from '../../../packages/ui/src/modal'
-import { createPopover } from '../../../packages/ui/src/popover'
-import type { PopoverElement } from '../../../packages/ui/src/popover'
-import { createToastStack } from '../../../packages/ui/src/toast'
-import type { ToastElement, ToastOptions, ToastStackElement } from '../../../packages/ui/src/toast'
+import { createConfirmModal, createPopover, createToastStack } from '@guide/ui'
+import type { ConfirmModalElement, PopoverElement, ToastElement, ToastOptions, ToastStackElement } from '@guide/ui'
 
 export interface TaskMenuAdapterProps {
   taskName: string

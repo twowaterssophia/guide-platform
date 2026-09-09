@@ -1,5 +1,3 @@
-@import "../../../packages/ui/src/tokens.css";
-
 * { box-sizing: border-box; }
 
 html, body, #root { min-height: 100%; margin: 0; }

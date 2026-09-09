@@ -84,7 +84,9 @@ FND-001..005
 
 - [x] FND-001：Console 已拆分为应用壳、路由、API client、功能页与通用页面；原有路由
   行为保留。验收：`pnpm --filter @guide/console typecheck`、`lint`、`build` 均通过。
-- [ ] FND-002：规范化 `@guide/ui` 使用。
+- [x] FND-002：Console 已通过工作区依赖从 `@guide/ui` 导入组件与样式，不再引用
+  `packages/ui/src`。UI 包导出并在构建时复制 `styles.css` 及其依赖。验收：UI 与 Console
+  的 `typecheck`、`lint`、`build` 均通过。
 - [ ] FND-003：Prisma migration 和数据库启动基线。
 - [ ] FND-004：API 错误、当前用户与请求日志基础。
 - [ ] FND-005：测试基础。
