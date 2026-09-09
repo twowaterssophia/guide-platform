@@ -109,17 +109,21 @@ model TourPath {
 }
 
 model TaskAction {
-  id          String         @id @default(cuid())
-  pointId     String?
-  point       TourPoint?     @relation("PointActions", fields: [pointId], references: [id], onDelete: Cascade)
-  pathId      String?
-  path        TourPath?      @relation("PathActions", fields: [pathId], references: [id], onDelete: Cascade)
-  sequence    Int
-  type        TaskActionType
-  narration   String?
-  skillId     String?
-  skillName   String?
-  createdAt   DateTime       @default(now())
+  id                String         @id @default(cuid())
+  pointId           String?
+  point             TourPoint?     @relation("PointActions", fields: [pointId], references: [id], onDelete: Cascade)
+  pathId            String?
+  path              TourPath?      @relation("PathActions", fields: [pathId], references: [id], onDelete: Cascade)
+  sequence          Int
+  type              TaskActionType
+  narration         String?
+  skillId           String?
+  skillName         String?
+  interactionPrompt String?
+  createdAt         DateTime       @default(now())
+
+  @@unique([pointId, sequence])
+  @@unique([pathId, sequence])
 }
 
 model Persona {

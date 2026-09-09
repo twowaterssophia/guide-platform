@@ -56,15 +56,13 @@
 | `speech`、`skill`、`interaction` | `SPEECH`、`SKILL`、`INTERACTION` | 枚举改为大写。 |
 | `narration` | `narration` | 仅语音动作允许且必填。 |
 | `skillId`、`skillName` | 同名字段 | 仅技能动作允许且 `skillId` 必填。 |
+| `prompt` | `interactionPrompt` | 仅交互动作允许；当前产品决策允许为空。 |
 
 ### 任务模型缺口
 
-旧版交互动作保存 `prompt`，而 `TaskAction` 当前没有 `prompt` 或通用配置字段。
-在实现任务写接口前必须二选一：新增 `interactionPrompt String?`，或新增结构化
-`configuration Json?`。在决定之前，导入器必须拒绝含 `prompt` 的任务，不能丢弃内容。
-
-当前 Prisma 也没有数据库约束保证 `TaskAction` 仅属于一个点位或一条路径。写入服务
-必须校验“恰有一个 target”，后续可在数据库约束或事务层补强。
+`20260909030000_task_action_integrity` 已新增 `TaskAction.interactionPrompt String?`，因此导入器
+应将旧版交互动作 `prompt` 原样写入，不能丢弃内容。该 migration 还在数据库层约束每个动作恰好
+属于一个点位或一条路径，并使点位与路径内的动作 `sequence` 分别唯一。
 
 ## Persona 与技能
 
