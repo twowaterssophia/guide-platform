@@ -250,7 +250,9 @@ docs/migration/phase-0-backlog.md
 
 ## Next Action
 
-Proceed with Phase 1, beginning with `FND-001` in
-[`phase-0-backlog.md`](phase-0-backlog.md): split the Console application into
-clear shell, route, API client, page, and feature boundaries without changing
-the current user-visible behavior.
+Phase 0 and the current task authoring/publishing slice are complete. Continue
+with `TASK-006` in [`phase-0-backlog.md`](phase-0-backlog.md): provide export,
+dry-run, and transactional import for legacy `guide.appData`; then create the
+independent Agent application and task synchronization APIs. External SSO,
+cloud skills, and MCP integration remain blocked until their sandbox contracts
+and credentials are provided.

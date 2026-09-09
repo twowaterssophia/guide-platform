@@ -276,6 +276,11 @@ export const tourTaskUpdateInputSchema = tourTaskWriteBaseSchema
   .superRefine(validateTourTaskWrite)
 export type TourTaskUpdateInput = z.infer<typeof tourTaskUpdateInputSchema>
 
+export const tourTaskLifecycleInputSchema = z.object({
+  expectedVersion: z.number().int().positive(),
+})
+export type TourTaskLifecycleInput = z.infer<typeof tourTaskLifecycleInputSchema>
+
 export const pcdEncodingSchema = z.enum(['ascii', 'binary', 'binary_compressed'])
 export type PcdEncoding = z.infer<typeof pcdEncodingSchema>
 

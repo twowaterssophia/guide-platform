@@ -35,6 +35,22 @@ export class TourTasksController {
     return this.tourTasksService.update(taskId, input)
   }
 
+  @Post(':taskId/publish')
+  @HttpCode(200)
+  @ApiOperation({ summary: '发布导览任务' })
+  @ApiOkResponse({ description: '发布后的导览任务详情。' })
+  publish(@Param('taskId') taskId: string, @Body() input: unknown) {
+    return this.tourTasksService.publish(taskId, input)
+  }
+
+  @Post(':taskId/archive')
+  @HttpCode(200)
+  @ApiOperation({ summary: '归档导览任务' })
+  @ApiOkResponse({ description: '归档后的导览任务详情。' })
+  archive(@Param('taskId') taskId: string, @Body() input: unknown) {
+    return this.tourTasksService.archive(taskId, input)
+  }
+
   @Delete(':taskId')
   @HttpCode(204)
   @ApiOperation({ summary: '删除导览任务' })

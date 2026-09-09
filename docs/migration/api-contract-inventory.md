@@ -97,8 +97,8 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 | `PATCH` | `/tour-tasks/:taskId` | `TourTaskUpdateInput` | `TourTaskDetail` | 已接入；使用 `expectedVersion` 做乐观并发控制，更新时重建编排结构。 |
 | `DELETE` | `/tour-tasks/:taskId` | 无 | `204 No Content` | 已接入；当前账号删除并由数据库级联清理点位、路径和动作。 |
 | `DELETE` | `/tour-tasks/:taskId` | 无 | `204` | 清理任务下属点位、路径、动作和下载记录。 |
-| `POST` | `/tour-tasks/:taskId/publish` | `expectedVersion` | `TourTaskDetail` | 仅完整编排可发布；递增版本。 |
-| `POST` | `/tour-tasks/:taskId/archive` | `expectedVersion` | `TourTaskDetail` | 已下载任务的 Agent 可继续执行已下载版本。 |
+| `POST` | `/tour-tasks/:taskId/publish` | `expectedVersion` | `TourTaskDetail` | 已接入；校验地图文件三件套、配准、完整编排和技能可用性后发布并递增版本。 |
+| `POST` | `/tour-tasks/:taskId/archive` | `expectedVersion` | `TourTaskDetail` | 已接入；仅已发布任务可归档，保持已发布内容版本供 Agent 使用。 |
 
 `TourTaskWriteInput` 已表达 `name`、必填 `mapId`、可选 `personaId`、有序点位、连续路径和
 有序动作。输入点位使用请求内 `key`，路径引用相邻点位 key；`interactionPrompt` 已由
@@ -106,7 +106,8 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 
 `TASK-004` 已完成 Console 适配：新建页调用 `POST /tour-tasks`，编辑页调用带
 `expectedVersion` 的 `PATCH /tour-tasks/:taskId`；前端保持点位和动作数组顺序，并在保存前执行名称、
-点位和动作必填校验。发布/归档端点仍由 `TASK-005` 实现，当前 DRAFT 任务不会被前端误标记为已发布。
+点位和动作必填校验。发布/归档端点已由 `TASK-005` 实现；当前 DRAFT 任务不会被前端误标记为已发布，
+已发布任务不可直接通过任务编辑接口覆盖。
 
 ### Agent sync
 

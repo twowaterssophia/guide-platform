@@ -68,6 +68,7 @@ export interface ConfirmModalControllerOptions {
   trigger?: HTMLElement | null
   confirmLabel?: string
   cancelLabel?: string
+  danger?: boolean
   onConfirm: () => void
   onCancel: () => void
 }
@@ -79,6 +80,7 @@ export function useConfirmModalController({
   trigger,
   confirmLabel,
   cancelLabel,
+  danger = true,
   onConfirm,
   onCancel,
 }: ConfirmModalControllerOptions) {
@@ -96,7 +98,7 @@ export function useConfirmModalController({
       cancelLabel,
       open: false,
       showClose: false,
-      danger: true,
+      danger,
       dismissOnBackdrop: false,
       dismissOnEscape: false,
       onConfirm: () => callbacksRef.current.onConfirm(),
@@ -109,7 +111,7 @@ export function useConfirmModalController({
       modal.destroy()
       modal.remove()
     }
-  }, [open, title, description, trigger])
+  }, [open, title, description, trigger, confirmLabel, cancelLabel, danger])
 }
 
 export function useToastStackController() {

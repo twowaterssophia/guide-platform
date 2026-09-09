@@ -246,6 +246,7 @@ export function NewTaskPage() {
 
   if (isEditing && detailQuery.isLoading) return <section className="page-section"><div className="state-panel">正在加载任务编辑器</div></section>
   if (isEditing && (detailQuery.isError || !detailQuery.data)) return <section className="page-section"><div className="state-panel state-error">无法加载该任务，请返回详情后重试。</div></section>
+  if (isEditing && detailQuery.data?.status === 'PUBLISHED') return <section className="page-section"><div className="state-panel state-error">已发布任务需先归档后再编辑。<button className="guide-button guide-button-secondary" type="button" onClick={() => navigate(`/tour-tasks/${taskId}`)}>返回任务详情</button></div></section>
 
   return <section className="page-section task-editor-page" aria-labelledby="new-task-title">
     <div className="page-heading"><div><button className="guide-button guide-button-text editor-back" type="button" onClick={() => navigate(isEditing ? `/tour-tasks/${taskId}` : '/tour-tasks')}><ArrowLeft aria-hidden="true" size={16} />{isEditing ? '返回任务详情' : '返回任务列表'}</button><h1 id="new-task-title">{isEditing ? '编辑导览任务' : '新建导览任务'}</h1><p className="page-summary">按三个步骤配置地图、点位和机器人动作，内容保存到当前账号。</p></div></div>

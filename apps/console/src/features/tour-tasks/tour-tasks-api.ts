@@ -1,5 +1,5 @@
 import { tourTaskDetailSchema, tourTaskListSchema } from '@guide/contracts'
-import type { TourTaskUpdateInput, TourTaskWriteInput } from '@guide/contracts'
+import type { TourTaskLifecycleInput, TourTaskUpdateInput, TourTaskWriteInput } from '@guide/contracts'
 import { deleteResource, getJson, patchJson, postJson } from '../../api/client'
 
 export const tourTasksQueryKey = ['tour-tasks'] as const
@@ -22,4 +22,12 @@ export async function updateTourTask(taskId: string, input: TourTaskUpdateInput)
 
 export async function deleteTourTask(taskId: string) {
   await deleteResource(`/tour-tasks/${taskId}`)
+}
+
+export async function publishTourTask(taskId: string, input: TourTaskLifecycleInput) {
+  return tourTaskDetailSchema.parse(await postJson(`/tour-tasks/${taskId}/publish`, input))
+}
+
+export async function archiveTourTask(taskId: string, input: TourTaskLifecycleInput) {
+  return tourTaskDetailSchema.parse(await postJson(`/tour-tasks/${taskId}/archive`, input))
 }

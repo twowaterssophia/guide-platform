@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, MapPinned, Pencil, Route, Trash2 } from 'lucide-react'
+import { Archive, ArrowLeft, MapPinned, Pencil, Route, Send, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { TaskAction, TourTaskDetail } from '@guide/contracts'
 import { ApiClientError } from '../../api/client'
 import { useConfirmModalController, useToastStackController } from '../../ui-adapters'
-import { deleteTourTask, getTourTask, tourTasksQueryKey } from './tour-tasks-api'
+import { archiveTourTask, deleteTourTask, getTourTask, publishTourTask, tourTasksQueryKey } from './tour-tasks-api'
 
 const taskDateFormatter = new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' })
 const actionLabels: Record<TaskAction['type'], string> = { SPEECH: '语音播报', SKILL: '执行技能', INTERACTION: '语音问答' }
@@ -29,6 +29,8 @@ export function TourTaskDetailPage() {
   const showToast = useToastStackController()
   const [deleteTrigger, setDeleteTrigger] = useState<HTMLElement | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [lifecycleAction, setLifecycleAction] = useState<'publish' | 'archive' | null>(null)
+  const [lifecycleTrigger, setLifecycleTrigger] = useState<HTMLElement | null>(null)
   const taskQuery = useQuery({ queryKey: [...tourTasksQueryKey, taskId], queryFn: () => getTourTask(taskId), enabled: Boolean(taskId) })
   const deleteMutation = useMutation({
     mutationFn: () => deleteTourTask(taskId),
@@ -39,14 +41,50 @@ export function TourTaskDetailPage() {
     },
     onError: (reason) => showToast({ variant: 'error', title: '删除任务失败', message: reason instanceof ApiClientError ? reason.message : '请刷新后重试。' }),
   })
+  const lifecycleMutation = useMutation({
+    mutationFn: (action: 'publish' | 'archive') => action === 'publish'
+      ? publishTourTask(taskId, { expectedVersion: taskQuery.data!.version })
+      : archiveTourTask(taskId, { expectedVersion: taskQuery.data!.version }),
+    onSuccess: async (updated) => {
+      queryClient.setQueryData([...tourTasksQueryKey, taskId], updated)
+      await queryClient.invalidateQueries({ queryKey: tourTasksQueryKey })
+      showToast({ variant: 'success', title: updated.status === 'PUBLISHED' ? '任务已发布' : '任务已归档', message: updated.status === 'PUBLISHED' ? `当前发布版本为 v${updated.version}。` : '已归档任务不会出现在 Agent 的已发布列表中。' })
+      setLifecycleAction(null)
+      setLifecycleTrigger(null)
+    },
+    onError: (reason, action) => {
+      showToast({ variant: 'error', title: action === 'publish' ? '无法发布任务' : '无法归档任务', message: reason instanceof ApiClientError ? reason.message : '请刷新后重试。' })
+      setLifecycleAction(null)
+      setLifecycleTrigger(null)
+    },
+  })
 
   useConfirmModalController({
-    open: confirmingDelete,
-    title: taskQuery.data ? `确认删除“${taskQuery.data.name}”？` : '',
-    description: '任务下的点位、路径和动作都会被删除。此操作不可撤销。',
-    trigger: deleteTrigger,
-    onConfirm: () => { setConfirmingDelete(false); setDeleteTrigger(null); deleteMutation.mutate() },
-    onCancel: () => { setConfirmingDelete(false); setDeleteTrigger(null) },
+    open: confirmingDelete || Boolean(lifecycleAction),
+    title: confirmingDelete
+      ? (taskQuery.data ? `确认删除“${taskQuery.data.name}”？` : '')
+      : lifecycleAction === 'publish' ? `确认发布“${taskQuery.data?.name ?? ''}”？` : `确认归档“${taskQuery.data?.name ?? ''}”？`,
+    description: confirmingDelete
+      ? '任务下的点位、路径和动作都会被删除。此操作不可撤销。'
+      : lifecycleAction === 'publish' ? '发布后机器人可下载此任务版本；后续修改需要先归档。' : '归档后任务将停止作为最新发布版本提供下载，已下载版本不受影响。',
+    trigger: confirmingDelete ? deleteTrigger : lifecycleTrigger,
+    confirmLabel: confirmingDelete ? '确认删除' : lifecycleAction === 'publish' ? '发布任务' : '归档任务',
+    danger: confirmingDelete,
+    onConfirm: () => {
+      if (confirmingDelete) { setConfirmingDelete(false); setDeleteTrigger(null); deleteMutation.mutate(); return }
+      if (lifecycleAction) {
+        const action = lifecycleAction
+        setLifecycleAction(null)
+        setLifecycleTrigger(null)
+        lifecycleMutation.mutate(action)
+      }
+    },
+    onCancel: () => {
+      setConfirmingDelete(false)
+      setDeleteTrigger(null)
+      setLifecycleAction(null)
+      setLifecycleTrigger(null)
+    },
   })
 
   if (taskQuery.isLoading) return <section className="page-section"><div className="state-panel">正在加载任务详情</div></section>
@@ -63,7 +101,8 @@ export function TourTaskDetailPage() {
           <p className="page-summary">创建于 {taskDateFormatter.format(new Date(task.createdAt))} · 更新于 {taskDateFormatter.format(new Date(task.updatedAt))}</p>
         </div>
         <div className="persona-detail-actions">
-          <button className="guide-button guide-button-secondary" type="button" onClick={() => navigate(`/tour-tasks/${task.id}/edit`)}><Pencil aria-hidden="true" size={16} strokeWidth={1.8} />编辑任务</button>
+          {task.status !== 'PUBLISHED' ? <button className="guide-button guide-button-secondary" type="button" onClick={() => navigate(`/tour-tasks/${task.id}/edit`)}><Pencil aria-hidden="true" size={16} strokeWidth={1.8} />编辑任务</button> : <span className="task-lifecycle-hint">已发布任务需先归档后编辑</span>}
+          {task.status === 'PUBLISHED' ? <button className="guide-button guide-button-secondary" type="button" onClick={(event) => { setLifecycleTrigger(event.currentTarget); setLifecycleAction('archive') }}><Archive aria-hidden="true" size={16} strokeWidth={1.8} />归档任务</button> : <button className="guide-button guide-button-primary" type="button" onClick={(event) => { setLifecycleTrigger(event.currentTarget); setLifecycleAction('publish') }}><Send aria-hidden="true" size={16} strokeWidth={1.8} />{task.status === 'ARCHIVED' ? '再次发布' : '发布任务'}</button>}
           <button className="guide-button guide-button-danger-outline" type="button" onClick={(event) => { setDeleteTrigger(event.currentTarget); setConfirmingDelete(true) }}><Trash2 aria-hidden="true" size={16} strokeWidth={1.8} />删除</button>
         </div>
       </div>

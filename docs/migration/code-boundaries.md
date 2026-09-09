@@ -18,8 +18,8 @@
 | --- | --- | --- | --- | --- | --- |
 | 旧版后台 | `index.html`、`src/app.js`、`src/styles.css` | 地图、任务、人设、MCP 插件的完整静态交互原型 | 浏览器 `guide.appData`，版本 `2`；兼容旧键 `guide.mcpPlugins` | 保留为行为参照，停止功能扩张 | `apps/console/` + `services/api/` |
 | 旧版 Agent | `booster-app-agent/` | 导览设置、地图资源、任务下载和执行控制的静态原型 | 以当前 DOM 状态为主，无 API 持久化 | 保留到 Agent 读写 API 完成 | 未来 `apps/agent/` + `agent-sync` API |
-| 新版 Console | `apps/console/` | React 后台壳、路由、任务列表、任务草稿界面和空状态 | 通过 REST 读取任务列表；新建/编辑暂未持久化 | 继续按业务域迁移 | React 前端唯一实现 |
-| API | `services/api/` | NestJS/Fastify、Swagger、健康检查、运行模式和任务列表 | Prisma/PostgreSQL；当前用户硬编码为 `guide@booster.tech` | 扩展为模块化单体 | 业务规则、鉴权和外部 Provider 边界 |
+| 新版 Console | `apps/console/` | React 后台壳、路由、任务列表、三步任务编排和空状态 | 通过 REST 读取和写入地图、人设、任务草稿与生命周期 | 继续按业务域迁移 | React 前端唯一实现 |
+| API | `services/api/` | NestJS/Fastify、Swagger、健康检查、运行模式、地图/人设/任务模块 | Prisma/PostgreSQL；demo identity 由 `CurrentUserService` 提供 | 扩展为模块化单体 | 业务规则、鉴权和外部 Provider 边界 |
 | 数据库模型 | `services/api/prisma/schema.prisma` | 用户、地图、任务、点位、路径、动作、人设、插件和下载记录的目标模型 | PostgreSQL | 在写接口前补充 migration，并修复已识别的模型缺口 | 业务事实来源 |
 | 共享契约 | `packages/contracts/` | Zod 输入/输出 schema 和 TypeScript 类型 | 不持有数据 | 所有 API DTO 在这里先定义或同步定义 | 前后端边界 |
 | 共享 UI | `packages/ui/` | Token、Button、Table、Tag、Empty、Popover、Modal、Toast | 不持有业务数据 | 保持无业务依赖；转为正式包导入 | 设计系统基础层 |

@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import type { Prisma, TaskAction as PrismaTaskAction, TourPath, TourPoint, TourTask } from '@prisma/client'
-import { tourTaskUpdateInputSchema, tourTaskWriteInputSchema } from '@guide/contracts'
+import { mapRegistrationMetadataSchema, tourTaskLifecycleInputSchema, tourTaskUpdateInputSchema, tourTaskWriteInputSchema } from '@guide/contracts'
 import type {
   PathTaskAction,
   PointTaskActionWrite,
@@ -8,6 +8,7 @@ import type {
   TourPath as ContractTourPath,
   TourPoint as ContractTourPoint,
   TourTaskDetail,
+  TourTaskLifecycleInput,
   TourTaskList,
   TourTaskSummary,
   TourTaskUpdateInput,
@@ -32,6 +33,14 @@ function validationMessage(issues: Array<{ path: PropertyKey[]; message: string 
 
 function parseWriteInput(input: unknown, update: boolean): TourTaskWriteInput | TourTaskUpdateInput {
   const result = update ? tourTaskUpdateInputSchema.safeParse(input) : tourTaskWriteInputSchema.safeParse(input)
+  if (!result.success) {
+    throw new BadRequestException({ code: 'VALIDATION_ERROR', message: validationMessage(result.error.issues) })
+  }
+  return result.data
+}
+
+function parseLifecycleInput(input: unknown): TourTaskLifecycleInput {
+  const result = tourTaskLifecycleInputSchema.safeParse(input)
   if (!result.success) {
     throw new BadRequestException({ code: 'VALIDATION_ERROR', message: validationMessage(result.error.issues) })
   }
@@ -132,6 +141,60 @@ export class TourTasksService {
     return skillNames
   }
 
+  private async assertPublishable(taskId: string, ownerId: string, transaction: Prisma.TransactionClient) {
+    const task = await transaction.tourTask.findFirst({
+      where: { id: taskId, ownerId },
+      include: {
+        map: true,
+        points: { include: { actions: true }, orderBy: { sequence: 'asc' } },
+        paths: { include: { actions: true }, orderBy: { sequence: 'asc' } },
+      },
+    })
+    if (!task) throw new NotFoundException('导览任务不存在')
+
+    const issues: string[] = []
+    const mapReady = Boolean(
+      task.map.storageKey
+        && task.map.originalFileName.toLowerCase().endsWith('.pcd')
+        && task.map.pcdEncoding
+        && task.map.checksumSha256
+        && task.map.previewStorageKey
+        && task.map.previewOriginalFileName
+        && task.map.previewMediaType
+        && task.map.previewSizeBytes
+        && task.map.previewChecksumSha256
+        && mapRegistrationMetadataSchema.safeParse(task.map.registrationMetadata).success,
+    )
+    if (!mapReady) issues.push('地图文件或二维预览配准信息不完整')
+    if (task.points.length === 0) issues.push('至少需要一个点位')
+    if (task.paths.length !== Math.max(0, task.points.length - 1)) issues.push('路径必须连接所有相邻点位')
+    task.points.forEach((point, index) => {
+      if (!point.name.trim()) issues.push(`点位 ${index + 1} 缺少名称`)
+      if (![point.x, point.y, point.angle].every(Number.isFinite)) issues.push(`点位 ${index + 1} 坐标或朝向无效`)
+      point.actions.forEach((action) => {
+        if (action.type === 'SPEECH' && !action.narration?.trim()) issues.push(`点位 ${index + 1} 的语音播报缺少内容`)
+        if (action.type === 'SKILL' && !action.skillId?.trim()) issues.push(`点位 ${index + 1} 的技能动作缺少技能`)
+      })
+    })
+    task.paths.forEach((path, index) => {
+      const from = task.points[index]
+      const to = task.points[index + 1]
+      if (!from || !to || path.fromPointId !== from.id || path.toPointId !== to.id) issues.push(`路径 ${index + 1} 未按点位顺序连接`)
+      path.actions.forEach((action) => {
+        if (action.type === 'SKILL') issues.push(`路径 ${index + 1} 不支持技能动作`)
+        if (action.type === 'SPEECH' && !action.narration?.trim()) issues.push(`路径 ${index + 1} 的语音播报缺少内容`)
+      })
+    })
+    const skillIds = task.points.flatMap((point) => point.actions).filter((action) => action.type === 'SKILL').map((action) => action.skillId).filter((skillId): skillId is string => Boolean(skillId))
+    if (skillIds.length > 0) {
+      const available = new Set((await this.catalog.list({ compatible: true })).map((skill) => skill.id))
+      const unavailable = skillIds.find((skillId) => !available.has(skillId))
+      if (unavailable) issues.push(`技能 ${unavailable} 不可用或不兼容`)
+    }
+    if (issues.length > 0) throw new BadRequestException({ code: 'TASK_NOT_PUBLISHABLE', message: issues.join('；') })
+    return task
+  }
+
   private async loadDetail(taskId: string, ownerId: string, transaction: Prisma.TransactionClient | PrismaService = this.prisma) {
     const task = await transaction.tourTask.findFirst({
       where: { id: taskId, ownerId },
@@ -228,12 +291,13 @@ export class TourTasksService {
     const skillNames = await this.resolveSkillNames(parsed)
     return this.prisma.$transaction(async (transaction) => {
       const updated = await transaction.tourTask.updateMany({
-        where: { id: taskId, ownerId: user.id, version: parsed.expectedVersion },
-        data: { name: parsed.name, mapId: parsed.mapId, personaId: parsed.personaId, version: { increment: 1 } },
+        where: { id: taskId, ownerId: user.id, version: parsed.expectedVersion, status: { not: 'PUBLISHED' } },
+        data: { name: parsed.name, mapId: parsed.mapId, personaId: parsed.personaId, status: 'DRAFT', version: { increment: 1 } },
       })
       if (updated.count === 0) {
-        const existing = await transaction.tourTask.findFirst({ where: { id: taskId, ownerId: user.id }, select: { id: true } })
+        const existing = await transaction.tourTask.findFirst({ where: { id: taskId, ownerId: user.id }, select: { id: true, status: true, version: true } })
         if (!existing) throw new NotFoundException('导览任务不存在')
+        if (existing.status === 'PUBLISHED') throw new ConflictException({ code: 'TASK_PUBLISHED_READ_ONLY', message: '已发布任务不可直接编辑，请先归档后再修改' })
         throw new ConflictException({ code: 'VERSION_CONFLICT', message: '导览任务已被其他会话修改，请刷新后重试' })
       }
       await transaction.tourPath.deleteMany({ where: { taskId } })
@@ -247,5 +311,43 @@ export class TourTasksService {
     const user = await this.currentUser.getCurrentUser()
     const deleted = await this.prisma.tourTask.deleteMany({ where: { id: taskId, ownerId: user.id } })
     if (deleted.count === 0) throw new NotFoundException('导览任务不存在')
+  }
+
+  async publish(taskId: string, input: unknown): Promise<TourTaskDetail> {
+    const parsed = parseLifecycleInput(input)
+    const user = await this.currentUser.getCurrentUser()
+    return this.prisma.$transaction(async (transaction) => {
+      const task = await this.assertPublishable(taskId, user.id, transaction)
+      if (task.status === 'PUBLISHED') throw new ConflictException({ code: 'TASK_INVALID_STATE', message: '导览任务已经发布' })
+      const updated = await transaction.tourTask.updateMany({
+        where: { id: taskId, ownerId: user.id, version: parsed.expectedVersion, status: { in: ['DRAFT', 'ARCHIVED'] } },
+        data: { status: 'PUBLISHED', version: { increment: 1 } },
+      })
+      if (updated.count === 0) {
+        const current = await transaction.tourTask.findFirst({ where: { id: taskId, ownerId: user.id }, select: { status: true, version: true } })
+        if (!current) throw new NotFoundException('导览任务不存在')
+        if (current.status === 'PUBLISHED') throw new ConflictException({ code: 'TASK_INVALID_STATE', message: '导览任务已经发布' })
+        throw new ConflictException({ code: 'VERSION_CONFLICT', message: '导览任务已被其他会话修改，请刷新后重试' })
+      }
+      return this.loadDetail(taskId, user.id, transaction)
+    })
+  }
+
+  async archive(taskId: string, input: unknown): Promise<TourTaskDetail> {
+    const parsed = parseLifecycleInput(input)
+    const user = await this.currentUser.getCurrentUser()
+    return this.prisma.$transaction(async (transaction) => {
+      const updated = await transaction.tourTask.updateMany({
+        where: { id: taskId, ownerId: user.id, version: parsed.expectedVersion, status: 'PUBLISHED' },
+        data: { status: 'ARCHIVED' },
+      })
+      if (updated.count === 0) {
+        const current = await transaction.tourTask.findFirst({ where: { id: taskId, ownerId: user.id }, select: { status: true, version: true } })
+        if (!current) throw new NotFoundException('导览任务不存在')
+        if (current.version !== parsed.expectedVersion) throw new ConflictException({ code: 'VERSION_CONFLICT', message: '导览任务已被其他会话修改，请刷新后重试' })
+        throw new ConflictException({ code: 'TASK_INVALID_STATE', message: '只有已发布任务可以归档' })
+      }
+      return this.loadDetail(taskId, user.id, transaction)
+    })
   }
 }
