@@ -250,9 +250,8 @@ docs/migration/phase-0-backlog.md
 
 ## Next Action
 
-Phase 0 and the current task authoring/publishing slice are complete. Continue
-with `TASK-006` in [`phase-0-backlog.md`](phase-0-backlog.md): provide export,
-dry-run, and transactional import for legacy `guide.appData`; then create the
-independent Agent application and task synchronization APIs. External SSO,
+Phase 0 and the current task authoring/publishing/import slice are complete.
+Continue with `AGENT-001` in [`phase-0-backlog.md`](phase-0-backlog.md): create
+the independent Agent application and task synchronization APIs. External SSO,
 cloud skills, and MCP integration remain blocked until their sandbox contracts
 and credentials are provided.

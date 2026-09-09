@@ -1,0 +1,63 @@
+{
+  "version": 2,
+  "data": {
+    "maps": [
+      { "id": "legacy-map", "name": "王府井站站厅", "fileName": "wangfujing-station-hall.map", "createdAt": "2026-08-31T09:00:00.000Z" }
+    ],
+    "mcpPlugins": [],
+    "personas": [
+      {
+        "id": "legacy-persona",
+        "name": "迁移讲解员",
+        "voice": "female",
+        "prompt": "负责完成迁移后的导览任务。",
+        "pluginIds": [],
+        "presetSkillsEnabled": true,
+        "customSkills": [],
+        "createdAt": "2026-08-31T09:40:00.000Z"
+      },
+      {
+        "id": "legacy-default",
+        "name": "默认",
+        "voice": "male",
+        "system": true,
+        "pluginIds": [],
+        "presetSkillsEnabled": true,
+        "customSkills": [],
+        "createdAt": "2026-08-31T09:40:00.000Z"
+      }
+    ],
+    "tourTasks": [
+      {
+        "id": "legacy-task",
+        "name": "迁移后的巡检任务",
+        "mapId": "legacy-map",
+        "voicePersonaId": "legacy-persona",
+        "createdAt": "2026-08-31T10:00:00.000Z",
+        "points": [
+          {
+            "id": "legacy-point-one",
+            "name": "入口",
+            "x": 100,
+            "y": 120,
+            "angle": 0,
+            "actions": [
+              { "id": "legacy-action-one", "type": "speech", "narration": "欢迎。" }
+            ]
+          },
+          {
+            "id": "legacy-point-two",
+            "name": "服务台",
+            "x": 180,
+            "y": 120,
+            "angle": 90,
+            "actions": []
+          }
+        ],
+        "paths": [
+          { "id": "legacy-path-one", "fromPointId": "legacy-point-one", "toPointId": "legacy-point-two", "actions": [] }
+        ]
+      }
+    ]
+  }
+}

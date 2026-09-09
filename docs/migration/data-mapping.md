@@ -1,6 +1,6 @@
 # 旧版数据到 Prisma 的映射
 
-状态：完成（阶段 0.4）
+状态：完成（阶段 0.4；TASK-006 导入工具已实现）
 
 ## 范围与原则
 
@@ -73,13 +73,9 @@
 | 自定义人设 | `ownerId` | 设为导入账户。 |
 | `presetSkillsEnabled` | 同名字段 | 原样保留。 |
 | `pluginIds[]` | `PersonaPlugin` | 逐个创建复合主键关联；插件必须存在。 |
-| `customSkills[]` | 无 | 不可静默迁移。 |
+| `customSkills[]` | `PersonaCustomSkill` | 保留技能快照、来源、调用说明和示例；按数组顺序写入 `sequence`。 |
 
-`customSkills[]` 包含 `skillId`、名称、来源、调用说明和示例。建议在阶段 3 选择以下
-模型之一并在迁移前定稿：
-
-1. `PersonaSkill` 独立模型，保存来源和可编辑说明；适合查询和约束。
-2. Persona 上的结构化 JSON 字段；实现快，但约束和查询能力较弱。
+`PersonaCustomSkill` 已在阶段 3 定稿为独立模型，迁移器会保留技能快照并校验来源。
 
 默认人设 `__system_default__` 也应在 seed 或 migration 中稳定创建，不能仅靠前端常量。
 
@@ -113,10 +109,10 @@
     -> 创建/解析 User 与系统默认 Persona
     -> 导入可用 MapAsset
     -> 导入 Plugin，再导入 PersonaPlugin
-    -> 导入 PersonaSkill（待模型定稿）
+    -> 导入 PersonaCustomSkill
     -> 导入 Task、Point、Path、Action
     -> 事务提交并输出旧 ID 到新 ID 报告
 ```
 
-拒绝条件包括：缺失地图文件、孤立引用、重复 ID、无效坐标、非连续路径、无法加密的
-认证配置，以及当前模型无法表达的交互 `prompt` 或自定义技能。
+拒绝条件包括：缺失地图文件绑定、孤立引用、重复 ID、无效坐标、非连续路径、无法加密的
+认证配置，以及当前模型无法表达的动作或字段。

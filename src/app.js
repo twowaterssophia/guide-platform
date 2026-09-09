@@ -305,6 +305,28 @@ function persistAppData() {
   }
 }
 
+function exportLegacyAppData() {
+  const payload = {
+    version: appStorageVersion,
+    data: cloneData({
+      maps: state.maps,
+      tourTasks: state.tourTasks,
+      personas: state.personas,
+      mcpPlugins: state.mcpPlugins,
+    }),
+  }
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `guide-app-data-${new Date().toISOString().slice(0, 10)}.json`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+  showToast('已导出迁移数据，请妥善保管文件')
+}
+
 function createTourTaskDraft() {
   return { name: '', mapId: '', points: [], paths: [], voicePersonaId: defaultPersonaId }
 }
@@ -1375,6 +1397,7 @@ function renderAccountMenu() {
           <div class="account-menu-divider"></div>
           <a class="account-menu-link" href="${operationGuideUrl}" target="_blank" rel="noreferrer" role="menuitem">使用手册</a>
           <button type="button" role="menuitem" data-action="toggle-account-language">${languageLabel}</button>
+          <button type="button" role="menuitem" data-action="export-legacy-data">导出迁移数据</button>
           <button class="account-menu-danger" type="button" role="menuitem" data-action="confirm-reset-demo">重置演示数据</button>
           <div class="account-menu-divider"></div>
           <button type="button" role="menuitem" data-action="confirm-logout">退出登录</button>
@@ -2883,6 +2906,12 @@ app.addEventListener('click', (event) => {
   if (action === 'toggle-account-language') {
     state.interfaceLanguage = state.interfaceLanguage === 'zh' ? 'en' : 'zh'
     render()
+    return
+  }
+  if (action === 'export-legacy-data') {
+    state.accountMenuOpen = false
+    render()
+    exportLegacyAppData()
     return
   }
   if (action === 'confirm-reset-demo') {

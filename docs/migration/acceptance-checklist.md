@@ -48,8 +48,11 @@
 
 ### C. 发布任务与 Agent 下载
 
-当前状态：TASK-005 的发布/归档部分已完成；Agent 列表、下载、更新和执行仍属于阶段 5。
+当前状态：TASK-005 与 TASK-006 已完成；Agent 列表、下载、更新和执行仍属于阶段 5。
 发布 API 与 Console 已使用版本号和状态冲突保护，具体证据记录在 `revised-execution-plan.md`。
+
+旧版迁移工具已提供导出、dry-run 与事务导入；具体命令和地图绑定规则见
+[`legacy-import-runbook.md`](legacy-import-runbook.md)。
 
 | 检查 | 通过条件 |
 | --- | --- |
