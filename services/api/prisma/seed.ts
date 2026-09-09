@@ -14,6 +14,18 @@ async function main() {
     },
   })
 
+  await prisma.persona.upsert({
+    where: { id: '__system_default__' },
+    update: {},
+    create: {
+      id: '__system_default__',
+      name: '默认',
+      voice: 'female',
+      isSystemDefault: true,
+      presetSkillsEnabled: true,
+    },
+  })
+
   const map = await prisma.mapAsset.upsert({
     where: { id: 'demo-wangfujing-map' },
     update: {},

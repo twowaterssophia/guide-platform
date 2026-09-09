@@ -66,7 +66,7 @@
 | EXT-002 | 云端技能列表、详情、下载、签名、撤销和限流协议 | 实现 sandbox skill catalog/package Provider。 |
 | EXT-003 | Agent/机器人任务包格式、设备身份和执行事件协议 | 决定 package、同步和实时状态接口。 |
 
-## 推荐执行顺序
+## 原始推荐执行顺序
 
 ```text
 FND-001..005
@@ -79,6 +79,21 @@ FND-001..005
 
 阶段 1 从 `FND-001` 开始。每项完成时必须更新本文件的状态、补充对应验收证据，
 并提交可独立回滚的代码变更。
+
+## 当前执行顺序
+
+地图文件协议的三项产品参数尚未确认，因此执行顺序调整为：
+
+```text
+FND-001..005 (completed)
+    -> PER-001 -> SKILL-001 -> PER-002A
+    -> TASK-001 -> TASK-002
+    -> MAP-001..004 after file policy confirmation
+    -> TASK-003..006 -> Agent
+```
+
+任务的最终写入仍要求地图；本次调整仅提前独立的人设、技能和任务合同工作，不新增无地图任务。
+完整状态和决策见 `docs/migration/revised-execution-plan.md`。
 
 ## 当前执行状态
 
@@ -99,5 +114,12 @@ FND-001..005
   contracts 校验 Zod 数据与必填 request ID，API 校验 request ID 与异常归一化，Console 校验
   API client 的成功和非成功响应。验收：三个包的测试共 8 项均通过。
 
-迁移阶段一完成。下一步为阶段二的地图资源迁移；开始 `2.1` 前仍需产品方定稿 OMap 文件限制
-和二维预览来源。
+迁移阶段一完成。地图文件支线等待产品方定稿 OMap 文件限制和二维预览来源；当前按重排计划
+推进独立的人设、技能和任务合同工作。
+
+- [x] PER-001：采用独立 `PersonaCustomSkill` 模型而非 JSON，并在 seed 中建立稳定的系统默认
+  人设。验收：`20260909010000_persona_custom_skills` 已应用，migration 状态同步，系统默认人设
+  已写入 PostgreSQL；全仓测试、类型检查、lint 和构建通过。
+- [ ] SKILL-001：进行中。
+- [ ] PER-002A：等待 SKILL-001；仅包含人设 CRUD、默认人设和自定义技能，插件绑定后置。
+- [ ] TASK-001、TASK-002：等待人设/技能基础完成；最终任务合同仍保持地图必填。
