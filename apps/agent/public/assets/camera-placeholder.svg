@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-label="实时相机画面占位图">
+  <rect width="1600" height="900" fill="#4b5257"/>
+  <rect x="485" y="272" width="630" height="356" rx="16" fill="#596167" stroke="#9ca2a6" stroke-width="3"/>
+  <path d="M555 565l148-154 112 103 88-80 142 131H555Z" fill="#737b80"/>
+  <circle cx="931" cy="374" r="32" fill="#c2c7ca"/>
+  <rect x="746" y="681" width="108" height="3" rx="1.5" fill="#a7adb1"/>
+</svg>

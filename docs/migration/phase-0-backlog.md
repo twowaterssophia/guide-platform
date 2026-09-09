@@ -142,6 +142,8 @@ FND-001..005 (completed)
   生命周期 Playwright 桌面/移动 2 项通过。
 - [x] TASK-006：已完成旧 `guide.appData` 导出、dry-run 和单事务导入。旧地图必须显式绑定到新版完整
   地图；明文 MCP 密钥、孤立引用、重复 ID、无效坐标和非连续路径会在 dry-run 中拒绝。
+- [x] AGENT-001：已创建独立 `apps/agent` React/Vite 应用，迁移 Agent 首页壳、设置页和任务同步入口；
+  同步 API 留给 AGENT-002，不伪造云端状态。
 
-当前继续进入 `AGENT-001`：创建独立 Agent 应用并实现已发布任务下载/同步；MCP 插件仍等待真实 API/协议。
+当前继续进入 `AGENT-002`：实现已发布任务列表、地图包下载和 `AgentDownload` 记录；MCP 插件仍等待真实 API/协议。
 MCP 插件仍等待真实 API/协议，不在此阶段伪造外部集成。
