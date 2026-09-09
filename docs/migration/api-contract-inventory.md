@@ -49,7 +49,8 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 | Personas | 已定义并由 `/personas` 使用 | Console 接入进行中；插件绑定由 MCP 模块后续补齐。 |
 | API error | 已定义并全局应用 | 后续资源模块补充业务级稳定错误 code。 |
 | Map | 已定义并由 `/maps` 使用 | 生产容量、对象存储和真实身份接入后保持相同摘要/详情合同。 |
-| Plugin、Agent | 未定义 | 每个业务 API 前补 Zod schema、输入/输出类型和 fixture。 |
+| Plugin | 未定义 | 真实 MCP 协议和凭据到位后补齐。 |
+| Agent | 已定义并由 Agent API 使用 | `AGENT-003` 补充显式更新/替换流程；执行状态仍等待真实协议。 |
 
 ## 提议接口
 
@@ -109,14 +110,13 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 点位和动作必填校验。发布/归档端点已由 `TASK-005` 实现；当前 DRAFT 任务不会被前端误标记为已发布，
 已发布任务不可直接通过任务编辑接口覆盖。
 
-### Agent sync
+### Agent sync（AGENT-002 已实现）
 
 | 方法 | 路径 | 请求 | 响应 | 规则 |
 | --- | --- | --- | --- | --- |
-| `GET` | `/agent/tour-tasks` | `deviceId` | `AgentTaskList` | 仅返回已发布且设备有权限下载的任务；含版本和本地同步状态。 |
-| `GET` | `/agent/tour-tasks/:taskId/package` | `deviceId` | `TaskPackage` 或短时 URL | 任务包包含版本、地图、动作、人设和依赖技能清单。 |
-| `POST` | `/agent/tour-tasks/:taskId/downloads` | `deviceId`、`downloadedVersion` | `AgentDownloadDetail` | 创建或更新 `AgentDownload`。 |
-| `DELETE` | `/agent/tour-tasks/:taskId/downloads/:deviceId` | 无 | `204` | 删除设备本地下载记录。 |
+| `GET` | `/agent/tasks` | `deviceId` query | `AgentTaskList` | 已实现；仅返回当前账号的 `PUBLISHED` 任务，含 `AVAILABLE`、`DOWNLOADED` 或 `UPDATE_AVAILABLE` 状态。 |
+| `POST` | `/agent/tasks/:taskId/download` | `deviceId` body | `AgentTaskPackage` | 已实现；返回任务详情、完整 PCD、PNG 预览、配准元数据和地图版本，并 upsert `AgentDownload`。地图三件套不完整时返回 `MAP_PACKAGE_UNAVAILABLE`。 |
+| `DELETE` | `/agent/tasks/:taskId/download` | `deviceId` query | `204` | 已实现；只删除指定设备的下载记录，不删除云端任务。 |
 | `POST` | `/agent/tour-tasks/:taskId/executions` | `deviceId`、任务版本 | `ExecutionState` | 阶段 5 后实现，记录开始/暂停/继续/停止。 |
 | `PATCH` | `/agent/executions/:executionId` | 状态或进度 | `ExecutionState` | 实时状态是否使用 WebSocket 由阶段 5 决定。 |
 

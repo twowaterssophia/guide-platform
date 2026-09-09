@@ -1,12 +1,42 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import type { AgentTaskSummary } from '@guide/contracts'
+import { AgentApiError, downloadAgentTask, listAgentTasks, removeAgentTask } from './agent-api'
 
 type Screen = 'home' | 'settings' | 'tasks'
 type AgentMode = '准备' | '行走'
 type GuideState = 'idle' | 'running' | 'paused'
+type LocalTask = { id: string; name: string; mapName: string; version: number }
 
-const localTasks = [
-  { id: 'local-demo-tour', name: '本地演示任务', mapName: '王府井站站厅', version: 1 },
-]
+const deviceStorageKey = 'guide.agent.deviceId'
+const taskStorageKey = 'guide.agent.tasks'
+
+function getDeviceId() {
+  const stored = window.localStorage.getItem(deviceStorageKey)
+  if (stored) return stored
+  const created = `agent-${crypto.randomUUID()}`
+  window.localStorage.setItem(deviceStorageKey, created)
+  return created
+}
+
+function getLocalTasks(): LocalTask[] {
+  try {
+    const parsed: unknown = JSON.parse(window.localStorage.getItem(taskStorageKey) ?? '[]')
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter((task): task is LocalTask => Boolean(
+      task && typeof task === 'object'
+        && typeof task.id === 'string'
+        && typeof task.name === 'string'
+        && typeof task.mapName === 'string'
+        && typeof task.version === 'number',
+    ))
+  } catch {
+    return []
+  }
+}
+
+function persistLocalTasks(tasks: LocalTask[]) {
+  window.localStorage.setItem(taskStorageKey, JSON.stringify(tasks))
+}
 
 function AppIcon() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 19.5V8.8a7 7 0 0 1 14 0v10.7" /><path d="M8.2 19.5v-5.6a3.8 3.8 0 0 1 7.6 0v5.6" /><path d="M12 4.5v4.1M10.1 15.5h.01M13.9 15.5h.01" /></svg>
@@ -54,7 +84,7 @@ function ActionButton({ label, kind, tone = 'default', onClick }: { label: strin
   return <button className={`agent-action ${tone === 'danger' ? 'agent-action-stop' : ''}`} type="button" aria-label={label} onClick={onClick}><span className="agent-action-icon"><ActionIcon kind={kind} /></span><span>{label}</span></button>
 }
 
-function HomeScreen({ mode, onModeChange, guideState, activeTask, onOpenSettings, onOpenTasks, onPause, onNext, onStop, onStart }: { mode: AgentMode; onModeChange: (mode: AgentMode) => void; guideState: GuideState; activeTask: string | null; onOpenSettings: () => void; onOpenTasks: () => void; onPause: () => void; onNext: () => void; onStop: () => void; onStart: (taskName: string) => void }) {
+function HomeScreen({ mode, onModeChange, guideState, activeTask, localTasks, onOpenSettings, onOpenTasks, onPause, onNext, onStop, onStart }: { mode: AgentMode; onModeChange: (mode: AgentMode) => void; guideState: GuideState; activeTask: string | null; localTasks: LocalTask[]; onOpenSettings: () => void; onOpenTasks: () => void; onPause: () => void; onNext: () => void; onStop: () => void; onStart: (taskName: string) => void }) {
   const running = guideState !== 'idle'
   const taskButtons = running ? [] : localTasks
   return <main className="app-stage">
@@ -77,11 +107,73 @@ function WebPage({ title, onBack, children }: { title: string; onBack: () => voi
 }
 
 function SettingsScreen({ onBack, onTasks }: { onBack: () => void; onTasks: () => void }) {
-  return <WebPage title="导览设置" onBack={onBack}><div className="settings-option-list"><button className="settings-option" type="button" onClick={() => undefined}><span className="settings-step-number">1</span><span className="settings-option-copy"><strong>上传地图</strong><small>将机器人本地地图上传到导览后台</small></span><span className="settings-option-arrow"><ArrowIcon /></span></button><div className="settings-option settings-option-info"><span className="settings-step-number">2</span><span className="settings-option-copy"><strong>创建导览任务</strong><small>在电脑端导览后台创建导览任务</small></span></div><button className="settings-option" type="button" onClick={onTasks}><span className="settings-step-number">3</span><span className="settings-option-copy"><strong>添加导览任务</strong><small>将导览后台的任务添加到机器人本地</small></span><span className="settings-option-arrow"><ArrowIcon /></span></button></div><p className="page-note">任务同步接口将在 AGENT-002 接入，当前页面不会伪造云端状态。</p></WebPage>
+  return <WebPage title="导览设置" onBack={onBack}><div className="settings-option-list"><button className="settings-option" type="button" onClick={() => undefined}><span className="settings-step-number">1</span><span className="settings-option-copy"><strong>上传地图</strong><small>将机器人本地地图上传到导览后台</small></span><span className="settings-option-arrow"><ArrowIcon /></span></button><div className="settings-option settings-option-info"><span className="settings-step-number">2</span><span className="settings-option-copy"><strong>创建导览任务</strong><small>在电脑端导览后台创建导览任务</small></span></div><button className="settings-option" type="button" onClick={onTasks}><span className="settings-step-number">3</span><span className="settings-option-copy"><strong>添加导览任务</strong><small>将导览后台的任务添加到机器人本地</small></span><span className="settings-option-arrow"><ArrowIcon /></span></button></div></WebPage>
 }
 
-function TaskScreen({ onBack }: { onBack: () => void }) {
-  return <WebPage title="添加导览任务" onBack={onBack}><div className="sync-state"><div className="sync-icon">⌁</div><h2>等待任务同步接口</h2><p>已发布任务列表、地图包下载和设备记录将在 AGENT-002 接入。</p><button className="resource-button" type="button" disabled>暂不可添加</button></div></WebPage>
+function syncLabel(task: AgentTaskSummary) {
+  if (task.syncState === 'DOWNLOADED') return `已添加 · v${task.downloadedVersion}`
+  if (task.syncState === 'UPDATE_AVAILABLE') return `可更新 · v${task.publishedVersion}`
+  return '添加'
+}
+
+function TaskScreen({ onBack, onTaskAdded, onTaskRemoved }: { onBack: () => void; onTaskAdded: (task: AgentTaskSummary) => void; onTaskRemoved: (taskId: string) => void }) {
+  const deviceId = useMemo(getDeviceId, [])
+  const [tasks, setTasks] = useState<AgentTaskSummary[]>([])
+  const [loading, setLoading] = useState(true)
+  const [busyTaskId, setBusyTaskId] = useState<string | null>(null)
+  const [message, setMessage] = useState('')
+
+  const refresh = async () => {
+    setLoading(true)
+    setMessage('')
+    try {
+      setTasks((await listAgentTasks(deviceId)).items)
+    } catch (error) {
+      setMessage(error instanceof AgentApiError ? error.message : '无法连接导览后台，请稍后重试')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { void refresh() }, [])
+
+  const handleTask = async (task: AgentTaskSummary) => {
+    setBusyTaskId(task.id)
+    setMessage('')
+    try {
+      if (task.syncState === 'DOWNLOADED') return
+      if (task.syncState === 'UPDATE_AVAILABLE' || task.syncState === 'AVAILABLE') {
+        const downloaded = await downloadAgentTask(task.id, deviceId)
+        const next: AgentTaskSummary = {
+          ...task,
+          downloadedVersion: downloaded.downloadedVersion,
+          syncState: 'DOWNLOADED',
+        }
+        setTasks((items) => items.map((item) => item.id === task.id ? next : item))
+        onTaskAdded(next)
+      }
+    } catch (error) {
+      setMessage(error instanceof AgentApiError ? error.message : '任务添加失败，请稍后重试')
+    } finally {
+      setBusyTaskId(null)
+    }
+  }
+
+  const handleRemove = async (task: AgentTaskSummary) => {
+    setBusyTaskId(task.id)
+    setMessage('')
+    try {
+      await removeAgentTask(task.id, deviceId)
+      setTasks((items) => items.map((item) => item.id === task.id ? { ...item, downloadedVersion: null, syncState: 'AVAILABLE' } : item))
+      onTaskRemoved(task.id)
+    } catch (error) {
+      setMessage(error instanceof AgentApiError ? error.message : '删除失败，请稍后重试')
+    } finally {
+      setBusyTaskId(null)
+    }
+  }
+
+  return <WebPage title="添加导览任务" onBack={onBack}><div className="agent-task-page"><p className="device-label">设备：{deviceId}</p>{message && <div className="sync-error" role="alert">{message}</div>}{loading ? <div className="sync-state compact"><div className="sync-icon">⌁</div><h2>正在获取已发布任务</h2></div> : tasks.length === 0 ? <div className="sync-state compact"><div className="sync-icon">⌁</div><h2>暂无可添加任务</h2><p>请先在导览后台发布任务。</p><button className="resource-button" type="button" onClick={() => void refresh()}>重新获取</button></div> : <div className="agent-task-list">{tasks.map((task) => <article className="agent-task-row" key={task.id}><div><strong>{task.name}</strong><span>{task.mapName} · {task.pointCount} 个点位</span></div><div className="agent-task-actions">{task.syncState === 'DOWNLOADED' ? <button className="resource-button resource-button-complete" type="button" disabled>{syncLabel(task)}</button> : <button className="resource-button" type="button" disabled={busyTaskId === task.id} onClick={() => void handleTask(task)}>{busyTaskId === task.id ? '添加中' : syncLabel(task)}</button>}{task.syncState === 'DOWNLOADED' && <button className="task-remove-button" type="button" disabled={busyTaskId === task.id} onClick={() => void handleRemove(task)}>删除</button>}</div></article>)}</div>}</div></WebPage>
 }
 
 export function AgentApp() {
@@ -89,9 +181,20 @@ export function AgentApp() {
   const [mode, setMode] = useState<AgentMode>('行走')
   const [guideState, setGuideState] = useState<GuideState>('idle')
   const [activeTask, setActiveTask] = useState<string | null>(null)
+  const [syncedTasks, setSyncedTasks] = useState<LocalTask[]>(getLocalTasks)
+  const rememberTask = (task: AgentTaskSummary) => setSyncedTasks((items) => {
+    const next = [{ id: task.id, name: task.name, mapName: task.mapName, version: task.publishedVersion }, ...items.filter((item) => item.id !== task.id)]
+    persistLocalTasks(next)
+    return next
+  })
+  const forgetTask = (taskId: string) => setSyncedTasks((items) => {
+    const next = items.filter((item) => item.id !== taskId)
+    persistLocalTasks(next)
+    return next
+  })
   const startTask = (name: string) => { setActiveTask(name); setGuideState('running') }
   const stopTask = () => { setActiveTask(null); setGuideState('idle') }
   if (screen === 'settings') return <div className="app-viewport"><SettingsScreen onBack={() => setScreen('home')} onTasks={() => setScreen('tasks')} /></div>
-  if (screen === 'tasks') return <div className="app-viewport"><TaskScreen onBack={() => setScreen('home')} /></div>
-  return <div className="app-viewport"><HomeScreen mode={mode} onModeChange={setMode} guideState={guideState} activeTask={activeTask} onOpenSettings={() => setScreen('settings')} onOpenTasks={() => setScreen('tasks')} onPause={() => setGuideState((value) => value === 'paused' ? 'running' : 'paused')} onNext={() => undefined} onStop={stopTask} onStart={startTask} /></div>
+  if (screen === 'tasks') return <div className="app-viewport"><TaskScreen onBack={() => setScreen('home')} onTaskAdded={rememberTask} onTaskRemoved={forgetTask} /></div>
+  return <div className="app-viewport"><HomeScreen mode={mode} onModeChange={setMode} guideState={guideState} activeTask={activeTask} localTasks={syncedTasks} onOpenSettings={() => setScreen('settings')} onOpenTasks={() => setScreen('tasks')} onPause={() => setGuideState((value) => value === 'paused' ? 'running' : 'paused')} onNext={() => undefined} onStop={stopTask} onStart={startTask} /></div>
 }

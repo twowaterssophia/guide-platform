@@ -281,6 +281,32 @@ export const tourTaskLifecycleInputSchema = z.object({
 })
 export type TourTaskLifecycleInput = z.infer<typeof tourTaskLifecycleInputSchema>
 
+export const agentTaskSyncStateSchema = z.enum(['AVAILABLE', 'DOWNLOADED', 'UPDATE_AVAILABLE'])
+export type AgentTaskSyncState = z.infer<typeof agentTaskSyncStateSchema>
+
+export const agentTaskSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  mapName: z.string(),
+  pointCount: z.number().int().nonnegative(),
+  publishedVersion: z.number().int().positive(),
+  downloadedVersion: z.number().int().positive().nullable(),
+  syncState: agentTaskSyncStateSchema,
+  updatedAt: z.string().datetime(),
+})
+export type AgentTaskSummary = z.infer<typeof agentTaskSummarySchema>
+
+export const agentTaskListSchema = z.object({
+  deviceId: z.string().min(1),
+  items: z.array(agentTaskSummarySchema),
+})
+export type AgentTaskList = z.infer<typeof agentTaskListSchema>
+
+export const agentDeviceInputSchema = z.object({
+  deviceId: z.string().trim().min(1).max(120),
+})
+export type AgentDeviceInput = z.infer<typeof agentDeviceInputSchema>
+
 export const pcdEncodingSchema = z.enum(['ascii', 'binary', 'binary_compressed'])
 export type PcdEncoding = z.infer<typeof pcdEncodingSchema>
 
@@ -324,6 +350,32 @@ export const mapRegistrationMetadataSchema = z.object({
   }
 })
 export type MapRegistrationMetadata = z.infer<typeof mapRegistrationMetadataSchema>
+
+export const agentTaskPackageSchema = z.object({
+  task: tourTaskDetailSchema,
+  map: z.object({
+    id: z.string(),
+    name: z.string(),
+    version: z.number().int().positive(),
+    registration: mapRegistrationMetadataSchema,
+    pcd: z.object({
+      fileName: z.string(),
+      mediaType: z.string(),
+      encoding: pcdEncodingSchema,
+      sizeBytes: z.number().int().nonnegative(),
+      contentBase64: z.string().min(1),
+    }),
+    preview: z.object({
+      fileName: z.string(),
+      mediaType: z.literal('image/png'),
+      sizeBytes: z.number().int().nonnegative(),
+      contentBase64: z.string().min(1),
+    }),
+  }),
+  downloadedVersion: z.number().int().positive(),
+  downloadedAt: z.string().datetime(),
+})
+export type AgentTaskPackage = z.infer<typeof agentTaskPackageSchema>
 
 export const mapAssetSummarySchema = z.object({
   id: z.string(),

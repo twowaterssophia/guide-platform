@@ -251,7 +251,7 @@ docs/migration/phase-0-backlog.md
 ## Next Action
 
 Phase 0 and the current task authoring/publishing/import slice are complete.
-Continue with `AGENT-002` in [`phase-0-backlog.md`](phase-0-backlog.md): connect
-the Agent shell to published-task synchronization APIs. External SSO,
+Continue with `AGENT-003` in [`phase-0-backlog.md`](phase-0-backlog.md): make
+published-version updates explicit in the Agent flow. External SSO,
 cloud skills, and MCP integration remain blocked until their sandbox contracts
 and credentials are provided.
