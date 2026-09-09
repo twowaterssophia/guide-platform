@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { DatabaseModule } from './database/database.module'
 import { HealthController } from './health/health.controller'
 import { IdentityModule } from './identity/identity.module'
+import { MapsModule } from './maps/maps.module'
 import { PersonasModule } from './personas/personas.module'
 import { RuntimeController } from './runtime/runtime.controller'
 import { RuntimeService } from './runtime/runtime.service'
@@ -10,7 +11,7 @@ import { TourTasksController } from './tour-tasks/tour-tasks.controller'
 import { TourTasksService } from './tour-tasks/tour-tasks.service'
 
 @Module({
-  imports: [DatabaseModule, IdentityModule, SkillsModule, PersonasModule],
+  imports: [DatabaseModule, IdentityModule, SkillsModule, PersonasModule, MapsModule],
   controllers: [HealthController, RuntimeController, TourTasksController],
   providers: [RuntimeService, TourTasksService],
 })

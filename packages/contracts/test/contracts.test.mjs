@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   apiErrorSchema,
+  mapAssetDetailSchema,
+  mapRegistrationMetadataSchema,
   skillListSchema,
   tourTaskListSchema,
   tourTaskUpdateInputSchema,
@@ -79,6 +81,61 @@ test('applies continuous path validation to task updates', () => {
     expectedVersion: 2,
     points: [{ key: 'entrance', name: '入口', x: 100, y: 240, angle: 90, actions: [] }],
     paths: [{ fromPointKey: 'entrance', toPointKey: 'entrance', actions: [] }],
+  })
+
+  assert.equal(result.success, false)
+})
+
+test('accepts registered PCD and PNG map assets', () => {
+  const registration = {
+    formatVersion: 1,
+    resolution: 0.05,
+    origin: { x: -10, y: -8, yaw: 0 },
+    width: 1024,
+    height: 768,
+    frameId: 'map',
+    imageAxes: { x: 'right', y: 'down' },
+    occupiedThreshold: 0.65,
+    freeThreshold: 0.2,
+    pcdTransform: {
+      translation: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0, w: 1 },
+    },
+  }
+  const result = mapAssetDetailSchema.safeParse({
+    id: 'map-1',
+    name: '一层大厅',
+    pcdFileName: 'map.pcd',
+    pcdEncoding: 'binary_compressed',
+    pcdSizeBytes: 1024,
+    previewAvailable: true,
+    version: 1,
+    createdAt: '2026-09-09T00:00:00.000Z',
+    updatedAt: '2026-09-09T00:00:00.000Z',
+    pcd: { fileName: 'map.pcd', mediaType: 'application/vnd.pointclouds', sizeBytes: 1024, checksumSha256: 'a'.repeat(64), encoding: 'binary_compressed' },
+    preview: { fileName: 'map.png', mediaType: 'image/png', sizeBytes: 512, checksumSha256: 'b'.repeat(64), url: '/api/v1/maps/map-1/preview', width: 1024, height: 768 },
+    registration,
+    referencedTaskCount: 0,
+  })
+
+  assert.equal(result.success, true)
+})
+
+test('rejects inverted occupancy thresholds', () => {
+  const result = mapRegistrationMetadataSchema.safeParse({
+    formatVersion: 1,
+    resolution: 0.05,
+    origin: { x: 0, y: 0, yaw: 0 },
+    width: 10,
+    height: 10,
+    frameId: 'map',
+    imageAxes: { x: 'right', y: 'down' },
+    occupiedThreshold: 0.2,
+    freeThreshold: 0.65,
+    pcdTransform: {
+      translation: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0, w: 1 },
+    },
   })
 
   assert.equal(result.success, false)

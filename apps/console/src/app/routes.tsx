@@ -4,7 +4,9 @@ import { TourTaskListPage } from '../features/tour-tasks/tour-task-list-page'
 import { PersonaDetailPage } from '../features/personas/persona-detail-page'
 import { PersonaFormPage } from '../features/personas/persona-form-page'
 import { PersonaListPage } from '../features/personas/persona-list-page'
-import { MapsPage, PluginsPage } from '../pages/empty-feature-page'
+import { MapDetailPage } from '../features/maps/map-detail-page'
+import { MapListPage } from '../features/maps/map-list-page'
+import { PluginsPage } from '../pages/empty-feature-page'
 import { RuntimePage } from '../pages/runtime-page'
 
 export function AppRoutes() {
@@ -12,7 +14,8 @@ export function AppRoutes() {
     <Routes>
       <Route path="/tour-tasks" element={<TourTaskListPage />} />
       <Route path="/tour-tasks/new" element={<NewTaskPage />} />
-      <Route path="/maps" element={<MapsPage />} />
+      <Route path="/maps" element={<MapListPage />} />
+      <Route path="/maps/:mapId" element={<MapDetailPage />} />
       <Route path="/voice/personas" element={<PersonaListPage />} />
       <Route path="/voice/personas/new" element={<PersonaFormPage />} />
       <Route path="/voice/personas/:personaId" element={<PersonaDetailPage />} />

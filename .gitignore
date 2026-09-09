@@ -14,3 +14,4 @@ tmp/
 *.log
 prisma/dev.db
 prisma/dev.db-journal
+services/api/storage/

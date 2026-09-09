@@ -22,10 +22,10 @@
 | FND-003 | Prisma migration 和数据库启动基线 | Docker Desktop | schema 有首个 migration，`migrate` + `seed` 可在空库运行。 |
 | FND-004 | API 错误、当前用户与请求日志基础 | FND-003 | demo identity 不再散落在业务 service；错误符合 `apiErrorSchema`。 |
 | FND-005 | 测试基础 | FND-001、FND-003 | contracts/API/Console 至少各有一个会实际执行的测试。 |
-| MAP-001 | MapAsset 契约、列表和详情 API | FND-003、FND-004 | 当前用户可以读取地图元数据。 |
-| MAP-002 | 地图上传与本地存储 Provider | MAP-001 | 文件、大小、媒体类型校验和安全存储路径可用。 |
-| MAP-003 | 地图 Console 页面 | MAP-001、MAP-002 | 列表、上传、详情、重命名、空/错/加载状态可用。 |
-| MAP-004 | 地图删除引用保护 | MAP-001 | 被任务引用时返回 `409 RESOURCE_IN_USE`。 |
+| MAP-001 | MapAsset 契约、列表和详情 API | FND-003、FND-004 | 已完成本地版本；当前用户可读取 PCD、PNG 预览和配准元数据。 |
+| MAP-002 | 地图上传与本地存储 Provider | MAP-001 | 已完成本地版本；三件套校验、可配置大小限制和安全 storage key 可用。 |
+| MAP-003 | 地图 Console 页面 | MAP-001、MAP-002 | 已完成；列表、上传、详情、预览、重命名、空/错/加载状态可用。 |
+| MAP-004 | 地图删除引用保护 | MAP-001 | 已完成；被任务引用时返回 `409 RESOURCE_IN_USE`。 |
 
 ## P0：任务草稿与发布闭环
 
@@ -82,13 +82,13 @@ FND-001..005
 
 ## 当前执行顺序
 
-地图文件协议的三项产品参数尚未确认，因此执行顺序调整为：
+地图文件协议已采用 `.pcd + .png + .json`；正式容量和对象存储仍在后续生产适配中，因此执行顺序调整为：
 
 ```text
 FND-001..005 (completed)
     -> PER-001 -> SKILL-001 -> PER-002A
     -> TASK-001 -> TASK-002
-    -> MAP-001..004 after file policy confirmation
+    -> MAP-001..004 (local complete)
     -> TASK-003..006 -> Agent
 ```
 
@@ -114,8 +114,8 @@ FND-001..005 (completed)
   contracts 校验 Zod 数据与必填 request ID，API 校验 request ID 与异常归一化，Console 校验
   API client 的成功和非成功响应。验收：三个包的测试共 8 项均通过。
 
-迁移阶段一完成。地图文件支线等待产品方定稿 OMap 文件限制和二维预览来源；当前按重排计划
-推进独立的人设、技能和任务合同工作。
+迁移阶段一完成。地图文件支线的本地版本已完成；正式容量、对象存储和生产身份作为联调参数
+后置，当前继续推进任务 CRUD 与详情。
 
 - [x] PER-001：采用独立 `PersonaCustomSkill` 模型而非 JSON，并在 seed 中建立稳定的系统默认
   人设。验收：`20260909010000_persona_custom_skills` 已应用，migration 状态同步，系统默认人设
@@ -127,3 +127,5 @@ FND-001..005 (completed)
   创建和编辑，已验证桌面与窄屏。插件绑定后置。
 - [x] TASK-001：任务详情、创建和更新契约已完成；任务保持地图必填，点位使用请求内唯一 key，路径按点位顺序连续连接，且移动途中禁止执行技能。
 - [x] TASK-002：`20260909030000_task_action_integrity` 已应用；交互 prompt 可持久化，动作恰有一个点位或路径归属，且容器内动作序号唯一。
+- [x] MAP-001..004：已完成本地地图资源闭环；合同、上传、存储、预览、改名和引用保护记录在
+  `docs/migration/map-file-contract.md`。正式容量和对象存储不阻塞本地迁移，但仍需生产联调。

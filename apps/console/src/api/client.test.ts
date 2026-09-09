@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { deleteResource, getJson, postJson } from './client'
+import { ApiClientError, deleteResource, getJson, postForm, postJson } from './client'
 
 describe('getJson', () => {
   afterEach(() => {
@@ -19,9 +19,15 @@ describe('getJson', () => {
   })
 
   it('rejects a non-successful response', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503 }))
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: false,
+      status: 409,
+      json: vi.fn().mockResolvedValue({ code: 'RESOURCE_IN_USE', message: '地图正在使用' }),
+    }))
 
-    await expect(getJson('/tour-tasks')).rejects.toThrow(/503/)
+    const error = await getJson('/tour-tasks').catch((reason: unknown) => reason)
+    expect(error).toBeInstanceOf(ApiClientError)
+    expect(error).toMatchObject({ status: 409, code: 'RESOURCE_IN_USE', message: '地图正在使用' })
   })
 
   it('sends JSON bodies for write requests', async () => {
@@ -43,5 +49,18 @@ describe('getJson', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 204 }))
 
     await expect(deleteResource('/personas/persona-1')).resolves.toBeUndefined()
+  })
+
+  it('sends multipart bodies without overriding the browser content type', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: vi.fn().mockResolvedValue({ id: 'map-1' }),
+    }))
+    const form = new FormData()
+    form.append('name', '一层大厅')
+
+    await expect(postForm('/maps', form)).resolves.toEqual({ id: 'map-1' })
+    expect(fetch).toHaveBeenCalledWith('http://127.0.0.1:3000/api/v1/maps', { method: 'POST', body: form })
   })
 })

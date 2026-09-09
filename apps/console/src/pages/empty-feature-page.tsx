@@ -1,4 +1,4 @@
-import { CircleUserRound, Map, Wrench } from 'lucide-react'
+import { CircleUserRound, Wrench } from 'lucide-react'
 import type { ComponentType } from 'react'
 
 interface EmptyFeaturePageProps {
@@ -27,10 +27,6 @@ export function EmptyFeaturePage({ icon: Icon, title, summary, emptyTitle, empty
       </div>
     </section>
   )
-}
-
-export function MapsPage() {
-  return <EmptyFeaturePage icon={Map} title="地图" summary="管理导览任务使用的地图资产" emptyTitle="暂无地图资产" emptyDescription="地图资产接口尚未接入。完成接口接入后，可在此上传和管理地图。" />
 }
 
 export function PersonasPage() {

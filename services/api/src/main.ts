@@ -3,11 +3,13 @@ import { Logger, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter } from '@nestjs/platform-fastify'
 import type { NestFastifyApplication } from '@nestjs/platform-fastify'
+import multipart from '@fastify/multipart'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { AppModule } from './app.module'
 import { ApiExceptionFilter } from './errors/api-exception.filter'
 import { attachRequestId } from './request-context/request-id.interceptor'
 import type { RequestWithContext } from './request-context/request-id.interceptor'
+import { getMapUploadLimits } from './maps/map-upload-limits'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -18,6 +20,11 @@ async function bootstrap() {
   const agentOrigin = process.env.AGENT_ORIGIN ?? 'http://127.0.0.1:5174'
   const requestLogger = new Logger('Request')
   const requestStartedAt = new WeakMap<object, number>()
+  const mapUploadLimits = getMapUploadLimits()
+
+  await app.register(multipart, {
+    limits: { files: 3, fields: 1, parts: 4, fieldSize: 512, fileSize: mapUploadLimits.pcdBytes },
+  })
 
   app.getHttpAdapter().getInstance().addHook('onRequest', (request, response, done) => {
     attachRequestId(request, response)

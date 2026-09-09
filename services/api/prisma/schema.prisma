@@ -54,6 +54,15 @@ model MapAsset {
   originalFileName String
   mediaType        String
   sizeBytes        Int
+  pcdEncoding      String?
+  checksumSha256   String?
+  previewStorageKey String?
+  previewOriginalFileName String?
+  previewMediaType String?
+  previewSizeBytes Int?
+  previewChecksumSha256 String?
+  registrationMetadata Json?
+  version          Int        @default(1)
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
   tourTasks        TourTask[]

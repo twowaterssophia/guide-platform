@@ -48,7 +48,8 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 | Skill summary/list | 已定义并由 `/skills` 使用 | 真实云端接入后保持相同摘要合同。 |
 | Personas | 已定义并由 `/personas` 使用 | Console 接入进行中；插件绑定由 MCP 模块后续补齐。 |
 | API error | 已定义并全局应用 | 后续资源模块补充业务级稳定错误 code。 |
-| Map、Persona、Plugin、Agent | 未定义 | 每个业务 API 前补 Zod schema、输入/输出类型和 fixture。 |
+| Map | 已定义并由 `/maps` 使用 | 生产容量、对象存储和真实身份接入后保持相同摘要/详情合同。 |
+| Plugin、Agent | 未定义 | 每个业务 API 前补 Zod schema、输入/输出类型和 fixture。 |
 
 ## 提议接口
 
@@ -57,8 +58,9 @@ Swagger 文档在 API 启动后位于 `/api-docs`。API 已通过全局异常过
 | 方法 | 路径 | 请求 | 响应 | 规则 |
 | --- | --- | --- | --- | --- |
 | `GET` | `/maps` | `cursor?`、`limit?` | `MapListPage` | 仅返回当前用户资产。 |
-| `POST` | `/maps` | multipart：`name`、`file` | `MapAssetDetail` | 校验文件类型、大小和名称；服务端写存储。 |
-| `GET` | `/maps/:mapId` | 无 | `MapAssetDetail` | 返回元数据、预览/下载引用和任务引用数。 |
+| `POST` | `/maps` | multipart：`name`、`pcd`、`preview`、`metadata` | `MapAssetDetail` | 校验 `.pcd + .png + .json`、大小、配准尺寸和名称；服务端写存储。 |
+| `GET` | `/maps/:mapId` | 无 | `MapAssetDetail` | 返回 PCD 元数据、PNG 预览引用、配准和任务引用数。 |
+| `GET` | `/maps/:mapId/preview` | 无 | `image/png` | 当前账号范围内返回二维预览流。 |
 | `PATCH` | `/maps/:mapId` | `name`、`expectedVersion?` | `MapAssetDetail` | 仅编辑元数据。 |
 | `DELETE` | `/maps/:mapId` | 无 | `204` | 有任务引用时返回 `409 RESOURCE_IN_USE`。 |
 

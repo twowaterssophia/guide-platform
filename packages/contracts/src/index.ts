@@ -276,6 +276,98 @@ export const tourTaskUpdateInputSchema = tourTaskWriteBaseSchema
   .superRefine(validateTourTaskWrite)
 export type TourTaskUpdateInput = z.infer<typeof tourTaskUpdateInputSchema>
 
+export const pcdEncodingSchema = z.enum(['ascii', 'binary', 'binary_compressed'])
+export type PcdEncoding = z.infer<typeof pcdEncodingSchema>
+
+export const mapRegistrationMetadataSchema = z.object({
+  formatVersion: z.literal(1),
+  resolution: z.number().positive().max(10),
+  origin: z.object({
+    x: z.number().finite(),
+    y: z.number().finite(),
+    yaw: z.number().finite(),
+  }),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+  frameId: z.string().trim().min(1).max(120),
+  imageAxes: z.object({
+    x: z.enum(['left', 'right']),
+    y: z.enum(['up', 'down']),
+  }),
+  occupiedThreshold: z.number().min(0).max(1),
+  freeThreshold: z.number().min(0).max(1),
+  pcdTransform: z.object({
+    translation: z.object({
+      x: z.number().finite(),
+      y: z.number().finite(),
+      z: z.number().finite(),
+    }),
+    rotation: z.object({
+      x: z.number().finite(),
+      y: z.number().finite(),
+      z: z.number().finite(),
+      w: z.number().finite(),
+    }),
+  }),
+}).superRefine((metadata, context) => {
+  if (metadata.freeThreshold >= metadata.occupiedThreshold) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['freeThreshold'],
+      message: '空闲阈值必须小于占用阈值',
+    })
+  }
+})
+export type MapRegistrationMetadata = z.infer<typeof mapRegistrationMetadataSchema>
+
+export const mapAssetSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  pcdFileName: z.string(),
+  pcdEncoding: pcdEncodingSchema.nullable(),
+  pcdSizeBytes: z.number().int().nonnegative(),
+  previewAvailable: z.boolean(),
+  version: z.number().int().positive(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+})
+export type MapAssetSummary = z.infer<typeof mapAssetSummarySchema>
+
+export const mapAssetListPageSchema = z.object({
+  items: z.array(mapAssetSummarySchema),
+  nextCursor: z.string().optional(),
+})
+export type MapAssetListPage = z.infer<typeof mapAssetListPageSchema>
+
+export const mapAssetFileSchema = z.object({
+  fileName: z.string(),
+  mediaType: z.string(),
+  sizeBytes: z.number().int().nonnegative(),
+  checksumSha256: z.string().regex(/^[a-f0-9]{64}$/).nullable(),
+})
+export type MapAssetFile = z.infer<typeof mapAssetFileSchema>
+
+export const mapAssetPreviewSchema = mapAssetFileSchema.extend({
+  url: z.string(),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+})
+export type MapAssetPreview = z.infer<typeof mapAssetPreviewSchema>
+
+export const mapAssetDetailSchema = mapAssetSummarySchema.extend({
+  pcd: mapAssetFileSchema.extend({ encoding: pcdEncodingSchema.nullable() }),
+  preview: mapAssetPreviewSchema.nullable(),
+  registration: mapRegistrationMetadataSchema.nullable(),
+  referencedTaskCount: z.number().int().nonnegative(),
+})
+export type MapAssetDetail = z.infer<typeof mapAssetDetailSchema>
+
+export const mapAssetRenameInputSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  expectedVersion: z.number().int().positive(),
+})
+export type MapAssetRenameInput = z.infer<typeof mapAssetRenameInputSchema>
+
 export const apiErrorSchema = z.object({
   code: z.string(),
   message: z.string(),
