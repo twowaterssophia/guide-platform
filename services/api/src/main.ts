@@ -18,6 +18,7 @@ async function bootstrap() {
   )
   const consoleOrigin = process.env.CONSOLE_ORIGIN ?? 'http://127.0.0.1:5173'
   const agentOrigin = process.env.AGENT_ORIGIN ?? 'http://127.0.0.1:5174'
+  const apiHost = process.env.API_HOST ?? '0.0.0.0'
   const requestLogger = new Logger('Request')
   const requestStartedAt = new WeakMap<object, number>()
   const mapUploadLimits = getMapUploadLimits()
@@ -56,7 +57,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api-docs', app, document)
 
-  await app.listen(Number(process.env.API_PORT ?? 3000), '127.0.0.1')
+  await app.listen(Number(process.env.API_PORT ?? 3000), apiHost)
 }
 
 void bootstrap()

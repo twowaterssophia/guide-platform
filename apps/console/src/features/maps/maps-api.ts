@@ -12,12 +12,10 @@ export async function getMap(mapId: string) {
   return mapAssetDetailSchema.parse(await getJson(`/maps/${mapId}`))
 }
 
-export async function uploadMap(input: { name: string; pcd: File; preview: File; metadata: File }) {
+export async function uploadMap(input: { name: string; bundle: File }) {
   const form = new FormData()
   form.append('name', input.name)
-  form.append('pcd', input.pcd)
-  form.append('preview', input.preview)
-  form.append('metadata', input.metadata)
+  form.append('bundle', input.bundle)
   return mapAssetDetailSchema.parse(await postForm('/maps', form))
 }
 

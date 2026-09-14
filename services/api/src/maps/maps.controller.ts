@@ -21,7 +21,7 @@ export class MapsController {
 
   @Post()
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: '上传 PCD、PNG 和配准 JSON 地图包' })
+  @ApiOperation({ summary: '上传包含 PCD、PNG 和配准 JSON 的 ZIP 地图包' })
   @ApiCreatedResponse({ description: '上传后的地图详情。' })
   async create(@Req() request: MapMultipartRequest) {
     return this.mapsService.create(await parseMapUploadRequest(request))

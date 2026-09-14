@@ -17,7 +17,7 @@
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 48px);
-  max-width: 402px;
+  max-width: 576px;
   overflow: auto;
   padding: var(--guide-space-8);
   width: 100%;
@@ -37,7 +37,7 @@
 
 .guide-modal-title {
   color: var(--guide-color-text-strong);
-  font-size: var(--guide-type-section-title-size);
+  font-size: 24px;
   font-weight: var(--guide-type-section-title-weight);
   line-height: var(--guide-type-section-title-line-height);
   margin: 0;
@@ -50,7 +50,7 @@
   background: transparent;
   border: 0;
   border-radius: var(--guide-radius-md);
-  color: var(--guide-color-text-muted);
+  color: var(--guide-color-text);
   cursor: pointer;
   display: inline-flex;
   flex: 0 0 auto;

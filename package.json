@@ -5,6 +5,7 @@
   "packageManager": "pnpm@11.19.0",
   "scripts": {
     "dev": "pnpm --parallel --stream dev",
+    "dev:up": "powershell -NoProfile -ExecutionPolicy Bypass -File ./start-guide-services.ps1",
     "dev:console": "pnpm --filter @guide/console dev",
     "dev:agent": "pnpm --filter @guide/agent dev",
     "dev:api": "pnpm --filter @guide/api dev",

@@ -15,7 +15,7 @@ describe('getJson', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     await expect(getJson('/tour-tasks')).resolves.toEqual(payload)
-    expect(fetchMock).toHaveBeenCalledWith('http://127.0.0.1:3000/api/v1/tour-tasks')
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/tour-tasks')
   })
 
   it('rejects a non-successful response', async () => {
@@ -38,7 +38,7 @@ describe('getJson', () => {
     }))
 
     await expect(postJson('/personas', { name: '导览员' })).resolves.toEqual({ id: 'persona-1' })
-    expect(fetch).toHaveBeenCalledWith('http://127.0.0.1:3000/api/v1/personas', {
+    expect(fetch).toHaveBeenCalledWith('/api/v1/personas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: '{"name":"导览员"}',
@@ -61,6 +61,6 @@ describe('getJson', () => {
     form.append('name', '一层大厅')
 
     await expect(postForm('/maps', form)).resolves.toEqual({ id: 'map-1' })
-    expect(fetch).toHaveBeenCalledWith('http://127.0.0.1:3000/api/v1/maps', { method: 'POST', body: form })
+    expect(fetch).toHaveBeenCalledWith('/api/v1/maps', { method: 'POST', body: form })
   })
 })

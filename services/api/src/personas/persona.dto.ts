@@ -10,32 +10,13 @@ import {
   Max,
   MaxLength,
   Min,
-  ValidateNested,
 } from 'class-validator'
-
-export class PersonaCustomSkillInputDto {
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
-  @IsString()
-  @IsNotEmpty()
-  skillId!: string
-
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(2_000)
-  instruction!: string
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(2_000)
-  example!: string
-}
 
 export class PersonaWriteDto {
   @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
   @IsString()
   @IsNotEmpty()
-  @MaxLength(80)
+  @MaxLength(100)
   name!: string
 
   @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
@@ -46,7 +27,7 @@ export class PersonaWriteDto {
 
   @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
   @IsString()
-  @MaxLength(8_000)
+  @MaxLength(1_000)
   prompt!: string
 
   @IsBoolean()
@@ -54,9 +35,10 @@ export class PersonaWriteDto {
 
   @IsArray()
   @ArrayMaxSize(50)
-  @ValidateNested({ each: true })
-  @Type(() => PersonaCustomSkillInputDto)
-  customSkills!: PersonaCustomSkillInputDto[]
+  @IsString({ each: true })
+  @IsOptional()
+  pluginIds!: string[]
+
 }
 
 export class PersonaUpdateDto extends PersonaWriteDto {

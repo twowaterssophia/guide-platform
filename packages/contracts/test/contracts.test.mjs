@@ -16,7 +16,6 @@ test('accepts a valid tour task list', () => {
     name: 'Lobby tour',
     mapName: 'Main floor',
     pointCount: 3,
-    status: 'DRAFT',
     version: 1,
     createdAt: '2026-09-09T00:00:00.000Z',
     updatedAt: '2026-09-09T00:00:00.000Z',

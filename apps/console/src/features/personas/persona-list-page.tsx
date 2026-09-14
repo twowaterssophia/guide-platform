@@ -1,17 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CircleUserRound, Plus, ShieldCheck } from 'lucide-react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { PersonaSummary } from '@guide/contracts'
 import { useConfirmModalController, useToastStackController } from '../../ui-adapters'
-import { PersonaActionsMenu } from './persona-actions-menu'
+import { LegacyEmptyIllustration } from '../../ui/legacy-empty-illustration'
 import { deletePersona, listPersonas, personaQueryKey } from './personas-api'
 
 const personaDateFormatter = new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' })
-
-function personaKind(persona: PersonaSummary) {
-  return persona.isSystemDefault ? '系统默认' : '自定义'
-}
 
 export function PersonaListPage() {
   const navigate = useNavigate()
@@ -50,27 +46,28 @@ export function PersonaListPage() {
     },
   })
 
-  const personas = personasQuery.data?.items ?? []
+  const personas = (personasQuery.data?.items ?? []).filter((persona) => !persona.isSystemDefault)
+  const showHeaderAction = !personasQuery.isSuccess || personas.length > 0
 
   return (
     <section className="page-section" aria-labelledby="personas-title">
       <div className="page-heading">
         <div>
-          <h1 id="personas-title">人设管理</h1>
-          <p className="page-summary">管理导览机器人使用的语音人设、表达规则与自定义技能。</p>
+          <h1 id="personas-title">人设</h1>
+          <p className="page-summary">设置导览时机器人的说话方式</p>
         </div>
-        <button className="guide-button guide-button-primary" type="button" onClick={() => navigate('/voice/personas/new')}>
+        {showHeaderAction ? <button className="guide-button guide-button-primary" type="button" onClick={() => navigate('/voice/personas/new')}>
           <Plus aria-hidden="true" size={16} strokeWidth={2.2} />
           新建人设
-        </button>
+        </button> : null}
       </div>
       {personasQuery.isLoading ? <div className="state-panel">正在加载人设</div> : null}
       {personasQuery.isError ? <div className="state-panel state-error">暂时无法加载人设，请检查本地服务。</div> : null}
       {personasQuery.isSuccess && personas.length === 0 ? (
         <div className="guide-empty">
-          <div className="guide-empty-icon" aria-hidden="true"><CircleUserRound size={42} strokeWidth={1.35} /></div>
-          <h2 className="guide-empty-title">暂无自定义人设</h2>
-          <p className="guide-empty-description">创建人设，为导览任务配置稳定的表达风格和技能规则。</p>
+          <div className="guide-empty-icon" aria-hidden="true"><LegacyEmptyIllustration kind="persona" /></div>
+          <h2 className="guide-empty-title">暂无人设</h2>
+          <p className="guide-empty-description">新建人设后，可在导览任务中使用</p>
           <button className="guide-button guide-button-primary guide-empty-action" type="button" onClick={() => navigate('/voice/personas/new')}>
             <Plus aria-hidden="true" size={16} strokeWidth={2.2} />
             新建人设
@@ -83,9 +80,7 @@ export function PersonaListPage() {
             <thead className="guide-table-head">
               <tr className="guide-table-row">
                 <th className="guide-table-header-cell">名称</th>
-                <th className="guide-table-header-cell">音色</th>
-                <th className="guide-table-header-cell">类型</th>
-                <th className="guide-table-header-cell">更新时间</th>
+                <th className="guide-table-header-cell">创建时间</th>
                 <th className="guide-table-header-cell guide-table-header-cell-actions actions-column">操作</th>
               </tr>
             </thead>
@@ -105,25 +100,10 @@ export function PersonaListPage() {
                   }}
                 >
                   <td className="guide-table-cell guide-table-cell-name task-name">{persona.name}</td>
-                  <td className="guide-table-cell">{persona.voice === 'female' ? '女声' : persona.voice === 'male' ? '男声' : persona.voice}</td>
-                  <td className="guide-table-cell">
-                    <span className={`guide-tag guide-tag-${persona.isSystemDefault ? 'info' : 'default'}`}>
-                      {persona.isSystemDefault ? <ShieldCheck aria-hidden="true" size={14} strokeWidth={1.8} /> : null}
-                      {personaKind(persona)}
-                    </span>
-                  </td>
-                  <td className="guide-table-cell">{personaDateFormatter.format(new Date(persona.updatedAt))}</td>
+                  <td className="guide-table-cell">{personaDateFormatter.format(new Date(persona.createdAt))}</td>
                   <td className="guide-table-cell guide-table-cell-actions actions-cell" onClick={(event) => event.stopPropagation()}>
-                    {!persona.isSystemDefault ? (
-                      <PersonaActionsMenu
-                        personaName={persona.name}
-                        onEdit={() => navigate(`/voice/personas/${persona.id}/edit`)}
-                        onDelete={(trigger) => {
-                          setDeleteTrigger(trigger)
-                          setPendingDelete(persona)
-                        }}
-                      />
-                    ) : <span className="persona-action-muted">只读</span>}
+                    <button className="guide-button guide-button-icon" type="button" aria-label={`编辑 ${persona.name}`} title="编辑" onClick={() => navigate(`/voice/personas/${persona.id}/edit`)}><Pencil aria-hidden="true" size={16} strokeWidth={1.8} /></button>
+                    <button className="guide-button guide-button-icon guide-button-icon-danger" type="button" aria-label={`删除 ${persona.name}`} title="删除" onClick={(event) => { setDeleteTrigger(event.currentTarget); setPendingDelete(persona) }}><Trash2 aria-hidden="true" size={16} strokeWidth={1.8} /></button>
                   </td>
                 </tr>
               ))}

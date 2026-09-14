@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { FileUp, Upload, X } from 'lucide-react'
+import { FileUp, X } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
 import type { FormEvent, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
@@ -22,11 +22,13 @@ interface MapFilePickerProps {
   label: string
   accept: string
   file: File | null
+  error?: string
   onChange: (file: File | null) => void
 }
 
-function MapFilePicker({ label, accept, file, onChange }: MapFilePickerProps) {
+function MapFilePicker({ label, accept, file, error, onChange }: MapFilePickerProps) {
   const inputId = useId()
+  const errorId = `${inputId}-error`
   return (
     <div className="editor-field map-file-field">
       <span>{label}</span>
@@ -34,6 +36,8 @@ function MapFilePicker({ label, accept, file, onChange }: MapFilePickerProps) {
         className="map-file-input"
         id={inputId}
         aria-label={label}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? errorId : undefined}
         type="file"
         accept={accept}
         onChange={(event) => onChange(event.target.files?.[0] ?? null)}
@@ -42,6 +46,7 @@ function MapFilePicker({ label, accept, file, onChange }: MapFilePickerProps) {
         <span className="map-file-picker-action"><FileUp aria-hidden="true" size={15} strokeWidth={1.8} />选择文件</span>
         <span className="map-file-picker-name" title={file?.name}>{file?.name ?? '未选择文件'}</span>
       </label>
+      {error ? <small className="editor-field-error" id={errorId} role="alert">{error}</small> : null}
     </div>
   )
 }
@@ -54,19 +59,15 @@ export function MapUploadModal({ open, trigger, onClose, onUploaded }: MapUpload
   const closeButtonRef = useRef<HTMLButtonElement | null>(null)
   const requestCloseRef = useRef<() => void>(() => undefined)
   const [name, setName] = useState('')
-  const [pcd, setPcd] = useState<File | null>(null)
-  const [preview, setPreview] = useState<File | null>(null)
-  const [metadata, setMetadata] = useState<File | null>(null)
-  const [error, setError] = useState('')
+  const [bundle, setBundle] = useState<File | null>(null)
+  const [errors, setErrors] = useState<{ name?: string; bundle?: string; form?: string }>({})
   const [confirmingDiscard, setConfirmingDiscard] = useState(false)
-  const dirty = Boolean(name || pcd || preview || metadata)
+  const dirty = Boolean(name || bundle)
 
   const resetAndClose = () => {
     setName('')
-    setPcd(null)
-    setPreview(null)
-    setMetadata(null)
-    setError('')
+    setBundle(null)
+    setErrors({})
     setConfirmingDiscard(false)
     onClose()
   }
@@ -86,7 +87,7 @@ export function MapUploadModal({ open, trigger, onClose, onUploaded }: MapUpload
       onUploaded()
     },
     onError: (reason) => {
-      setError(reason instanceof ApiClientError ? reason.message : '上传失败，请检查文件后重试。')
+      setErrors({ form: reason instanceof ApiClientError ? reason.message : '上传失败，请检查文件后重试。' })
     },
   })
 
@@ -140,12 +141,12 @@ export function MapUploadModal({ open, trigger, onClose, onUploaded }: MapUpload
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    setError('')
-    if (!name.trim()) return setError('请输入地图名称。')
-    if (!extensionMatches(pcd, '.pcd')) return setError('请选择 .pcd 三维地图文件。')
-    if (!extensionMatches(preview, '.png')) return setError('请选择 .png 二维地图文件。')
-    if (!extensionMatches(metadata, '.json')) return setError('请选择 .json 配准元数据。')
-    uploadMutation.mutate({ name: name.trim(), pcd: pcd!, preview: preview!, metadata: metadata! })
+    const nextErrors: { name?: string; bundle?: string } = {}
+    if (!name.trim()) nextErrors.name = '请输入地图名称。'
+    if (!extensionMatches(bundle, '.zip')) nextErrors.bundle = '请选择 .zip 地图包。'
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length) return
+    uploadMutation.mutate({ name: name.trim(), bundle: bundle! })
   }
 
   const stopFormPropagation = (event: ReactKeyboardEvent<HTMLFormElement>) => {
@@ -163,22 +164,21 @@ export function MapUploadModal({ open, trigger, onClose, onUploaded }: MapUpload
             <X aria-hidden="true" size={18} strokeWidth={1.8} />
           </button>
         </div>
-        <form onSubmit={submit} onKeyDown={stopFormPropagation}>
+        <form onSubmit={submit} onKeyDown={stopFormPropagation} noValidate>
           <div className="guide-modal-content map-upload-fields">
             <label className="editor-field">
               <span>地图名称</span>
-              <input ref={nameRef} aria-label="地图名称" value={name} maxLength={120} onChange={(event) => setName(event.target.value)} placeholder="请输入地图名称" />
+              <input ref={nameRef} aria-label="地图名称" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? `${titleId}-name-error` : undefined} value={name} maxLength={120} onChange={(event) => { setName(event.target.value); setErrors((current) => ({ ...current, name: undefined })) }} placeholder="请输入地图名称" />
+              {errors.name ? <small className="editor-field-error" id={`${titleId}-name-error`} role="alert">{errors.name}</small> : null}
             </label>
-            <MapFilePicker label="三维地图（PCD）" accept=".pcd,application/vnd.pointclouds,application/octet-stream" file={pcd} onChange={setPcd} />
-            <MapFilePicker label="二维地图（PNG）" accept=".png,image/png" file={preview} onChange={setPreview} />
-            <MapFilePicker label="配准元数据（JSON）" accept=".json,application/json" file={metadata} onChange={setMetadata} />
-            {error ? <p className="map-form-error" role="alert">{error}</p> : null}
+            <MapFilePicker label="地图文件" accept=".zip,application/zip,application/x-zip-compressed" file={bundle} error={errors.bundle} onChange={(file) => { setBundle(file); setErrors((current) => ({ ...current, bundle: undefined })) }} />
+            <p className="map-upload-help">ZIP 内需包含一个 PCD 三维地图、一个 PNG 二维地图和一个 JSON 配准文件。</p>
+            {errors.form ? <p className="map-form-error" role="alert">{errors.form}</p> : null}
           </div>
           <div className="guide-modal-footer">
             <button className="guide-button guide-button-secondary" type="button" onClick={requestClose} disabled={uploadMutation.isPending}>取消</button>
             <button className="guide-button guide-button-primary" type="submit" disabled={uploadMutation.isPending}>
-              <Upload aria-hidden="true" size={16} strokeWidth={1.8} />
-              {uploadMutation.isPending ? '正在上传' : '添加地图'}
+              {uploadMutation.isPending ? '上传中' : '确定'}
             </button>
           </div>
         </form>

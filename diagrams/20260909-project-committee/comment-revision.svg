@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800">
+  <rect x="0" y="0" width="1600" height="800" fill="#ffffff"/>
+
+  <text x="800" y="52" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="30" font-weight="700" fill="#111111">项目委员会组织架构</text>
+
+  <!-- 总决策 -->
+  <rect x="400" y="90" width="800" height="108" fill="#ffffff" stroke="#444444" stroke-width="2"/>
+  <text x="800" y="122" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" fill="#555555">总决策</text>
+  <text x="600" y="166" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="24" font-weight="700" fill="#111111">史克克</text>
+  <text x="1000" y="166" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="24" font-weight="700" fill="#111111">赵华伟</text>
+
+  <!-- 总决策到双方项目经理 -->
+  <line x1="800" y1="198" x2="800" y2="236" stroke="#555555" stroke-width="2"/>
+  <line x1="425" y1="236" x2="1185" y2="236" stroke="#555555" stroke-width="2"/>
+  <line x1="425" y1="236" x2="425" y2="272" stroke="#555555" stroke-width="2"/>
+  <line x1="1185" y1="236" x2="1185" y2="272" stroke="#555555" stroke-width="2"/>
+
+  <!-- 双方项目经理 -->
+  <rect x="225" y="272" width="400" height="100" fill="#ffffff" stroke="#444444" stroke-width="2"/>
+  <text x="425" y="306" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" fill="#555555">项目经理</text>
+  <text x="425" y="347" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="23" font-weight="700" fill="#111111">徐倩凇</text>
+
+  <rect x="985" y="272" width="400" height="100" fill="#ffffff" stroke="#444444" stroke-width="2"/>
+  <text x="1185" y="306" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" fill="#555555">项目经理</text>
+  <text x="1185" y="347" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="23" font-weight="700" fill="#111111">吴雁军</text>
+
+  <!-- 加速进化侧执行角色 -->
+  <line x1="425" y1="372" x2="425" y2="430" stroke="#555555" stroke-width="2"/>
+  <line x1="215" y1="430" x2="635" y2="430" stroke="#555555" stroke-width="2"/>
+  <line x1="215" y1="430" x2="215" y2="466" stroke="#555555" stroke-width="2"/>
+  <line x1="425" y1="430" x2="425" y2="466" stroke="#555555" stroke-width="2"/>
+  <line x1="635" y1="430" x2="635" y2="466" stroke="#555555" stroke-width="2"/>
+
+  <rect x="120" y="466" width="190" height="110" fill="#ffffff" stroke="#666666" stroke-width="2"/>
+  <text x="215" y="505" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="15" fill="#555555">产品设计负责人</text>
+  <text x="215" y="548" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="21" font-weight="700" fill="#111111">徐倩凇</text>
+
+  <rect x="330" y="466" width="190" height="110" fill="#ffffff" stroke="#666666" stroke-width="2"/>
+  <text x="425" y="505" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="15" fill="#555555">开发负责人</text>
+  <text x="425" y="548" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="21" font-weight="700" fill="#111111">王登辉</text>
+
+  <rect x="540" y="466" width="190" height="110" fill="#ffffff" stroke="#666666" stroke-width="2"/>
+  <text x="635" y="505" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="15" fill="#555555">架构设计</text>
+  <text x="635" y="548" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="21" font-weight="700" fill="#111111">高阳</text>
+
+  <!-- 北京地铁侧执行角色 -->
+  <line x1="1185" y1="372" x2="1185" y2="430" stroke="#555555" stroke-width="2"/>
+  <line x1="975" y1="430" x2="1395" y2="430" stroke="#555555" stroke-width="2"/>
+  <line x1="975" y1="430" x2="975" y2="466" stroke="#555555" stroke-width="2"/>
+  <line x1="1185" y1="430" x2="1185" y2="466" stroke="#555555" stroke-width="2"/>
+  <line x1="1395" y1="430" x2="1395" y2="466" stroke="#555555" stroke-width="2"/>
+
+  <rect x="880" y="466" width="190" height="110" fill="#ffffff" stroke="#666666" stroke-width="2"/>
+  <text x="975" y="505" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="15" fill="#555555">集成方案负责人</text>
+  <text x="975" y="548" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="21" font-weight="700" fill="#111111">待定</text>
+
+  <rect x="1090" y="466" width="190" height="110" fill="#ffffff" stroke="#666666" stroke-width="2"/>
+  <text x="1185" y="505" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="15" fill="#555555">集成开发负责人</text>
+  <text x="1185" y="548" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="21" font-weight="700" fill="#111111">待定</text>
+
+  <rect x="1300" y="466" width="190" height="110" fill="#ffffff" stroke="#666666" stroke-width="2"/>
+  <text x="1395" y="505" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="15" fill="#555555">测试与验收负责人</text>
+  <text x="1395" y="548" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="21" font-weight="700" fill="#111111">待定</text>
+</svg>

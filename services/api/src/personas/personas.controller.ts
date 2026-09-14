@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiCreatedResponse, ApiExtraModels, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
-import { ListPersonasQuery, PersonaCustomSkillInputDto, PersonaUpdateDto, PersonaWriteDto } from './persona.dto'
+import { ListPersonasQuery, PersonaUpdateDto, PersonaWriteDto } from './persona.dto'
 import { PersonasService } from './personas.service'
 
 @ApiTags('personas')
-@ApiExtraModels(ListPersonasQuery, PersonaCustomSkillInputDto, PersonaWriteDto, PersonaUpdateDto)
+@ApiExtraModels(ListPersonasQuery, PersonaWriteDto, PersonaUpdateDto)
 @Controller('personas')
 export class PersonasController {
   constructor(@Inject(PersonasService) private readonly personasService: PersonasService) {}

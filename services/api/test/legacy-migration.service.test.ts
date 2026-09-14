@@ -18,7 +18,6 @@ function sourceData() {
         prompt: '迁移测试人设',
         pluginIds: [],
         presetSkillsEnabled: true,
-        customSkills: [],
         createdAt: '2026-08-31T09:40:00.000Z',
       }],
       tourTasks: [{

@@ -1,9 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Pencil, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowLeft, Pencil, ShieldCheck, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useConfirmModalController, useToastStackController } from '../../ui-adapters'
-import { PersonaActionsMenu } from './persona-actions-menu'
 import { deletePersona, getPersona, personaQueryKey } from './personas-api'
 
 export function PersonaDetailPage() {
@@ -59,38 +58,26 @@ export function PersonaDetailPage() {
           <p className="page-summary">音色：{persona.voice === 'female' ? '女声' : persona.voice === 'male' ? '男声' : persona.voice}</p>
         </div>
         {!persona.isSystemDefault ? (
-          <div className="persona-detail-actions">
+          <div className="detail-heading-actions">
             <button className="guide-button guide-button-secondary" type="button" onClick={() => navigate(`/voice/personas/${persona.id}/edit`)}>
               <Pencil aria-hidden="true" size={16} strokeWidth={1.8} />
               编辑
             </button>
-            <PersonaActionsMenu
-              personaName={persona.name}
-              onDelete={(trigger) => {
-                setDeleteTrigger(trigger)
-                setConfirmingDelete(true)
-              }}
-            />
+            <button className="guide-button guide-button-danger-outline" type="button" onClick={(event) => { setDeleteTrigger(event.currentTarget); setConfirmingDelete(true) }}><Trash2 aria-hidden="true" size={16} strokeWidth={1.8} />删除</button>
           </div>
         ) : null}
       </div>
       <div className="persona-detail-layout">
-        <section className="persona-detail-section" aria-labelledby="persona-prompt-title">
-          <h2 id="persona-prompt-title">表达规则</h2>
-          <p className="persona-prompt-copy">{persona.prompt || '未设置额外表达规则。'}</p>
+        <section className="persona-detail-section" aria-labelledby="persona-qa-title">
+          <h2 id="persona-qa-title">问答设置</h2>
+          <dl className="persona-detail-meta">
+            <div><dt>提示词</dt><dd className="persona-prompt-copy">{persona.prompt || '未设置'}</dd></div>
+            <div><dt>插件</dt><dd>{persona.plugins.length ? persona.plugins.map((plugin) => <span className="guide-tag guide-tag-default" key={plugin.id}>{plugin.name}</span>) : '未选择'}</dd></div>
+          </dl>
         </section>
         <section className="persona-detail-section" aria-labelledby="persona-skills-title">
-          <div className="persona-section-heading"><div><h2 id="persona-skills-title">技能设置</h2><p>应用预置技能：{persona.presetSkillsEnabled ? '已启用' : '未启用'}</p></div><Sparkles aria-hidden="true" size={20} strokeWidth={1.8} /></div>
-          {persona.customSkills.length === 0 ? <p className="persona-empty-copy">未添加自定义技能。</p> : (
-            <div className="persona-skill-detail-list">
-              {persona.customSkills.map((skill) => (
-                <article className="persona-skill-detail-item" key={skill.id}>
-                  <div><strong>{skill.skillName}</strong><span className="guide-tag guide-tag-default">{skill.source === 'official' ? '官方技能' : '云端技能'}</span></div>
-                  <dl><div><dt>调用规则</dt><dd>{skill.instruction}</dd></div><div><dt>示例</dt><dd>{skill.example}</dd></div></dl>
-                </article>
-              ))}
-            </div>
-          )}
+          <h2 id="persona-skills-title">手势动作</h2>
+          <p className="persona-detail-gesture-status">{persona.presetSkillsEnabled ? '已启用' : '未启用'}</p>
         </section>
       </div>
     </section>

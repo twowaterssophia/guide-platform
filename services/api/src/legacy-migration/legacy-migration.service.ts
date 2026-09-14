@@ -83,13 +83,6 @@ function actionType(value: unknown): 'SPEECH' | 'SKILL' | 'INTERACTION' | null {
   return normalized === 'SPEECH' || normalized === 'SKILL' || normalized === 'INTERACTION' ? normalized : null
 }
 
-function sourceSkill(value: unknown): 'OFFICIAL' | 'CLOUD' | null {
-  const normalized = nonEmptyString(value)?.toLowerCase()
-  if (normalized === 'official' || normalized === 'booster-official') return 'OFFICIAL'
-  if (normalized === 'cloud') return 'CLOUD'
-  return null
-}
-
 function issue(report: LegacyMigrationReport, code: string, path: string, message: string, level: 'error' | 'warning' = 'error') {
   report.issues.push({ level, code, path, message })
 }
@@ -164,14 +157,6 @@ export class LegacyMigrationService {
       for (const persona of prepared.personas) {
         if (persona.system === true || persona.isSystemDefault === true) continue
         const createdAt = parseDate(persona.createdAt) ?? new Date()
-        const customSkills = arrayValue(persona.customSkills).map((skill, sequence) => ({
-          skillId: nonEmptyString(skill.skillId)!,
-          skillName: nonEmptyString(skill.skillName)!,
-          source: sourceSkill(skill.source)!,
-          instruction: stringValue(skill.instruction)?.trim() ?? '',
-          example: stringValue(skill.example)?.trim() ?? '',
-          sequence,
-        }))
         await transaction.persona.create({
           data: {
             id: nonEmptyString(persona.id)!,
@@ -184,7 +169,6 @@ export class LegacyMigrationService {
             version: 1,
             createdAt,
             updatedAt: createdAt,
-            customSkills: customSkills.length > 0 ? { create: customSkills } : undefined,
           },
         })
         personas += 1
@@ -417,10 +401,6 @@ export class LegacyMigrationService {
       for (const [pluginIndex, pluginIdValue] of (Array.isArray(persona.pluginIds) ? persona.pluginIds : []).entries()) {
         const pluginId = nonEmptyString(pluginIdValue)
         if (!pluginId || (!pluginIds.has(pluginId) && !existingPluginIds.has(pluginId))) issue(report, 'MISSING_PLUGIN_REFERENCE', `personas[${personaIndex}].pluginIds[${pluginIndex}]`, `人设引用了不存在的插件：${pluginIdValue}`)
-      }
-      for (const [skillIndex, skill] of arrayValue(persona.customSkills).entries()) {
-        if (!nonEmptyString(skill.skillId) || !nonEmptyString(skill.skillName) || !nonEmptyString(skill.instruction) || !nonEmptyString(skill.example)) issue(report, 'INVALID_CUSTOM_SKILL', `personas[${personaIndex}].customSkills[${skillIndex}]`, '自定义技能必须包含 ID、名称、调用说明和示例')
-        if (!sourceSkill(skill.source)) issue(report, 'INVALID_CUSTOM_SKILL_SOURCE', `personas[${personaIndex}].customSkills[${skillIndex}].source`, '自定义技能来源只能是官方或云端')
       }
       if (!parseDate(persona.createdAt)) issue(report, 'INVALID_DATE', `personas[${personaIndex}].createdAt`, '创建时间不是有效日期')
     }

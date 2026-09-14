@@ -33,8 +33,8 @@
 
 .guide-empty-description {
   color: var(--guide-color-text-placeholder);
-  font-size: var(--guide-type-body-size);
-  line-height: var(--guide-type-body-line-height);
+  font-size: var(--guide-type-caption-size);
+  line-height: var(--guide-type-caption-line-height);
   margin: 10px 0 0;
   max-width: 560px;
   overflow-wrap: anywhere;

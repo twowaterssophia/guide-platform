@@ -1,8 +1,8 @@
-# Hi Chat Design → 导览后台：具体设计规范 v1.1
+# Hi Chat Design → 导览后台：具体设计规范 v1.11
 
 > 这是一份面向后续开发的单一设计规范入口。它把视觉、布局、组件、状态、交互和页面映射集中在一起。
 >
-> 规范状态：**阶段 1 v1.1，唯一实施入口**。A 为 Figma / 当前项目直接证据，B 为明确实施映射，P 为产品决策；Prototype 圆形连线细节不属于本规范的实施前置条件。任何 B/P 都不得被描述为 Figma 原始读数；后续若取得新证据，只更新本文件的变更记录和对应 Token。
+> 规范状态：**阶段 1 v1.11，唯一实施入口**。A 为 Figma / 当前项目直接证据，B 为明确实施映射，P 为产品决策；Prototype 圆形连线细节不属于本规范的实施前置条件。任何 B/P 都不得被描述为 Figma 原始读数；后续若取得新证据，只更新本文件的变更记录和对应 Token。
 
 ## 0. 设计目标与边界
 
@@ -28,7 +28,7 @@
 |---|---|---|
 | A：已确认 | 已从 Figma 结构、属性或当前代码直接观察 | Figma 有 `首页`、`空状态`、`创建人设2`、`Modal`、`Alert`、`Button`、`Table cell`；首页 1440×870；属性出现 `#F5F5F5`、`#F9FEFF` |
 | B：实施值 | 为后续开发给出的明确工作值 | 页面边距 48px、控件高度 36px、Modal 默认宽度 480px |
-| P：产品决策 | Figma 没有暴露原始值，或业务需要明确取舍 | 地图选择用 Select Dialog、插件表单用宽 Modal、地图编排保留独立页面 |
+| P：产品决策 | Figma 没有暴露原始值，或业务需要明确取舍 | 地图选择用锚定 Select、技能选择用分组 Modal、地图编排保留独立页面 |
 | BLOCKED：来源阻塞 | 已尝试只读方法仍无法取得可靠证据 | Prototype 热点连线、真实字体文件、完整 Button Variant 色值 |
 
 当 A 与 B 冲突时，以 A 为准；P 只在没有 A 时生效；BLOCKED 不得被猜测值覆盖。
@@ -42,14 +42,16 @@
 | Figma 首页基准尺寸 | 1440 × 870（A） |
 | 桌面最小可用宽度 | 1024px（B） |
 | 页面左右边距 | 48px（B） |
-| 页面最大内容宽度 | 1344px，即 `1440 - 2×48`（B） |
+| 页面内容宽度 | 填满页面可用宽度，不设置最大宽度（P：HiChat 当前页面参考） |
 | 小屏左右边距 | 24px（B） |
 | 顶部导航高度 | 64px（B：实施映射，Figma 未暴露精确值） |
 | 页面标题区最小高度 | 62px（B） |
 | 标题区到首个内容区 | 32px（B） |
 | 主要区块之间 | 32–40px（B） |
+| 工作区背景 | `#EDF7FF → #FBFCFF → #F3F1FF` 青蓝至近白至淡紫的线性渐变（B：Hi Chat Hub 全页视觉参考映射） |
+| 工作区面板 | 每个页面的顶层工作区：纯白、无外描边；20px 为实施圆角；内容不足一屏时，面板最小高度覆盖可见内容区（A/B：Hi Chat Hub 空列表视觉参考 + 实施映射） |
 
-页面应使用开放布局、列表、表格和分割线作为主要组织方式；除 Modal、Popover、预览区域和确实需要强调的编辑块外，不给每个区块额外套卡片。
+页面应使用开放布局、留白和独立白色工作区作为主要组织方式；列表、空态、详情与加载态使用纯白无描边的全宽工作区，并在内容不足时延展至可见内容区底部。编辑页在渐变画布中以多个独立白色卡片组织模块，操作区也使用独立白色卡片；不以大面积外描边或密集分割线组织页面。仅在同一张动作配置卡内，允许使用极弱分隔线区分相邻动作段。
 
 ### 2.2 页面壳
 
@@ -64,38 +66,45 @@ App shell
    └─ Page body（table / form / preview / editor）
 ```
 
-- 顶部导航底部使用 1px 分割线。
-- 当前一级导航使用文字变深 + 底部 2px active indicator。
+- 顶部导航可直接置于工作区渐变上，不使用结构性分割线；当前一级导航仍使用文字变深 + 底部 2px active indicator。
 - 页面标题左对齐；主操作位于标题区右侧。
 - 详情页和表单页的返回按钮与标题在同一水平线。
-- 复杂编辑页的底部操作栏固定在视口底部，并为内容预留底部空间。
+- 复杂编辑页的操作按钮正常出现在内容末尾，置于独立白色操作卡片中，不吸附视口底部。
+- 插件列表在没有数据时只在空态底部提供“添加插件”；有数据后才在标题区提供同一主操作，避免重复入口。
+- 添加、编辑插件使用独立表单页；字段单列排列，认证方式使用带勾选状态的 Popover Select，不使用浏览器原生 Select。
+- 插件空态使用中性灰色插头线稿，与旧版导览后台的空态图标语义一致。
 
-### 2.3 语音模块二级导航
+### 2.3 人设模块二级导航
 
-- 一级导航选择“语音”后，左侧显示二级导航：`人设`、`插件`。
-- 二级导航宽度：176px（B）。
-- 二级导航与内容之间间距：48px（B）。
-- 二级导航右侧使用 1px 分割线。
-- 选中项使用浅灰背景、深色文字和 600 字重，不使用高饱和色块。
+- 一级导航选择“人设”后，左侧显示二级导航：`人设`、`插件`。
+- 二级导航宽度：184px（B）。
+- 二级导航与内容之间间距：28px（B）。
+- 二级导航不使用右侧分割线；每项带对应的线性图标。
+- 选中项使用白色圆角表面、深色文字和 600 字重；默认与 Hover 项保持透明或轻白表面。
 
 ## 3. 色彩规范
 
 ### 3.1 核心 Token
 
-| Token | v1.1 值 | 用途 | 证据 |
+| Token | v1.6 值 | 用途 | 证据 |
 |---|---|---|---|
 | `--color-page` | `#FFFFFF` | Modal、表格主体和默认表面 | Figma Modal Background/Body（A） |
 | `--color-empty-start` | `#F5F5F5` | `空状态` 页面渐变起点 | Figma `空状态` Properties（A） |
 | `--color-empty-end` | `#F9FEFF` | `空状态` 页面渐变终点 | Figma `空状态` Properties（A） |
 | `--color-persona-start` | `#F5F7FF` | `创建人设2` 页面渐变起点 | Figma `创建人设2` Properties（A） |
 | `--color-persona-end` | `#FAFEFF` | `创建人设2` 页面渐变终点 | Figma `创建人设2` Properties（A） |
+| `--color-workspace-start` | `#EDF7FF` | 全部后台工作区渐变左侧起点 | B：Hi Chat Hub 全页视觉参考映射 |
+| `--color-workspace-center` | `#FBFCFF` | 全部后台工作区渐变中部过渡 | B：Hi Chat Hub 全页视觉参考映射 |
+| `--color-workspace-end` | `#F3F1FF` | 全部后台工作区渐变右侧终点 | B：Hi Chat Hub 全页视觉参考映射 |
+| `--gradient-workspace` | `linear-gradient(115deg, #EDF7FF 0%, #FBFCFF 52%, #F3F1FF 100%)` | Console 页面壳和滚动背景 | B：以 Hi Chat Hub 全页背景的青蓝至淡紫过渡实施 |
 | `--color-text-strong` | `#161616` | 标题、主文本 | 当前项目基线（A/B） |
 | `--color-text` | `#303030` | 正文、表单值 | 当前项目基线（B） |
 | `--color-text-muted` | `#777777` | 说明、表头、辅助信息 | 当前项目基线（B） |
 | `--color-text-placeholder` | `#8A8A8A` | Placeholder、空状态辅助文案 | 当前项目基线（B） |
-| `--color-border-strong` | `#BCBCBC` at 16% | Table cell 底部分割线 / 重点描边 | Figma `Table cell` Properties（A） |
-| `--color-border` | `#D5D5D5` | 输入框、Select、Popover 边框 | 当前项目基线（B） |
-| `--color-divider` | `#EDEDED` | 表格行、区块分割线 | 当前项目基线（B） |
+| `--color-border-strong` | `#BCBCBC` at 16% | 重点描边的候选 Token；当前页面不作为结构分割线使用 | Figma `Table cell` Properties（A） |
+| `--color-border` | `#D9D9D9` | 输入框、Select、Popover 边框 | HiChat 控件参考的实施映射（B） |
+| `--color-divider` | `#EDEDED` | 兼容旧组件的保留 Token；当前页面不作为区块或表格分割线使用 | 当前项目基线（B） |
+| `--color-table-divider` | `#F0F0F2` | 表格数据行之间的弱分割线；最后一行不绘制 | Hi Chat 列表实施映射（B） |
 | `--color-surface-subtle` | `#F8F8F8` | Hover、标签、次级表面 | 当前项目基线（B） |
 | `--color-surface-hover` | `#F3F3F3` | 菜单项、列表项 Hover | 当前项目基线（B） |
 | `--color-accent` | `#6E63FF` | 品牌图标、主操作、选中指示和聚焦轮廓 | Hi Chat 主操作视觉 + Figma `Alert` 精确色值（A） |
@@ -109,7 +118,7 @@ App shell
 ### 3.2 使用规则
 
 - 默认组件和内容表面保持纯白；不能把白色擅自改成米色、奶油色或暖灰色。
-- 仅在 Figma 已显示的 `空状态`、`创建人设2` 页面壳使用对应渐变 Token，不给按钮、表格和表单凭空增加渐变。
+- 后台页面壳统一使用 `--gradient-workspace`；按钮、表格、输入框、Select 和表单字段保持纯白或中性表面，不在控件本身增加渐变。
 - 整体仍以白色表面和中性文本为主；`#6E63FF` 只用于主操作、当前导航指示、品牌图标、选中控件和聚焦反馈，不大面积铺色。
 - 主按钮使用紫色实心；危险按钮使用语义红色，不与主操作混用。
 - 错误色只用于错误边框、错误文案和危险状态，不用于大面积装饰。
@@ -129,19 +138,19 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 
 | Token | 字号 | 字重 | 行高 | 用途 |
 |---|---:|---:|---:|---|
-| `type.page-title` | 26px | 650 | 1.25 | 页面标题、详情标题 |
-| `type.section-title` | 18px | 600 | 1.4 | 空状态标题、Modal 标题 |
-| `type.subsection` | 14px | 600 | 1.4 | 表单区块、任务区块标题 |
-| `type.body` | 13px | 400 | 1.55 | 正文、表格值、表单值 |
-| `type.body-strong` | 13px | 600 | 1.5 | 名称、强调值、主操作文字 |
-| `type.label` | 13px | 600 | 1.4 | 字段标签、表单标题 |
-| `type.caption` | 12px | 400 | 1.5 | 辅助说明、时间、表头 |
-| `type.button` | 13px | 600 | 1 | Button 文本 |
+| `type.page-title` | 28px | 650 | 1.25 | 页面标题、详情标题 |
+| `type.section-title` | 22px | 600 | 1.4 | 空状态标题、Modal 标题 |
+| `type.subsection` | 18px | 600 | 1.4 | 表单区块、任务区块标题 |
+| `type.body` | 16px | 400 | 1.55 | 正文、表格值、表单值 |
+| `type.body-strong` | 16px | 600 | 1.5 | 名称、强调值、主操作文字 |
+| `type.label` | 16px | 600 | 1.4 | 字段标签、表单标题 |
+| `type.caption` | 14px | 400 | 1.5 | 辅助说明、时间、表头 |
+| `type.button` | 16px | 600 | 1 | Button 文本 |
 
 规则：
 
 - 所有 Button、Tab、Input、Select、Popover、表格单元格都显式声明字号，不能依赖浏览器默认值。
-- 中文正文不得使用过小字号；12px 只用于辅助信息和时间。
+- 正文、标签、输入值、placeholder 和按钮统一使用 16px；辅助信息、时间和表头统一使用 14px。
 - 标题与辅助说明之间默认间距 8–10px。
 - 长文本使用自然换行；名称和表格单元格可截断，但必须通过 title 或详情页保留完整内容。
 
@@ -167,12 +176,13 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 
 | Token | 值 | 用途 |
 |---|---:|---|
-| `radius-sm` | 3px | Input、Select、细粒度控件 |
-| `radius-md` | 4px | Button、Popover、Table tag、菜单 |
-| `radius-lg` | 6px | Modal、预览容器、编辑块 |
+| `radius-sm` | 12px | Input、Select、细粒度控件 |
+| `radius-md` | 12px | Button、Popover、Table tag、菜单 |
+| `radius-lg` | 32px | Modal、预览容器、编辑块 |
+| `radius-workspace` | 20px（B） | 白色无描边编辑器、配置、空态和列表面板；移动端 14px |
 | `radius-round` | 50% | 头像、点位标记、Toggle thumb |
 
-除 Figma 明确展示为大圆角容器的区域，不使用 12px 以上圆角，也不把普通按钮做成胶囊。
+`radius-workspace` 只用于 Figma 明确展示的大面积工作区容器，包括列表的外层面板；Input、Button、Tag、菜单和浮层仍遵循小圆角 Token，不把普通按钮做成胶囊。
 
 ### 5.3 阴影 Token
 
@@ -182,7 +192,7 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 --shadow-toast: 0 10px 30px rgb(0 0 0 / 12%);
 ```
 
-只用于浮层，不给普通页面区块增加阴影。
+只用于浮层，不给普通工作区面板增加阴影或描边；白色工作区应依靠渐变画布和留白形成层级。
 
 ## 6. 基础组件规范
 
@@ -191,10 +201,10 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 | 变体 | 高度 | 内边距 | 背景 | 文字 |
 |---|---:|---:|---|---|
 | Primary | 44px | 0 18px（B：实施映射） | `#6E63FF` | `#FFFFFF` |
-| Secondary | 38px | 0 18px | `#FFFFFF` | `#3E3E3E` |
+| Secondary | 44px | 0 18px | `#FFFFFF` | `#3E3E3E` |
 | Text | 30px | 0 | transparent | `#4C4C4C` |
 | Icon | 30×30px | 0 | transparent | 当前文字色 |
-| Danger | 38px | 0 18px | `#B42318` | `#FFFFFF` |
+| Danger | 44px | 0 18px | `#B42318` | `#FFFFFF` |
 
 状态：
 
@@ -208,16 +218,16 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 
 ### 6.2 Input / Select / Textarea
 
-- 默认高度：38px。
-- 默认边框：1px `#D5D5D5`。
-- 圆角：3px。
-- 水平内边距：11px。
-- 文字：13px，颜色 `#1D1D1D`。
-- Placeholder：`#8A8A8A`。
+- 默认高度：44px。
+- 默认边框：1px `#D9D9D9`。
+- 圆角：12px。
+- 水平内边距：14px。
+- 文字：16px，颜色 `#303030`。
+- Placeholder：14px，`#8A8A8A`。
 - Hover：边框 `#A6A6A6`。
 - Focus：边框 `#6E63FF` + 2px `rgb(110 99 255 / 15%)` 外描边。
 - Error：边框 `#B42318`，下方 12px 错误文案。
-- Textarea 默认最小高度：112px；动作播报文本域可使用 38px 起始高度并随内容扩展。
+- Textarea 默认最小高度：112px；动作播报文本域最小高度为 44px，并随内容扩展。
 
 ### 6.3 Radio / Checkbox / Toggle
 
@@ -229,16 +239,16 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 
 ### 6.4 Table
 
-- 表格不使用外层大卡片。
+- 列表表格置于白色无描边工作区面板内；表格本身不增加描边、阴影或嵌套卡片。
 - 表头最小高度：42px。
 - 数据行最小高度：64px（A：`Table cell` Height Fixed 64px）。
 - 单元格水平内边距：16px（A：`Table cell` Padding 16px）。
-- 表头：12px、500 字重、`#777777`。
-- 数据：13px、`#303030`。
-- 行分割线：0.5px `#BCBCBC` at 16%（A：`Table cell` Bottom border）。
+- 表头：14px、500 字重、`#777777`。
+- 数据：16px、`#303030`。
+- 数据行之间使用 `1px #F0F0F2` 弱分割线，最后一行不绘制尾部分割线；不再依靠行距模拟分隔。
 - Row Hover：`#FAFAFA`。
 - 名称列使用 600 字重。
-- 操作列右对齐或按 Figma 组件统一左对齐，不能一个页面一种方式。
+- 任务、地图、人设、插件列表的操作列统一居中；编辑、删除等常用操作直接展示为等尺寸图标按钮，不收进“更多”菜单。
 - 行点击进入详情时，行内按钮必须阻止事件冒泡，避免同时跳转。
 
 ### 6.5 Tag
@@ -246,9 +256,9 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 - 高度：25–26px。
 - 水平内边距：8px。
 - 边框：1px `#DEDEDE`。
-- 圆角：3px。
+- 圆角：12px。
 - 背景：`#F8F8F8`。
-- 文字：12px，`#565656`。
+- 文字：14px，`#565656`。
 - 超出列宽时截断；完整工具名放在 title / 详情页。
 
 ### 6.6 Empty state
@@ -256,16 +266,16 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 - 默认最小高度：430–480px。
 - 图标 / 插图在上，标题在下，说明再下，CTA 最后。
 - 图标与标题间距：26px。
-- 标题：18px、600 字重。
-- 说明：13px、`#8A8A8A`，上方 10px。
+- 标题：22px、600 字重。
+- 说明：14px、`#8A8A8A`，上方 10px。
 - CTA：上方 28px。
 - 空状态必须提供下一步动作：新建、添加或查看说明。
 
 ### 6.7 Popover / Dropdown
 
 - 背景：白色。
-- 边框：1px `#D5D5D5`。
-- 圆角：3–4px。
+- 边框：1px `#D9D9D9`。
+- 圆角：12px。
 - 阴影：`--shadow-popover`。
 - 内边距：6px。
 - 菜单项最小高度：32–36px。
@@ -277,13 +287,13 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 
 | 类型 | 宽度 |
 |---|---:|
-| Confirm / Alert | 402×178px（A：Modal 变体；业务可在 372–402px 间按内容取值） |
+| Confirm / Alert | 576px 宽（B：根据 HiChat 参考图的实施映射） |
 | 普通表单 Modal | 372px 宽，内容高度按 396 / 578 / 589 / 607px 变体取值（A） |
 | 动态字段 / 插件 Modal | 711px 或 758px 宽变体（A） |
 
 - 遮罩：`rgb(0 0 0 / 32%)`。
 - Modal 背景：白色（A：Background/Body `#FFFFFF`）；圆角使用 Figma `Utilities/Border Radius/3XL` 语义 Token（A），CSS 数值为 B 实施映射。
-- Modal 主体采用 Vertical Auto Layout；外层 Padding 32px、主 Gap 使用 `Utilities/Spacing/7`（A）。
+- Modal 主体采用 Vertical Auto Layout；外层 Padding 32px、32px 圆角；主 Gap 使用 `Utilities/Spacing/7`（A）。
 - Header、Content、Footer 的内部间距在不破坏 32px 外边距的前提下采用 B 实施映射。
 - Footer：右对齐，按钮间距 10px；默认“取消”在左、“确认 / 保存”在右。
 - 点击遮罩：普通信息 Modal 可关闭；有未保存内容的编辑 Modal 不得因误触遮罩丢失数据，应先弹放弃确认或不关闭。
@@ -310,7 +320,8 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 |---|---|---|
 | 独立页面 | 多步骤、画布、持续编辑 | 新建 / 编辑导览任务、创建 / 编辑人设、地图点位编排 |
 | Modal | 局部表单、一次性配置、危险确认 | 添加地图、添加插件、删除、放弃编辑、退出登录、重置 |
-| Select Dialog | 需要搜索、列表较长、选择后回填 | 选择地图；技能 / 插件选项超过 8 项时升级 |
+| Select / Popover | 选项较少、需要直接选择并回填 | 地图、人设等短列表 |
+| Select Dialog / Modal | 需要搜索、分组或展示辅助信息 | 技能 / 插件等复杂选项 |
 | Popover | 少量即时选项、更多操作 | 行更多菜单、添加任务类型、简单技能选择、账户菜单 |
 | Toast | 成功、失败、处理中短反馈 | 保存成功、插件刷新、任务删除、同步提示 |
 
@@ -368,9 +379,11 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 
 - 点击数据行进入任务详情。
 - 点击“编辑”进入任务编辑流。
-- 点击“更多”打开 Popover，仅显示删除。
+- 表头使用整行浅灰圆角容器；操作列与行内图标按钮居中对齐。
+- “编辑”和红色删除图标直接展示，不把删除隐藏在“更多”菜单中。
 - 删除使用 Confirm Modal。
 - 无数据时使用 Empty state，CTA 为“新建导览任务”。
+- 任务列表以 10 条为一页进行客户端分页；只有多页时显示“共 N 条”、页码与上一页 / 下一页，当前兼容全量列表接口，后续 API 迁移为 cursor 分页时保持同一交互。
 
 ### 8.2 地图列表与详情
 
@@ -382,20 +395,22 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 
 ### 8.3 人设列表与创建 / 编辑
 
-- 人设列表复用 Table / Empty state / More menu。
+- 人设列表复用 Table / Empty state / 居中的可见图标操作。
 - 创建人设保留独立页面，复用 Figma 中 `创建人设2` 的表单区块结构。
-- 表单区块：基础设置、问答设置、技能设置。
+- 表单区块：基础设置、问答设置、说话时调用技能。
 - 返回按钮位于标题左侧。
 - 取消 / 返回时若有未保存变更，使用放弃编辑 Confirm Modal。
-- 插件选择：默认使用 Popover 多选；当选项需要搜索或描述过长时升级为 Select Dialog。
-- 预置技能开关使用 Toggle；自定义技能使用分组 Popover。
+- 问答设置仅包含可选提示词与可多选插件；不使用“表达规则”“关联插件”等非需求文案。
+- “说话时调用技能”使用 Toggle，说明机器人可在说话时配合手势；当前不支持人设自定义技能。
+- 新建 / 编辑人设、插件均为独立页面，不展示语音二级导航；人设列表和插件列表才保留该导航。
+- “插件（可多选）”使用可勾选的自定义下拉框，默认 placeholder 为“请选择插件”，不使用浏览器原生多选框。
 
 ### 8.4 MCP 插件列表与添加 / 编辑
 
 - 列表列：插件名称、工具数量 / 工具名称、创建时间、最后刷新时间、操作。
 - 工具名称使用 Tag；超出列宽截断并提供详情查看。
-- “刷新”是行内动作，点击后进入 loading，完成后 Toast。
-- 添加插件优先改为宽表单 Modal；Modal 内部内容区滚动，Footer 固定可见。
+- “刷新”、编辑、删除均使用居中的行内图标按钮；刷新完成后显示 Toast。
+- 添加和编辑插件使用独立页面，字段纵向排列，底部操作保持可见。
 - 动态认证字段根据认证方式出现，切换认证方式时保留可恢复草稿，不能静默清空已输入值。
 - 保存插件需要显示处理中状态；初始化失败使用错误 Toast，并在必要时保留字段错误。
 
@@ -409,13 +424,20 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 
 交互调整：
 
-- 第一步地图选择由当前页面内展开列表升级为 Select Dialog；选择后回填并关闭。
+- 第一步地图选择使用输入框下方的锚定 Select；选项只显示地图名称，选择后回填并关闭。
 - 第二步地图缩放控件保留 Popover 之外的固定工具控件，因为它属于画布操作。
 - 第三步“添加任务”使用 Popover 菜单。
-- 技能选择使用分组 Popover；技能很多时升级为 Select Dialog。
+- 技能选择使用分组 Modal，列表展示名称与版本，选中后通过“确定”回填。
 - 语音人设选择使用自定义 Select / Popover，不使用浏览器原生 Select 作为最终视觉。
-- 底部固定操作栏保留：上一步、下一步、取消、保存。
-- 点位和动作拖拽排序保留，不因视觉迁移而删除。
+- 基础信息字段纵向排列，不使用并排双列。
+- “设置任务”和“选择语音人设”是两张独立白色卡片。
+- 底部操作区以独立白色卡片正常展示：上一步、下一步、取消、保存。
+- 点位和任务拖拽排序保留；点位列表使用单一表头、无底色行和弱分割线。
+- 点位列表为空时仅展示“暂无点位”，不展示表头；有数据时表头为“序号、名称、X 坐标、Y 坐标、朝向、操作”，采用 16px / 600 的字段标签规格，最后一行不展示尾部分割线。
+- 地图 Select 未选择时使用 `#8A8A8A` placeholder 色；输入值与 placeholder 均为 16px。
+- 任务段落的图标、主标题和“添加任务”文字按钮以主标题的垂直中心对齐；“添加任务”使用主题紫色。段落标题与首个字段、相邻字段之间均保留 16px 间距。
+- 默认人设只在任务包含语音播报或语音问答时展示；没有语音任务且未选择自定义人设时，详情页不渲染人设区。
+- 页面根节点保留稳定的垂直滚动条槽位，避免内容跨越视口高度时工作区横向抖动。
 
 ## 9. 当前代码映射
 
@@ -505,8 +527,8 @@ font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif
 
 以下决策是 P：产品决策，不是 Figma Prototype 连线的直接复述：
 
-1. 地图选择采用 Select Dialog：列表可搜索，选择后要回填并关闭。
-2. 添加插件采用 711/758px 宽 Modal：认证字段动态变化，需要保留上下文与滚动区。
+1. 地图选择采用锚定 Select：列表项只显示地图名称，选择后要回填并关闭。
+2. 添加 / 编辑插件采用独立页面：认证字段动态变化，页面表单可完整展示操作区并与旧版导览后台一致。
 3. 创建 / 编辑人设保持独立页面：目标稿存在 `创建人设2` 页面样例，且导览业务字段较多。
 4. 地图点位、拖拽排序、动作编排保持独立编辑页面：画布和持续编辑上下文不能被小弹窗破坏。
 5. 删除、放弃编辑、退出登录、重置使用 Confirm Modal：这些操作需要用户明确决定，不能用短 Toast 替代。
@@ -516,7 +538,7 @@ Prototype 已通过编辑器 Properties、画布截图、Prototype 演示页三�
 
 ## 13. 验收入口
 
-唯一实施入口为本文件 v1.1。阶段 1 在 `phase-1-checklist.md` 全部关键项完成且 `verify-phase1.ps1` 返回 0 后即可宣布完成；Prototype 圆形连线细节作为非关键风险保留记录。
+唯一实施入口为本文件 v1.10。阶段 1 在 `phase-1-checklist.md` 全部关键项完成且 `verify-phase1.ps1` 返回 0 后即可宣布完成；Prototype 圆形连线细节作为非关键风险保留记录。
 
 ## 14. 变更记录
 
@@ -525,3 +547,13 @@ Prototype 已通过编辑器 Properties、画布截图、Prototype 演示页三�
 | v0.1 | 2026-09-08 | 建立统一设计规范初稿。 |
 | v1.0 | 2026-09-08 | 纳入本轮 Figma 只读证据、Modal / Alert 变体、页面渐变差异、Prototype 阻塞边界和产品决策；作为唯一实施入口。 |
 | v1.1 | 2026-09-09 | 根据 Hi Chat 主操作视觉和已确认 Accent 色值，将主操作、选中指示和聚焦反馈统一为 `#6E63FF` 紫色体系，危险操作保留语义红。 |
+| v1.2 | 2026-09-10 | 根据 Hi Chat Hub 创建页视觉参考，将 `#F5F7FF → #FAFEFF` 提升为后台全局工作区渐变；顶层编辑、配置和空态面板统一为纯白无外描边，并新增 `radius-workspace`。 |
+| v1.3 | 2026-09-10 | 补齐列表页：任务、地图、人设和插件表格均置于白色无描边工作区面板内，行分割线保留在面板内部。 |
+| v1.4 | 2026-09-11 | 根据 Hi Chat Hub 空列表参考，顶层白色工作区统一覆盖页面可见内容区；标题、操作和内容纳入同一面板，移除列表、表单、空态和加载态的嵌套白色容器。 |
+| v1.5 | 2026-09-11 | 根据 Hi Chat Hub 全页背景参考，工作区渐变调整为青蓝、近白和淡紫三段过渡；白色内容面保持纯白。 |
+| v1.6 | 2026-09-11 | 根据 HiChat 页面和确认弹窗参考，提升全局排版等级（28/22/18/16/14），输入控件统一为 44px、12px 圆角、`#D9D9D9` 边框，确认弹窗采用 576px 宽和 32px 圆角的实施映射；移除结构性分割线。 |
+| v1.7 | 2026-09-11 | 确认所有工作区无最大宽度、任务表头采用浅灰圆角行和居中操作列；语音侧栏采用图标与白色选中态；编辑流拆为独立白色模块与非吸底操作卡；插件空态回归中性线稿，辅助文案统一为 14px。 |
+| v1.8 | 2026-09-11 | 插件新增/编辑由弹窗调整为独立页面，全部字段纵向排列，认证方式采用自定义 Popover Select；空态恢复旧版插头线稿且不重复展示顶部主操作。账户菜单新增操作手册与受确认保护的演示数据重置；人设动作开关统一命名为“手势动作”。 |
+| v1.9 | 2026-09-11 | 任务、地图、人设和插件列表统一为居中的可见图标操作；地图选择改为仅显示名称的锚定 Select；点位列表采用单一表头与弱分割线；朝向改用主题色向上箭头；技能选择升级为分组 Modal；任务详情按地图及点位、任务、人设重排。 |
+| v1.10 | 2026-09-11 | 地图、人设、导览任务空态复用旧版对应线稿；新增 / 编辑人设与插件移除语音侧栏；任务列表补充弱行分割线与客户端分页；点位表头按字段标签规格调整并清除末行分割线；人设插件改为可多选下拉框，手势动作补充说明。 |
+| v1.11 | 2026-09-11 | Placeholder 与表单值统一为 16px；地图未选择状态使用 placeholder 色；任务段落的图标、标题与紫色添加操作对齐并增加字段间距；详情页按是否存在语音任务或自定义人设决定是否展示人设；稳定滚动条槽位消除内容增长时的横向抖动。 |

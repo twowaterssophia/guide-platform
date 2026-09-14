@@ -26,11 +26,6 @@ enum PluginAuthType {
   BASIC
 }
 
-enum SkillSource {
-  OFFICIAL
-  CLOUD
-}
-
 model User {
   id             String      @id @default(cuid())
   externalId     String?     @unique
@@ -146,30 +141,11 @@ model Persona {
   presetSkillsEnabled Boolean          @default(true)
   version             Int              @default(1)
   pluginLinks         PersonaPlugin[]
-  customSkills        PersonaCustomSkill[]
   tourTasks           TourTask[]
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
 
   @@index([ownerId, createdAt])
-}
-
-model PersonaCustomSkill {
-  id          String      @id @default(cuid())
-  personaId   String
-  persona     Persona     @relation(fields: [personaId], references: [id], onDelete: Cascade)
-  skillId     String
-  skillName   String
-  source      SkillSource
-  instruction String
-  example     String
-  sequence    Int
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  @@unique([personaId, skillId])
-  @@unique([personaId, sequence])
-  @@index([personaId])
 }
 
 model McpPlugin {

@@ -79,7 +79,6 @@ function taskDetail(task: TaskWithPackageRelations): TourTaskDetail {
     name: task.name,
     map: { id: task.map.id, name: task.map.name },
     persona: task.persona ? { id: task.persona.id, name: task.persona.name, isSystemDefault: task.persona.isSystemDefault } : null,
-    status: task.status,
     version: task.version,
     points: task.points.sort((left, right) => left.sequence - right.sequence).map(taskPoint),
     paths: task.paths.sort((left, right) => left.sequence - right.sequence).map(taskPath),
@@ -88,9 +87,9 @@ function taskDetail(task: TaskWithPackageRelations): TourTaskDetail {
   }
 }
 
-function syncState(publishedVersion: number, downloadedVersion: number | null): AgentTaskSummary['syncState'] {
+function syncState(remoteVersion: number, downloadedVersion: number | null): AgentTaskSummary['syncState'] {
   if (downloadedVersion === null) return 'AVAILABLE'
-  return downloadedVersion < publishedVersion ? 'UPDATE_AVAILABLE' : 'DOWNLOADED'
+  return downloadedVersion < remoteVersion ? 'UPDATE_AVAILABLE' : 'DOWNLOADED'
 }
 
 @Injectable()
@@ -104,7 +103,7 @@ export class AgentService {
   async list(deviceId: string): Promise<AgentTaskList> {
     const user = await this.currentUser.getCurrentUser()
     const tasks = await this.prisma.tourTask.findMany({
-      where: { ownerId: user.id, status: 'PUBLISHED' },
+      where: { ownerId: user.id },
       orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
       select: {
         id: true,
@@ -125,7 +124,7 @@ export class AgentService {
           name: task.name,
           mapName: task.map.name,
           pointCount: task._count.points,
-          publishedVersion: task.version,
+          remoteVersion: task.version,
           downloadedVersion,
           syncState: syncState(task.version, downloadedVersion),
           updatedAt: task.updatedAt.toISOString(),
@@ -137,7 +136,7 @@ export class AgentService {
   async download(taskId: string, deviceId: string): Promise<AgentTaskPackage> {
     const user = await this.currentUser.getCurrentUser()
     const task = await this.prisma.tourTask.findFirst({
-      where: { id: taskId, ownerId: user.id, status: 'PUBLISHED' },
+      where: { id: taskId, ownerId: user.id },
       include: {
         map: true,
         persona: { select: { id: true, name: true, isSystemDefault: true } },
@@ -145,7 +144,7 @@ export class AgentService {
         paths: { include: { actions: true }, orderBy: { sequence: 'asc' } },
       },
     }) as TaskWithPackageRelations | null
-    if (!task) throw new NotFoundException('已发布导览任务不存在')
+    if (!task) throw new NotFoundException('导览任务不存在')
 
     const registrationResult = mapRegistrationMetadataSchema.safeParse(task.map.registrationMetadata)
     const mapReady = Boolean(
@@ -201,7 +200,7 @@ export class AgentService {
           contentBase64: preview.toString('base64'),
         },
       },
-      downloadedVersion: task.version,
+      synchronizedVersion: task.version,
       downloadedAt: downloadedAt.toISOString(),
     }
   }

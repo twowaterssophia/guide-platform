@@ -1,33 +1,15 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { BadRequestException } from '@nestjs/common'
-import { DemoSkillCatalogProvider } from '../src/skills/demo-skill-catalog.provider'
-import { resolveCustomSkillCreates } from '../src/personas/personas.service'
+import { personaWriteInputSchema } from '@guide/contracts'
 
-test('resolves custom skill names and sources from the catalog', async () => {
-  const result = await resolveCustomSkillCreates([{
-    skillId: 'official-handshake',
-    instruction: '  greet visitors  ',
-    example: '  hello  ',
-  }], new DemoSkillCatalogProvider())
+test('accepts the supported persona settings without custom skills', () => {
+  const result = personaWriteInputSchema.safeParse({
+    name: '展厅讲解员',
+    voice: 'female',
+    prompt: '使用清晰、友好的语气回答问题。',
+    presetSkillsEnabled: true,
+    pluginIds: ['plugin-knowledge-base'],
+  })
 
-  assert.deepEqual(result, [{
-    skillId: 'official-handshake',
-    skillName: '握手',
-    source: 'OFFICIAL',
-    instruction: 'greet visitors',
-    example: 'hello',
-    sequence: 0,
-  }])
-})
-
-test('rejects unavailable custom skills', async () => {
-  await assert.rejects(
-    resolveCustomSkillCreates([{
-      skillId: 'missing-skill',
-      instruction: 'use it',
-      example: 'example',
-    }], new DemoSkillCatalogProvider()),
-    BadRequestException,
-  )
+  assert.equal(result.success, true)
 })

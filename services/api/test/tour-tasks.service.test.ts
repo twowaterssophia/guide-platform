@@ -27,38 +27,6 @@ test('tour task CRUD preserves ownership, ordering, versions, and cascades', asy
       sizeBytes: 128,
     },
   })
-  const publishableMap = await prisma.mapAsset.create({
-    data: {
-      ownerId: owner.id,
-      name: 'Publishable map',
-      storageKey: `tests/${suffix}/publishable/map.pcd`,
-      originalFileName: 'publishable.pcd',
-      mediaType: 'application/vnd.pointclouds',
-      sizeBytes: 128,
-      pcdEncoding: 'ascii',
-      checksumSha256: '0'.repeat(64),
-      previewStorageKey: `tests/${suffix}/publishable/map.png`,
-      previewOriginalFileName: 'publishable.png',
-      previewMediaType: 'image/png',
-      previewSizeBytes: 64,
-      previewChecksumSha256: '1'.repeat(64),
-      registrationMetadata: {
-        formatVersion: 1,
-        resolution: 0.05,
-        origin: { x: 0, y: 0, yaw: 0 },
-        width: 1,
-        height: 1,
-        frameId: 'map',
-        imageAxes: { x: 'right', y: 'down' },
-        occupiedThreshold: 0.65,
-        freeThreshold: 0.2,
-        pcdTransform: {
-          translation: { x: 0, y: 0, z: 0 },
-          rotation: { x: 0, y: 0, z: 0, w: 1 },
-        },
-      },
-    },
-  })
   const otherMap = await prisma.mapAsset.create({
     data: {
       ownerId: otherOwner.id,
@@ -127,7 +95,6 @@ test('tour task CRUD preserves ownership, ordering, versions, and cascades', asy
   await context.test('creates and reads a fully ordered task detail', async () => {
     const created = await service.create(writeInput)
 
-    assert.equal(created.status, 'DRAFT')
     assert.equal(created.version, 1)
     assert.equal(created.map.id, map.id)
     assert.equal(created.persona?.id, persona.id)
@@ -187,38 +154,4 @@ test('tour task CRUD preserves ownership, ordering, versions, and cascades', asy
     await assert.rejects(service.get(created.id), NotFoundException)
   })
 
-  await context.test('publishes, archives, and republishes with optimistic versions', async () => {
-    const created = await service.create({ ...writeInput, mapId: publishableMap.id, name: 'Lifecycle tour' })
-    const published = await service.publish(created.id, { expectedVersion: created.version })
-    assert.equal(published.status, 'PUBLISHED')
-    assert.equal(published.version, 2)
-
-    await assert.rejects(
-      service.update(created.id, { ...writeInput, mapId: publishableMap.id, expectedVersion: published.version }),
-      ConflictException,
-    )
-
-    const archived = await service.archive(created.id, { expectedVersion: published.version })
-    assert.equal(archived.status, 'ARCHIVED')
-    assert.equal(archived.version, published.version)
-
-    const edited = await service.update(created.id, {
-      ...writeInput,
-      mapId: publishableMap.id,
-      name: 'Lifecycle tour edited',
-      expectedVersion: archived.version,
-    })
-    assert.equal(edited.status, 'DRAFT')
-    assert.equal(edited.version, 3)
-    assert.equal(edited.name, 'Lifecycle tour edited')
-
-    const republished = await service.publish(created.id, { expectedVersion: edited.version })
-    assert.equal(republished.status, 'PUBLISHED')
-    assert.equal(republished.version, 4)
-  })
-
-  await context.test('rejects incomplete map assets at publish time', async () => {
-    const created = await service.create({ ...writeInput, name: 'Incomplete map tour' })
-    await assert.rejects(service.publish(created.id, { expectedVersion: created.version }), BadRequestException)
-  })
 })

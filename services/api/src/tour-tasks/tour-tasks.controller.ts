@@ -15,7 +15,7 @@ export class TourTasksController {
   }
 
   @Post()
-  @ApiOperation({ summary: '创建导览任务草稿' })
+  @ApiOperation({ summary: '创建导览任务' })
   @ApiCreatedResponse({ description: '创建后的导览任务详情。' })
   create(@Body() input: unknown) {
     return this.tourTasksService.create(input)
@@ -29,26 +29,10 @@ export class TourTasksController {
   }
 
   @Patch(':taskId')
-  @ApiOperation({ summary: '更新导览任务草稿' })
+  @ApiOperation({ summary: '更新导览任务' })
   @ApiOkResponse({ description: '更新后的导览任务详情。' })
   update(@Param('taskId') taskId: string, @Body() input: unknown) {
     return this.tourTasksService.update(taskId, input)
-  }
-
-  @Post(':taskId/publish')
-  @HttpCode(200)
-  @ApiOperation({ summary: '发布导览任务' })
-  @ApiOkResponse({ description: '发布后的导览任务详情。' })
-  publish(@Param('taskId') taskId: string, @Body() input: unknown) {
-    return this.tourTasksService.publish(taskId, input)
-  }
-
-  @Post(':taskId/archive')
-  @HttpCode(200)
-  @ApiOperation({ summary: '归档导览任务' })
-  @ApiOkResponse({ description: '归档后的导览任务详情。' })
-  archive(@Param('taskId') taskId: string, @Body() input: unknown) {
-    return this.tourTasksService.archive(taskId, input)
   }
 
   @Delete(':taskId')

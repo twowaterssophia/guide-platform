@@ -7,8 +7,9 @@ import { PersonaFormPage } from '../features/personas/persona-form-page'
 import { PersonaListPage } from '../features/personas/persona-list-page'
 import { MapDetailPage } from '../features/maps/map-detail-page'
 import { MapListPage } from '../features/maps/map-list-page'
-import { PluginsPage } from '../pages/empty-feature-page'
-import { RuntimePage } from '../pages/runtime-page'
+import { PluginDetailPage } from '../features/plugins/plugin-detail-page'
+import { PluginFormPage } from '../features/plugins/plugin-form-page'
+import { PluginsPage } from '../features/plugins/plugins-page'
 
 export function AppRoutes() {
   return (
@@ -24,7 +25,9 @@ export function AppRoutes() {
       <Route path="/voice/personas/:personaId" element={<PersonaDetailPage />} />
       <Route path="/voice/personas/:personaId/edit" element={<PersonaFormPage />} />
       <Route path="/voice/plugins" element={<PluginsPage />} />
-      <Route path="/runtime" element={<RuntimePage />} />
+      <Route path="/voice/plugins/new" element={<PluginFormPage />} />
+      <Route path="/voice/plugins/:pluginId" element={<PluginDetailPage />} />
+      <Route path="/voice/plugins/:pluginId/edit" element={<PluginFormPage />} />
       <Route path="*" element={<Navigate to="/tour-tasks" replace />} />
     </Routes>
   )

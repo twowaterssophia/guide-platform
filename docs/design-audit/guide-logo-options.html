@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>导览后台 Logo 方案</title>
+  <style>
+    :root { color: #161616; font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif; background: linear-gradient(115deg, #edf7ff 0%, #fbfcff 52%, #f3f1ff 100%); }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; padding: 64px; }
+    main { margin: 0 auto; max-width: 1120px; }
+    h1 { font-size: 30px; line-height: 1.25; margin: 0; }
+    .intro { color: #777; font-size: 16px; margin: 12px 0 36px; }
+    .options { display: grid; gap: 20px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    article { background: #fff; border-radius: 20px; min-width: 0; padding: 28px; }
+    .preview { align-items: center; background: #f8f8f8; border-radius: 12px; display: flex; min-height: 180px; padding: 28px; }
+    .brand { align-items: center; color: #161616; display: inline-flex; gap: 12px; min-width: 0; }
+    .mark { color: #6e63ff; flex: 0 0 auto; height: 34px; width: 34px; }
+    .brand-copy { display: grid; gap: 2px; }
+    .brand-name { font-size: 20px; font-weight: 700; line-height: 1.1; white-space: nowrap; }
+    .brand-subtitle { color: #777; font-size: 12px; font-weight: 500; line-height: 1.2; }
+    h2 { font-size: 18px; line-height: 1.4; margin: 24px 0 8px; }
+    p { color: #777; font-size: 14px; line-height: 1.6; margin: 0; }
+    .tag { color: #6e63ff; font-size: 12px; font-weight: 700; margin-top: 16px; }
+    @media (max-width: 900px) { body { padding: 32px 24px; } .options { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>导览后台 Logo 方案</h1>
+    <p class="intro">三个方案均按 HiChat Hub 的“线性图标 + 紧凑文字标识”语言设计，适配现有 64px 顶栏。</p>
+    <section class="options" aria-label="Logo 方案">
+      <article>
+        <div class="preview">
+          <div class="brand">
+            <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M7 25V9l7-3v16l-7 3Zm11-3V6l7 3v16l-7-3Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="m10 12 4 2 4-2 4 2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10.5" cy="20.5" r="1.7" fill="currentColor"/></svg>
+            <span class="brand-copy"><span class="brand-name">GUIDE HUB</span><span class="brand-subtitle">导览后台</span></span>
+          </div>
+        </div>
+        <h2>方案 A：GUIDE HUB</h2>
+        <p>地图折页与位置点组合，直接表达“导览平台”。命名和 HiChat Hub 的产品体系最协调，识别清晰。</p>
+        <p class="tag">推荐</p>
+      </article>
+      <article>
+        <div class="preview">
+          <div class="brand">
+            <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M7 24c3-8 6-8 9-3s6 5 9-4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="7" cy="24" r="3" stroke="currentColor" stroke-width="2.2"/><circle cx="25" cy="17" r="3" stroke="currentColor" stroke-width="2.2"/></svg>
+            <span class="brand-copy"><span class="brand-name">GUIDE FLOW</span><span class="brand-subtitle">导览后台</span></span>
+          </div>
+        </div>
+        <h2>方案 B：GUIDE FLOW</h2>
+        <p>路径与两个停靠点强调任务编排和机器人移动。更偏业务流程型产品，适合突出点位和路线能力。</p>
+      </article>
+      <article>
+        <div class="preview">
+          <div class="brand">
+            <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 5c5.2 0 9 4 9 9.1 0 6.3-9 12.9-9 12.9S7 20.4 7 14.1C7 9 10.8 5 16 5Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="m12.5 14.5 2.2 2.2 4.8-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="brand-copy"><span class="brand-name">导览中枢</span><span class="brand-subtitle">GUIDE CONSOLE</span></span>
+          </div>
+        </div>
+        <h2>方案 C：导览中枢</h2>
+        <p>地点标记和确认符号强调现场管理与可靠执行。中文主名称更适合面向内部运营人员的场景。</p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

@@ -22,7 +22,7 @@ const registrationMetadata = {
   },
 }
 
-test('agent sync lists published tasks, downloads a package, tracks versions, and removes it', async (context) => {
+test('agent sync lists account tasks, downloads a package, tracks versions, and removes it', async (context) => {
   const prisma = new PrismaClient()
   const suffix = randomUUID()
   const owner = await prisma.user.create({ data: { email: `agent-owner-${suffix}@example.com`, displayName: 'Agent owner' } })
@@ -74,11 +74,10 @@ test('agent sync lists published tasks, downloads a package, tracks versions, an
   const available = await service.list(deviceId)
   assert.equal(available.items.length, 1)
   assert.equal(available.items[0]?.syncState, 'AVAILABLE')
-  assert.equal(available.items[0]?.publishedVersion, 2)
+  assert.equal(available.items[0]?.remoteVersion, 2)
 
   const downloaded = await service.download(task.id, deviceId)
-  assert.equal(downloaded.task.status, 'PUBLISHED')
-  assert.equal(downloaded.downloadedVersion, 2)
+  assert.equal(downloaded.synchronizedVersion, 2)
   assert.equal(Buffer.from(downloaded.map.pcd.contentBase64, 'base64').toString(), 'PCD')
   assert.equal(await prisma.agentDownload.count({ where: { deviceId, tourTaskId: task.id } }), 1)
 

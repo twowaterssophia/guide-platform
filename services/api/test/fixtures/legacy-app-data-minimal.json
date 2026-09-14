@@ -13,7 +13,6 @@
         "prompt": "负责完成迁移后的导览任务。",
         "pluginIds": [],
         "presetSkillsEnabled": true,
-        "customSkills": [],
         "createdAt": "2026-08-31T09:40:00.000Z"
       },
       {
@@ -23,7 +22,6 @@
         "system": true,
         "pluginIds": [],
         "presetSkillsEnabled": true,
-        "customSkills": [],
         "createdAt": "2026-08-31T09:40:00.000Z"
       }
     ],

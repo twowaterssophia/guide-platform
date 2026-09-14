@@ -1,20 +1,11 @@
 import { z } from 'zod'
 
-export const providerModeSchema = z.enum(['demo', 'sandbox', 'production'])
-export type ProviderMode = z.infer<typeof providerModeSchema>
-
 export const healthResponseSchema = z.object({
   status: z.literal('ok'),
   service: z.literal('guide-api'),
   timestamp: z.string().datetime(),
 })
 export type HealthResponse = z.infer<typeof healthResponseSchema>
-
-export const runtimeInfoSchema = z.object({
-  identityProvider: providerModeSchema,
-  skillProvider: providerModeSchema,
-})
-export type RuntimeInfo = z.infer<typeof runtimeInfoSchema>
 
 export const skillSourceSchema = z.enum(['official', 'cloud'])
 export type SkillSource = z.infer<typeof skillSourceSchema>
@@ -31,17 +22,6 @@ export type SkillSummary = z.infer<typeof skillSummarySchema>
 export const skillListSchema = z.array(skillSummarySchema)
 export type SkillList = z.infer<typeof skillListSchema>
 
-export const personaCustomSkillSchema = z.object({
-  id: z.string(),
-  skillId: z.string(),
-  skillName: z.string(),
-  source: skillSourceSchema,
-  instruction: z.string(),
-  example: z.string(),
-  sequence: z.number().int().nonnegative(),
-})
-export type PersonaCustomSkill = z.infer<typeof personaCustomSkillSchema>
-
 export const personaSummarySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -56,7 +36,8 @@ export type PersonaSummary = z.infer<typeof personaSummarySchema>
 export const personaDetailSchema = personaSummarySchema.extend({
   prompt: z.string(),
   presetSkillsEnabled: z.boolean(),
-  customSkills: z.array(personaCustomSkillSchema),
+  pluginIds: z.array(z.string()),
+  plugins: z.array(z.object({ id: z.string(), name: z.string() })),
 })
 export type PersonaDetail = z.infer<typeof personaDetailSchema>
 
@@ -66,19 +47,12 @@ export const personaListPageSchema = z.object({
 })
 export type PersonaListPage = z.infer<typeof personaListPageSchema>
 
-export const personaCustomSkillInputSchema = z.object({
-  skillId: z.string().min(1),
-  instruction: z.string().trim().min(1).max(2_000),
-  example: z.string().trim().min(1).max(2_000),
-})
-export type PersonaCustomSkillInput = z.infer<typeof personaCustomSkillInputSchema>
-
 export const personaWriteInputSchema = z.object({
-  name: z.string().trim().min(1).max(80),
+  name: z.string().trim().min(1).max(100),
   voice: z.string().trim().min(1).max(80),
-  prompt: z.string().trim().max(8_000),
+  prompt: z.string().trim().max(1_000),
   presetSkillsEnabled: z.boolean(),
-  customSkills: z.array(personaCustomSkillInputSchema).max(50),
+  pluginIds: z.array(z.string().min(1)).max(50).default([]),
 })
 export type PersonaWriteInput = z.infer<typeof personaWriteInputSchema>
 
@@ -92,7 +66,6 @@ export const tourTaskSummarySchema = z.object({
   name: z.string(),
   mapName: z.string(),
   pointCount: z.number().int().nonnegative(),
-  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']),
   version: z.number().int().positive(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -101,9 +74,6 @@ export type TourTaskSummary = z.infer<typeof tourTaskSummarySchema>
 
 export const tourTaskListSchema = z.array(tourTaskSummarySchema)
 export type TourTaskList = z.infer<typeof tourTaskListSchema>
-
-export const tourTaskStatusSchema = z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'])
-export type TourTaskStatus = z.infer<typeof tourTaskStatusSchema>
 
 export const taskActionTypeSchema = z.enum(['SPEECH', 'SKILL', 'INTERACTION'])
 export type TaskActionType = z.infer<typeof taskActionTypeSchema>
@@ -181,7 +151,6 @@ export const tourTaskDetailSchema = z.object({
   name: z.string(),
   map: tourTaskMapRefSchema,
   persona: tourTaskPersonaRefSchema.nullable(),
-  status: tourTaskStatusSchema,
   version: z.number().int().positive(),
   points: z.array(tourPointSchema),
   paths: z.array(tourPathSchema),
@@ -276,11 +245,6 @@ export const tourTaskUpdateInputSchema = tourTaskWriteBaseSchema
   .superRefine(validateTourTaskWrite)
 export type TourTaskUpdateInput = z.infer<typeof tourTaskUpdateInputSchema>
 
-export const tourTaskLifecycleInputSchema = z.object({
-  expectedVersion: z.number().int().positive(),
-})
-export type TourTaskLifecycleInput = z.infer<typeof tourTaskLifecycleInputSchema>
-
 export const agentTaskSyncStateSchema = z.enum(['AVAILABLE', 'DOWNLOADED', 'UPDATE_AVAILABLE'])
 export type AgentTaskSyncState = z.infer<typeof agentTaskSyncStateSchema>
 
@@ -289,7 +253,7 @@ export const agentTaskSummarySchema = z.object({
   name: z.string(),
   mapName: z.string(),
   pointCount: z.number().int().nonnegative(),
-  publishedVersion: z.number().int().positive(),
+  remoteVersion: z.number().int().positive(),
   downloadedVersion: z.number().int().positive().nullable(),
   syncState: agentTaskSyncStateSchema,
   updatedAt: z.string().datetime(),
@@ -372,10 +336,71 @@ export const agentTaskPackageSchema = z.object({
       contentBase64: z.string().min(1),
     }),
   }),
-  downloadedVersion: z.number().int().positive(),
+  synchronizedVersion: z.number().int().positive(),
   downloadedAt: z.string().datetime(),
 })
 export type AgentTaskPackage = z.infer<typeof agentTaskPackageSchema>
+
+export const pluginAuthTypeSchema = z.enum(['NONE', 'BEARER', 'API_KEY', 'BASIC'])
+export type PluginAuthType = z.infer<typeof pluginAuthTypeSchema>
+
+export const mcpToolSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional(),
+})
+export type McpTool = z.infer<typeof mcpToolSchema>
+
+export const mcpPluginSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  tools: z.array(mcpToolSchema),
+  createdAt: z.string().datetime(),
+  lastRefreshedAt: z.string().datetime().nullable(),
+})
+export type McpPluginSummary = z.infer<typeof mcpPluginSummarySchema>
+
+export const mcpPluginDetailSchema = mcpPluginSummarySchema.extend({
+  examples: z.string(),
+  serviceUrl: z.string().url(),
+  authType: pluginAuthTypeSchema,
+  hasCredentials: z.boolean(),
+  customHeaders: z.record(z.string()),
+  personaCount: z.number().int().nonnegative(),
+})
+export type McpPluginDetail = z.infer<typeof mcpPluginDetailSchema>
+
+export const mcpPluginListPageSchema = z.object({
+  items: z.array(mcpPluginSummarySchema),
+  nextCursor: z.string().optional(),
+})
+export type McpPluginListPage = z.infer<typeof mcpPluginListPageSchema>
+
+const mcpCredentialsSchema = z.object({
+  token: z.string().optional(),
+  headerName: z.string().optional(),
+  apiKey: z.string().optional(),
+  username: z.string().optional(),
+  password: z.string().optional(),
+}).optional()
+
+export const mcpPluginWriteInputSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  description: z.string().trim().min(1).max(2_000),
+  examples: z.string().trim().min(1).max(2_000),
+  serviceUrl: z.string().url().max(2_000),
+  authType: pluginAuthTypeSchema,
+  credentials: mcpCredentialsSchema,
+  keepExistingCredentials: z.boolean().default(false),
+  customHeaders: z.record(z.string()).default({}),
+}).superRefine((input, context) => {
+  const credentials = input.credentials
+  if (input.keepExistingCredentials && (!credentials || Object.values(credentials).every((value) => !value?.trim()))) return
+  if (input.authType === 'BEARER' && !credentials?.token?.trim()) context.addIssue({ code: z.ZodIssueCode.custom, path: ['credentials', 'token'], message: '请输入 Bearer Token' })
+  if (input.authType === 'API_KEY' && (!credentials?.headerName?.trim() || !credentials.apiKey?.trim())) context.addIssue({ code: z.ZodIssueCode.custom, path: ['credentials'], message: '请输入请求头名称和 API Key' })
+  if (input.authType === 'BASIC' && (!credentials?.username?.trim() || !credentials.password)) context.addIssue({ code: z.ZodIssueCode.custom, path: ['credentials'], message: '请输入用户名和密码' })
+})
+export type McpPluginWriteInput = z.infer<typeof mcpPluginWriteInputSchema>
 
 export const mapAssetSummarySchema = z.object({
   id: z.string(),

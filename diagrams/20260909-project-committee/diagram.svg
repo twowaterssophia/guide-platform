@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+  <rect x="0" y="0" width="1600" height="980" fill="#F6F8FC"/>
+
+  <!-- Title -->
+  <text x="800" y="54" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="30" font-weight="700" fill="#15233D">项目委员会组织架构</text>
+  <text x="800" y="86" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="15" fill="#64748B">北京地铁 × 加速进化｜双方联合决策与执行协同机制</text>
+  <line x1="520" y1="108" x2="1080" y2="108" stroke="#CBD5E1" stroke-width="2"/>
+
+  <!-- Decision layer -->
+  <rect x="690" y="124" width="220" height="34" rx="17" fill="#E8EEF9"/>
+  <text x="800" y="147" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#34558D">总决策层</text>
+
+  <rect x="160" y="176" width="600" height="104" rx="14" fill="#19345F"/>
+  <rect x="840" y="176" width="600" height="104" rx="14" fill="#215C56"/>
+  <circle cx="205" cy="228" r="22" fill="#5D8FE6"/>
+  <text x="205" y="235" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="18" font-weight="700" fill="#FFFFFF">决</text>
+  <text x="250" y="220" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="14" fill="#B9CCF3">加速进化</text>
+  <text x="250" y="251" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF">史克克</text>
+  <circle cx="885" cy="228" r="22" fill="#55B5A4"/>
+  <text x="885" y="235" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="18" font-weight="700" fill="#FFFFFF">决</text>
+  <text x="930" y="220" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="14" fill="#B6E0DA">北京地铁</text>
+  <text x="930" y="251" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF">赵总</text>
+
+  <!-- Decision to PM connectors -->
+  <polyline points="460,280 460,336" fill="none" stroke="#6C8FCB" stroke-width="3"/>
+  <polyline points="1140,280 1140,336" fill="none" stroke="#5AA69A" stroke-width="3"/>
+  <polyline points="460,300 1140,300" fill="none" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="8 8"/>
+  <circle cx="800" cy="300" r="6" fill="#94A3B8"/>
+  <text x="800" y="292" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#64748B">联合决策</text>
+
+  <!-- Project manager layer -->
+  <rect x="240" y="336" width="440" height="116" rx="14" fill="#FFFFFF" stroke="#6C8FCB" stroke-width="3"/>
+  <rect x="920" y="336" width="440" height="116" rx="14" fill="#FFFFFF" stroke="#5AA69A" stroke-width="3"/>
+  <rect x="264" y="354" width="94" height="26" rx="13" fill="#E8EEF9"/>
+  <text x="311" y="372" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" font-weight="700" fill="#34558D">项目经理</text>
+  <rect x="944" y="354" width="94" height="26" rx="13" fill="#E4F3F0"/>
+  <text x="991" y="372" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" font-weight="700" fill="#24766A">项目经理</text>
+  <text x="274" y="415" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="24" font-weight="700" fill="#15233D">加速进化｜徐倩凇</text>
+  <text x="954" y="415" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="24" font-weight="700" fill="#15233D">北京地铁｜吴部长</text>
+  <text x="274" y="438" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#64748B">需求统筹 · 进度管理 · 双方协同</text>
+  <text x="954" y="438" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#64748B">需求统筹 · 进度管理 · 双方协同</text>
+
+  <!-- PM to team connectors -->
+  <polyline points="460,452 460,500 245,500 245,604" fill="none" stroke="#6C8FCB" stroke-width="3"/>
+  <polyline points="460,500 460,604" fill="none" stroke="#6C8FCB" stroke-width="3"/>
+  <polyline points="460,500 675,500 675,604" fill="none" stroke="#6C8FCB" stroke-width="3"/>
+  <polyline points="1140,452 1140,500 925,500 925,604" fill="none" stroke="#5AA69A" stroke-width="3"/>
+  <polyline points="1140,500 1140,604" fill="none" stroke="#5AA69A" stroke-width="3"/>
+  <polyline points="1140,500 1355,500 1355,604" fill="none" stroke="#5AA69A" stroke-width="3"/>
+  <circle cx="460" cy="500" r="6" fill="#6C8FCB"/>
+  <circle cx="1140" cy="500" r="6" fill="#5AA69A"/>
+
+  <!-- Left team panel -->
+  <rect x="100" y="560" width="720" height="300" rx="18" fill="#EEF4FF" stroke="#C7D7F6" stroke-width="2"/>
+  <rect x="100" y="560" width="720" height="64" rx="18" fill="#DCE9FF"/>
+  <rect x="100" y="606" width="720" height="18" fill="#DCE9FF"/>
+  <circle cx="138" cy="592" r="17" fill="#6C8FCB"/>
+  <text x="138" y="598" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">A</text>
+  <text x="170" y="591" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="20" font-weight="700" fill="#19345F">加速进化侧</text>
+  <text x="170" y="614" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#5270A4">产品与研发执行团队</text>
+
+  <!-- Left role cards -->
+  <rect x="140" y="648" width="200" height="154" rx="12" fill="#FFFFFF" stroke="#B7CBF0" stroke-width="2"/>
+  <rect x="360" y="648" width="200" height="154" rx="12" fill="#FFFFFF" stroke="#B7CBF0" stroke-width="2"/>
+  <rect x="580" y="648" width="200" height="154" rx="12" fill="#FFFFFF" stroke="#B7CBF0" stroke-width="2"/>
+  <circle cx="180" cy="690" r="20" fill="#6C8FCB"/>
+  <text x="180" y="697" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">01</text>
+  <circle cx="400" cy="690" r="20" fill="#6C8FCB"/>
+  <text x="400" y="697" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">02</text>
+  <circle cx="620" cy="690" r="20" fill="#6C8FCB"/>
+  <text x="620" y="697" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">03</text>
+  <text x="180" y="746" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="18" font-weight="700" fill="#15233D">产品经理</text>
+  <text x="460" y="746" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="18" font-weight="700" fill="#15233D">开发负责人</text>
+  <text x="680" y="730" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="17" font-weight="700" fill="#15233D">技术架构</text>
+  <text x="680" y="755" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="17" font-weight="700" fill="#15233D">设计顾问</text>
+  <line x1="164" y1="760" x2="316" y2="760" stroke="#E2E8F0" stroke-width="2"/>
+  <line x1="384" y1="760" x2="536" y2="760" stroke="#E2E8F0" stroke-width="2"/>
+  <line x1="604" y1="760" x2="756" y2="760" stroke="#E2E8F0" stroke-width="2"/>
+  <text x="180" y="783" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">方案与体验</text>
+  <text x="460" y="783" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">研发交付</text>
+  <text x="680" y="783" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">技术架构</text>
+
+  <!-- Right team panel -->
+  <rect x="860" y="560" width="720" height="300" rx="18" fill="#EDF8F6" stroke="#C2E2DC" stroke-width="2"/>
+  <rect x="860" y="560" width="720" height="64" rx="18" fill="#D9F0EC"/>
+  <rect x="860" y="606" width="720" height="18" fill="#D9F0EC"/>
+  <circle cx="898" cy="592" r="17" fill="#5AA69A"/>
+  <text x="898" y="598" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">B</text>
+  <text x="930" y="591" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="20" font-weight="700" fill="#215C56">北京地铁侧</text>
+  <text x="930" y="614" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#4D8179">集成与验收执行团队</text>
+
+  <!-- Right role cards -->
+  <rect x="900" y="648" width="200" height="154" rx="12" fill="#FFFFFF" stroke="#B6D9D2" stroke-width="2"/>
+  <rect x="1120" y="648" width="200" height="154" rx="12" fill="#FFFFFF" stroke="#B6D9D2" stroke-width="2"/>
+  <rect x="1340" y="648" width="200" height="154" rx="12" fill="#FFFFFF" stroke="#B6D9D2" stroke-width="2"/>
+  <circle cx="940" cy="690" r="20" fill="#5AA69A"/>
+  <text x="940" y="697" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">01</text>
+  <circle cx="1160" cy="690" r="20" fill="#5AA69A"/>
+  <text x="1160" y="697" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">02</text>
+  <circle cx="1380" cy="690" r="20" fill="#5AA69A"/>
+  <text x="1380" y="697" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">03</text>
+  <text x="1000" y="730" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="17" font-weight="700" fill="#15233D">集成方案</text>
+  <text x="1000" y="755" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="17" font-weight="700" fill="#15233D">负责人</text>
+  <text x="1220" y="746" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="17" font-weight="700" fill="#15233D">集成开发负责人</text>
+  <text x="1440" y="730" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="15" font-weight="700" fill="#15233D">测试与验收</text>
+  <text x="1440" y="755" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="17" font-weight="700" fill="#15233D">负责人</text>
+  <line x1="924" y1="760" x2="1076" y2="760" stroke="#E2E8F0" stroke-width="2"/>
+  <line x1="1144" y1="760" x2="1296" y2="760" stroke="#E2E8F0" stroke-width="2"/>
+  <line x1="1364" y1="760" x2="1516" y2="760" stroke="#E2E8F0" stroke-width="2"/>
+  <text x="1000" y="783" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">总体集成方案</text>
+  <text x="1220" y="783" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">平台对接与实施</text>
+  <text x="1440" y="783" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">测试组织与验收</text>
+
+  <!-- Footer -->
+  <line x1="520" y1="885" x2="1080" y2="885" stroke="#CBD5E1" stroke-width="2"/>
+  <text x="800" y="910" text-anchor="middle" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="14" fill="#64748B">协同链路：总决策层 → 项目经理 → 专业执行团队</text>
+</svg>

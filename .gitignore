@@ -7,6 +7,7 @@ test-results/
 blob-report/
 .codex-preview/
 _wbcheck/
+canvas/
 tmp/
 .env
 .env.*

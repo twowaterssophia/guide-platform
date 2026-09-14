@@ -1,27 +1,11 @@
 import { PrismaClient, TourTaskStatus } from '@prisma/client'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
+import { demoPcd, demoPreview, demoRegistration } from '../src/demo-data/demo-map'
+import { demoKnowledgePlugin, demoPersona, demoTour } from '../src/demo-data/demo-tour'
 
 const prisma = new PrismaClient()
 const demoUserEmail = process.env.DEMO_USER_EMAIL ?? 'guide@booster.tech'
-
-const demoPcd = Buffer.from(`# .PCD v0.7 - Point Cloud Data file format\nVERSION .7\nFIELDS x y z\nSIZE 4 4 4\nTYPE F F F\nCOUNT 1 1 1\nWIDTH 1\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS 1\nDATA ascii\n0 0 0\n`, 'utf8')
-const demoPreview = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64')
-const demoRegistration = {
-  formatVersion: 1,
-  resolution: 0.05,
-  origin: { x: 0, y: 0, yaw: 0 },
-  width: 1,
-  height: 1,
-  frameId: 'map',
-  imageAxes: { x: 'right', y: 'down' },
-  occupiedThreshold: 0.65,
-  freeThreshold: 0.2,
-  pcdTransform: {
-    translation: { x: 0, y: 0, z: 0 },
-    rotation: { x: 0, y: 0, z: 0, w: 1 },
-  },
-}
 
 async function writeDemoMapBundle() {
   const root = resolve(process.env.MAP_STORAGE_ROOT ?? './storage/maps')
@@ -89,24 +73,84 @@ async function main() {
 
   await writeDemoMapBundle()
 
-  await prisma.tourTask.upsert({
-    where: { id: 'demo-wangfujing-tour' },
-    update: {},
-    create: {
-      id: 'demo-wangfujing-tour',
+  const plugin = await prisma.mcpPlugin.upsert({
+    where: { id: 'demo-wangfujing-plugin' },
+    update: {
       ownerId: user.id,
-      name: '王府井站站厅巡检',
-      mapId: map.id,
-      status: TourTaskStatus.PUBLISHED,
-      points: {
-        create: [
-          { sequence: 1, name: '站厅服务台', x: 210, y: 322, angle: 90 },
-          { sequence: 2, name: '站厅 PIS 屏', x: 492, y: 220, angle: 0 },
-          { sequence: 3, name: '防汛物资存放点', x: 734, y: 330, angle: 270 },
-        ],
-      },
+      name: demoKnowledgePlugin.name,
+      description: demoKnowledgePlugin.description,
+      examples: demoKnowledgePlugin.examples,
+      serviceUrl: demoKnowledgePlugin.serviceUrl,
+      authType: 'NONE',
+      tools: demoKnowledgePlugin.tools,
+      lastRefreshedAt: new Date(),
+    },
+    create: {
+      id: 'demo-wangfujing-plugin',
+      ownerId: user.id,
+      name: demoKnowledgePlugin.name,
+      description: demoKnowledgePlugin.description,
+      examples: demoKnowledgePlugin.examples,
+      serviceUrl: demoKnowledgePlugin.serviceUrl,
+      authType: 'NONE',
+      tools: demoKnowledgePlugin.tools,
+      lastRefreshedAt: new Date(),
     },
   })
+  const persona = await prisma.persona.upsert({
+    where: { id: 'demo-wangfujing-persona' },
+    update: {
+      ownerId: user.id,
+      name: demoPersona.name,
+      voice: demoPersona.voice,
+      prompt: demoPersona.prompt,
+      presetSkillsEnabled: demoPersona.presetSkillsEnabled,
+      pluginLinks: { deleteMany: {}, create: { pluginId: plugin.id } },
+    },
+    create: {
+      id: 'demo-wangfujing-persona',
+      ownerId: user.id,
+      name: demoPersona.name,
+      voice: demoPersona.voice,
+      prompt: demoPersona.prompt,
+      presetSkillsEnabled: demoPersona.presetSkillsEnabled,
+      pluginLinks: { create: { pluginId: plugin.id } },
+    },
+  })
+
+  await prisma.agentDownload.deleteMany({ where: { tourTaskId: 'demo-wangfujing-tour' } })
+  await prisma.tourTask.deleteMany({ where: { id: 'demo-wangfujing-tour' } })
+  const task = await prisma.tourTask.create({
+    data: {
+      id: 'demo-wangfujing-tour',
+      ownerId: user.id,
+      name: demoTour.name,
+      mapId: map.id,
+      personaId: persona.id,
+      status: TourTaskStatus.PUBLISHED,
+      points: { create: demoTour.points.map((point, index) => ({
+        sequence: index + 1,
+        name: point.name,
+        x: point.x,
+        y: point.y,
+        angle: point.angle,
+        actions: { create: point.actions.map((action, actionIndex) => action.type === 'SKILL'
+          ? { sequence: actionIndex + 1, type: action.type, skillId: action.skillId, skillName: action.skillName }
+          : { sequence: actionIndex + 1, type: action.type, narration: action.narration }) },
+      })) },
+    },
+    include: { points: { orderBy: { sequence: 'asc' } } },
+  })
+  const pointIds = new Map(task.points.map((point) => [point.sequence, point.id]))
+  await Promise.all(demoTour.paths.map((path, index) => prisma.tourPath.create({
+    data: {
+      taskId: task.id,
+      sequence: index + 1,
+      fromPointId: pointIds.get(path.fromSequence)!,
+      toPointId: pointIds.get(path.toSequence)!,
+      actions: { create: path.actions.map((action, actionIndex) => ({ sequence: actionIndex + 1, type: action.type, narration: action.narration })) },
+    },
+  })))
 }
 
 main()

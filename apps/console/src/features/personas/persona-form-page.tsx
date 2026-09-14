@@ -1,45 +1,41 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Save, Sparkles, Trash2 } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { useBeforeUnload, useBlocker, useNavigate, useParams } from 'react-router-dom'
-import type { PersonaCustomSkillInput, PersonaWriteInput, SkillSummary } from '@guide/contracts'
+import type { PersonaWriteInput } from '@guide/contracts'
 import { ApiClientError } from '../../api/client'
 import { useConfirmModalController } from '../../ui-adapters'
-import { SkillPicker, VoiceSelect } from './persona-form-controls'
-import { createPersona, getPersona, listCompatibleSkills, personaQueryKey, updatePersona } from './personas-api'
+import { PluginMultiSelect, VoiceSelect } from './persona-form-controls'
+import { createPersona, getPersona, listPlugins, personaQueryKey, updatePersona } from './personas-api'
 
 interface PersonaDraft {
   name: string
   voice: string
   prompt: string
+  pluginIds: string[]
   presetSkillsEnabled: boolean
-  customSkills: PersonaCustomSkillInput[]
 }
 
 const emptyDraft: PersonaDraft = {
   name: '',
   voice: 'female',
   prompt: '',
+  pluginIds: [],
   presetSkillsEnabled: true,
-  customSkills: [],
 }
 
-function draftFromPersona(persona: { name: string; voice: string; prompt: string; presetSkillsEnabled: boolean; customSkills: PersonaCustomSkillInput[] }): PersonaDraft {
-  return {
-    name: persona.name,
-    voice: persona.voice,
-    prompt: persona.prompt,
-    presetSkillsEnabled: persona.presetSkillsEnabled,
-    customSkills: persona.customSkills.map(({ skillId, instruction, example }) => ({ skillId, instruction, example })),
-  }
-}
-
-function displaySkillSource(skill: SkillSummary) {
-  return skill.source === 'official' ? '官方技能' : '云端技能'
+function draftFromPersona(persona: PersonaDraft): PersonaDraft {
+  return { ...persona, pluginIds: [...persona.pluginIds] }
 }
 
 function draftsMatch(left: PersonaDraft, right: PersonaDraft) {
   return JSON.stringify(left) === JSON.stringify(right)
+}
+
+function resizeTextarea(textarea: HTMLTextAreaElement | null) {
+  if (!textarea) return
+  textarea.style.height = 'auto'
+  textarea.style.height = `${textarea.scrollHeight}px`
 }
 
 export function PersonaFormPage() {
@@ -49,13 +45,16 @@ export function PersonaFormPage() {
   const queryClient = useQueryClient()
   const [draft, setDraft] = useState<PersonaDraft>(emptyDraft)
   const [initialDraft, setInitialDraft] = useState<PersonaDraft>(emptyDraft)
+  const [errors, setErrors] = useState<{ name?: string }>({})
+  const promptRef = useRef<HTMLTextAreaElement | null>(null)
   const skipBlockRef = useRef(false)
+  const errorPrefix = useId()
   const detailQuery = useQuery({
     queryKey: [...personaQueryKey, personaId],
     queryFn: () => getPersona(personaId ?? ''),
     enabled: isEditing,
   })
-  const skillsQuery = useQuery({ queryKey: ['skills', 'compatible'], queryFn: listCompatibleSkills })
+  const pluginsQuery = useQuery({ queryKey: ['mcp-plugins'], queryFn: listPlugins })
 
   useEffect(() => {
     if (!detailQuery.data) return
@@ -63,6 +62,8 @@ export function PersonaFormPage() {
     setDraft(nextDraft)
     setInitialDraft(nextDraft)
   }, [detailQuery.data])
+
+  useEffect(() => resizeTextarea(promptRef.current), [draft.prompt])
 
   const isDirty = !draftsMatch(draft, initialDraft)
   const blocker = useBlocker(useCallback(() => isDirty && !skipBlockRef.current, [isDirty]))
@@ -88,12 +89,8 @@ export function PersonaFormPage() {
         name: draft.name.trim(),
         voice: draft.voice,
         prompt: draft.prompt.trim(),
+        pluginIds: draft.pluginIds,
         presetSkillsEnabled: draft.presetSkillsEnabled,
-        customSkills: draft.customSkills.map((skill) => ({
-          skillId: skill.skillId,
-          instruction: skill.instruction.trim(),
-          example: skill.example.trim(),
-        })),
       }
       if (isEditing && detailQuery.data) {
         return updatePersona(personaId ?? '', { ...input, expectedVersion: detailQuery.data.version })
@@ -106,31 +103,6 @@ export function PersonaFormPage() {
       navigate(`/voice/personas/${persona.id}`, { replace: true })
     },
   })
-
-  const availableSkills = skillsQuery.data ?? []
-  const selectedSkillIds = new Set(draft.customSkills.map((skill) => skill.skillId))
-  const canSave = Boolean(
-    draft.name.trim()
-    && draft.voice
-    && draft.customSkills.every((skill) => skill.instruction.trim() && skill.example.trim()),
-  )
-
-  const toggleSkill = (skillId: string) => setDraft((current) => {
-    const isSelected = current.customSkills.some((skill) => skill.skillId === skillId)
-    return {
-      ...current,
-      customSkills: isSelected
-        ? current.customSkills.filter((skill) => skill.skillId !== skillId)
-        : [...current.customSkills, { skillId, instruction: '', example: '' }],
-    }
-  })
-
-  const updateSkill = (skillId: string, key: 'instruction' | 'example', value: string) => {
-    setDraft((current) => ({
-      ...current,
-      customSkills: current.customSkills.map((skill) => skill.skillId === skillId ? { ...skill, [key]: value } : skill),
-    }))
-  }
 
   if (isEditing && detailQuery.isLoading) return <section className="page-section"><div className="state-panel">正在加载人设</div></section>
   if (isEditing && (detailQuery.isError || detailQuery.data?.isSystemDefault)) {
@@ -146,45 +118,33 @@ export function PersonaFormPage() {
             {isEditing ? '返回人设详情' : '返回人设列表'}
           </button>
           <h1 id="persona-form-title">{isEditing ? '编辑人设' : '新建人设'}</h1>
-          <p className="page-summary">设置机器人在导览中的表达方式，以及允许自主调用的技能。</p>
+          <p className="page-summary">为机器人设置名称、音色以及回答问题时可使用的插件。</p>
         </div>
       </div>
-      <form className="persona-editor" onSubmit={(event) => {
+      <form className="persona-editor" noValidate onSubmit={(event) => {
         event.preventDefault()
-        if (canSave) saveMutation.mutate()
+        const nextErrors = draft.name.trim() ? {} : { name: '请输入人设名称。' }
+        setErrors(nextErrors)
+        if (!Object.keys(nextErrors).length) saveMutation.mutate()
       }}>
         <section className="persona-form-section" aria-labelledby="persona-basic-title">
           <h2 id="persona-basic-title">基础设置</h2>
           <div className="persona-form-grid">
-            <label className="editor-field"><span>人设名称</span><input value={draft.name} maxLength={80} required onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))} placeholder="例如：展厅讲解员" /></label>
+            <label className="editor-field"><span>名称</span><input aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? `${errorPrefix}-name` : undefined} value={draft.name} maxLength={100} onChange={(event) => { setDraft((current) => ({ ...current, name: event.target.value })); setErrors({}) }} placeholder="请输入人设名称" />{errors.name ? <small className="editor-field-error" id={`${errorPrefix}-name`} role="alert">{errors.name}</small> : null}</label>
             <div className="editor-field"><span id="persona-voice-label">音色</span><VoiceSelect value={draft.voice} labelId="persona-voice-label" onChange={(voice) => setDraft((current) => ({ ...current, voice }))} /></div>
           </div>
-          <label className="editor-field persona-prompt-field"><span>表达规则</span><textarea value={draft.prompt} maxLength={8_000} onChange={(event) => setDraft((current) => ({ ...current, prompt: event.target.value }))} placeholder="描述导览时的角色、语气和回答边界。" /></label>
+        </section>
+        <section className="persona-form-section" aria-labelledby="persona-qa-title">
+          <div className="persona-section-heading"><div><h2 id="persona-qa-title">问答设置</h2><p>设置机器人回答问题时的说话方式和可调用插件。</p></div></div>
+          <label className="editor-field persona-prompt-field"><span>提示词（可选）</span><textarea ref={promptRef} rows={1} value={draft.prompt} maxLength={1_000} onChange={(event) => { setDraft((current) => ({ ...current, prompt: event.target.value })); resizeTextarea(event.currentTarget) }} placeholder="请输入机器人回答问题时需要遵循的规则" /></label>
+          <div className="editor-field persona-plugin-field"><span id="persona-plugin-label">插件（可多选）</span><PluginMultiSelect labelId="persona-plugin-label" plugins={pluginsQuery.data?.items ?? []} value={draft.pluginIds} onChange={(pluginIds) => setDraft((current) => ({ ...current, pluginIds }))} /></div>
         </section>
         <section className="persona-form-section" aria-labelledby="persona-skill-settings-title">
-          <div className="persona-section-heading"><div><h2 id="persona-skill-settings-title">技能设置</h2><p>为人设配置可自主调用的动作技能与模型调用规则。</p></div><Sparkles aria-hidden="true" size={20} strokeWidth={1.8} /></div>
-          <label className="persona-toggle"><input type="checkbox" checked={draft.presetSkillsEnabled} onChange={(event) => setDraft((current) => ({ ...current, presetSkillsEnabled: event.target.checked }))} /><span className="persona-toggle-control" aria-hidden="true" /><span><strong>应用预置技能</strong><small>包含基础问候和常用动作能力。</small></span></label>
-          <div className="persona-custom-skills">
-            <div className="persona-custom-skills-heading"><div><strong>自定义技能</strong><p>仅可选择当前兼容的官方或云端技能，并为每项技能补充调用规则与示例。</p></div></div>
-            {skillsQuery.isLoading ? <p className="persona-empty-copy">正在加载可用技能。</p> : null}
-            {skillsQuery.isError ? <p className="persona-form-error">无法加载技能目录，请检查本地服务。</p> : null}
-            {skillsQuery.isSuccess ? <SkillPicker skills={availableSkills} selectedSkillIds={selectedSkillIds} onToggleSkill={toggleSkill} /> : null}
-            {draft.customSkills.length > 0 ? <div className="persona-skill-edit-list">
-              {draft.customSkills.map((selectedSkill) => {
-                const skill = availableSkills.find((item) => item.id === selectedSkill.skillId)
-                return <article className="persona-skill-edit-item" key={selectedSkill.skillId}>
-                  <div className="persona-skill-edit-heading"><div><strong>{skill?.name ?? selectedSkill.skillId}</strong><span>{skill ? displaySkillSource(skill) : '技能目录已变化'}</span></div><button className="guide-button guide-button-icon persona-delete-icon" type="button" aria-label={`移除 ${skill?.name ?? selectedSkill.skillId}`} title="移除技能" onClick={() => toggleSkill(selectedSkill.skillId)}><Trash2 aria-hidden="true" size={16} strokeWidth={1.8} /></button></div>
-                  <div className="persona-skill-edit-grid">
-                    <label className="editor-field"><span>调用规则</span><textarea required value={selectedSkill.instruction} onChange={(event) => updateSkill(selectedSkill.skillId, 'instruction', event.target.value)} placeholder="例如：在固定点位欢迎访客时调用。" /></label>
-                    <label className="editor-field"><span>示例</span><textarea required value={selectedSkill.example} onChange={(event) => updateSkill(selectedSkill.skillId, 'example', event.target.value)} placeholder="例如：欢迎来到展厅，我来为您介绍。" /></label>
-                  </div>
-                </article>
-              })}
-            </div> : <p className="persona-empty-copy">尚未添加自定义技能。</p>}
-          </div>
+          <div className="persona-section-heading"><div><h2 id="persona-skill-settings-title">手势动作</h2><p>启用后，机器人可以在说话时配合手势动作。</p></div></div>
+          <label className="persona-toggle"><input aria-label="启用手势动作" type="checkbox" checked={draft.presetSkillsEnabled} onChange={(event) => setDraft((current) => ({ ...current, presetSkillsEnabled: event.target.checked }))} /><span className="persona-toggle-control" aria-hidden="true" /><span><strong>{draft.presetSkillsEnabled ? '已启用' : '未启用'}</strong></span></label>
         </section>
         {saveMutation.isError ? <p className="persona-form-error" role="alert">{saveMutation.error instanceof ApiClientError && saveMutation.error.status === 409 ? '人设已被其他会话更新，请刷新后再试。' : '保存失败，请检查填写内容后重试。'}</p> : null}
-        <footer className="persona-editor-actions"><button className="guide-button guide-button-secondary" type="button" onClick={() => navigate(isEditing && personaId ? `/voice/personas/${personaId}` : '/voice/personas')}>取消</button><button className={`guide-button guide-button-primary${saveMutation.isPending ? ' is-loading' : ''}`} type="submit" disabled={!canSave || saveMutation.isPending}><Save aria-hidden="true" size={16} strokeWidth={1.8} />{isEditing ? '保存修改' : '创建人设'}</button></footer>
+        <footer className="persona-editor-actions"><button className="guide-button guide-button-secondary" type="button" onClick={() => navigate(isEditing && personaId ? `/voice/personas/${personaId}` : '/voice/personas')}>取消</button><button className={`guide-button guide-button-primary${saveMutation.isPending ? ' is-loading' : ''}`} type="submit" disabled={saveMutation.isPending}>保存</button></footer>
       </form>
     </section>
   )

@@ -1,5 +1,5 @@
 :root {
-  /* Hi Chat Design -> 导览后台：design-spec.md v1.1 */
+  /* Hi Chat Design -> 导览后台：design-spec.md v1.6 */
 
   /* Color */
   --guide-color-page: #ffffff;
@@ -8,6 +8,10 @@
   --guide-color-empty-end: #f9feff;
   --guide-color-persona-start: #f5f7ff;
   --guide-color-persona-end: #fafeff;
+  --guide-color-workspace-start: #edf7ff;
+  --guide-color-workspace-center: #fbfcff;
+  --guide-color-workspace-end: #f3f1ff;
+  --guide-gradient-workspace: linear-gradient(115deg, var(--guide-color-workspace-start) 0%, var(--guide-color-workspace-center) 52%, var(--guide-color-workspace-end) 100%);
   --guide-color-text-strong: #161616;
   --guide-color-text: #303030;
   --guide-color-text-muted: #777777;
@@ -15,8 +19,9 @@
   --guide-color-text-secondary: var(--guide-color-text-muted);
   --guide-color-text-tertiary: var(--guide-color-text-placeholder);
   --guide-color-border-strong: rgb(188 188 188 / 16%);
-  --guide-color-border: #d5d5d5;
+  --guide-color-border: #d9d9d9;
   --guide-color-divider: #ededed;
+  --guide-color-table-divider: #f0f0f2;
   --guide-color-surface-subtle: #f8f8f8;
   --guide-color-surface-hover: #f3f3f3;
   --guide-color-accent: #6e63ff;
@@ -34,28 +39,28 @@
 
   /* Typography */
   --guide-font-sans: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --guide-type-page-title-size: 26px;
+  --guide-type-page-title-size: 28px;
   --guide-type-page-title-weight: 650;
   --guide-type-page-title-line-height: 1.25;
-  --guide-type-section-title-size: 18px;
+  --guide-type-section-title-size: 22px;
   --guide-type-section-title-weight: 600;
   --guide-type-section-title-line-height: 1.4;
-  --guide-type-subsection-size: 14px;
+  --guide-type-subsection-size: 18px;
   --guide-type-subsection-weight: 600;
   --guide-type-subsection-line-height: 1.4;
-  --guide-type-body-size: 13px;
+  --guide-type-body-size: 16px;
   --guide-type-body-weight: 400;
   --guide-type-body-line-height: 1.55;
-  --guide-type-body-strong-size: 13px;
+  --guide-type-body-strong-size: 16px;
   --guide-type-body-strong-weight: 600;
   --guide-type-body-strong-line-height: 1.5;
-  --guide-type-label-size: 13px;
+  --guide-type-label-size: 16px;
   --guide-type-label-weight: 600;
   --guide-type-label-line-height: 1.4;
-  --guide-type-caption-size: 12px;
+  --guide-type-caption-size: 14px;
   --guide-type-caption-weight: 400;
   --guide-type-caption-line-height: 1.5;
-  --guide-type-button-size: 13px;
+  --guide-type-button-size: 16px;
   --guide-type-button-weight: 600;
   --guide-type-button-line-height: 1;
 
@@ -75,9 +80,10 @@
   --guide-action-bar-height: 72px;
 
   /* Radius and border */
-  --guide-radius-sm: 3px;
-  --guide-radius-md: 4px;
-  --guide-radius-lg: 6px;
+  --guide-radius-sm: 12px;
+  --guide-radius-md: 12px;
+  --guide-radius-lg: 32px;
+  --guide-radius-workspace: 20px;
   --guide-radius-round: 50%;
   --guide-border-width: 1px;
   --guide-border-width-table: 0.5px;

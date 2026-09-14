@@ -4,6 +4,7 @@ import {
   skillListSchema,
 } from '@guide/contracts'
 import type { PersonaUpdateInput, PersonaWriteInput, SkillList } from '@guide/contracts'
+import { mcpPluginListPageSchema } from '@guide/contracts'
 import { deleteResource, getJson, patchJson, postJson } from '../../api/client'
 
 export const personaQueryKey = ['personas'] as const
@@ -30,4 +31,8 @@ export async function deletePersona(personaId: string) {
 
 export async function listCompatibleSkills(): Promise<SkillList> {
   return skillListSchema.parse(await getJson('/skills?compatible=true'))
+}
+
+export async function listPlugins() {
+  return mcpPluginListPageSchema.parse(await getJson('/mcp-plugins'))
 }

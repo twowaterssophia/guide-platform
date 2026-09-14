@@ -1,14 +1,71 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, FileImage, Pencil } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowLeft, Pencil, Trash2, X } from 'lucide-react'
+import { useEffect, useId, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ApiClientError } from '../../api/client'
 import { useConfirmModalController, useToastStackController } from '../../ui-adapters'
-import { MapActionsMenu } from './map-actions-menu'
 import { deleteMap, getMap, mapPreviewUrl, mapsQueryKey, renameMap } from './maps-api'
-import { formatFileSize } from './map-list-page'
 
 const detailDateFormatter = new Intl.DateTimeFormat('zh-CN', { dateStyle: 'long', timeStyle: 'short' })
+
+interface MapRenameDialogProps {
+  open: boolean
+  name: string
+  error: string
+  pending: boolean
+  trigger: HTMLElement | null
+  onNameChange: (name: string) => void
+  onSave: () => void
+  onClose: () => void
+}
+
+function MapRenameDialog({ open, name, error, pending, trigger, onNameChange, onSave, onClose }: MapRenameDialogProps) {
+  const dialogRef = useRef<HTMLDivElement | null>(null)
+  const titleId = useId()
+
+  useEffect(() => {
+    if (!open) return
+    window.requestAnimationFrame(() => dialogRef.current?.querySelector<HTMLInputElement>('input')?.focus())
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      onClose()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      if (trigger?.isConnected) trigger.focus()
+    }
+  }, [onClose, open, trigger])
+
+  if (!open) return null
+
+  return createPortal(
+    <div className="guide-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <div ref={dialogRef} className="guide-modal map-rename-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+        <div className="guide-modal-header">
+          <h2 className="guide-modal-title" id={titleId}>编辑地图名称</h2>
+          <button className="guide-modal-close" type="button" aria-label="关闭" disabled={pending} onClick={onClose}><X aria-hidden="true" size={18} /></button>
+        </div>
+        <form noValidate onSubmit={(event) => { event.preventDefault(); onSave() }}>
+          <div className="guide-modal-content">
+            <label className="editor-field">
+              <span>地图名称</span>
+              <input aria-label="地图名称" aria-invalid={Boolean(error)} value={name} maxLength={120} onChange={(event) => onNameChange(event.target.value)} />
+              {error ? <small className="editor-field-error" role="alert">{error}</small> : null}
+            </label>
+          </div>
+          <div className="guide-modal-footer">
+            <button className="guide-button guide-button-secondary" type="button" disabled={pending} onClick={onClose}>取消</button>
+            <button className="guide-button guide-button-primary" type="submit" disabled={pending}>{pending ? '保存中' : '保存'}</button>
+          </div>
+        </form>
+      </div>
+    </div>,
+    document.body,
+  )
+}
 
 export function MapDetailPage() {
   const { mapId = '' } = useParams()
@@ -16,9 +73,10 @@ export function MapDetailPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const showToast = useToastStackController()
-  const [editing, setEditing] = useState(() => Boolean((location.state as { edit?: boolean } | null)?.edit))
+  const [renameOpen, setRenameOpen] = useState(() => Boolean((location.state as { edit?: boolean } | null)?.edit))
   const [name, setName] = useState('')
   const [renameError, setRenameError] = useState('')
+  const [renameTrigger, setRenameTrigger] = useState<HTMLElement | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [deleteTrigger, setDeleteTrigger] = useState<HTMLElement | null>(null)
   const mapQuery = useQuery({ queryKey: [...mapsQueryKey, mapId], queryFn: () => getMap(mapId), enabled: Boolean(mapId) })
@@ -27,7 +85,8 @@ export function MapDetailPage() {
     onSuccess: async (updated) => {
       queryClient.setQueryData([...mapsQueryKey, mapId], updated)
       await queryClient.invalidateQueries({ queryKey: mapsQueryKey })
-      setEditing(false)
+      setRenameOpen(false)
+      setRenameTrigger(null)
       setRenameError('')
       showToast({ variant: 'success', title: '地图名称已更新', message: `当前名称为“${updated.name}”。` })
     },
@@ -63,15 +122,31 @@ export function MapDetailPage() {
     },
   })
 
+  const loadedMapName = mapQuery.data?.name
+  useEffect(() => {
+    if (!renameOpen || !loadedMapName) return
+    setName(loadedMapName)
+    setRenameError('')
+  }, [loadedMapName, renameOpen])
+
   if (mapQuery.isLoading) return <section className="page-section"><div className="state-panel">正在加载地图详情</div></section>
   if (mapQuery.isError || !mapQuery.data) return <section className="page-section"><div className="state-panel state-error">无法加载该地图，请返回列表后重试。</div></section>
   const map = mapQuery.data
-  const registration = map.registration
+  const isSquarePreview = Boolean(map.registration && map.registration.width > 1 && map.registration.width === map.registration.height)
 
-  const beginRename = () => {
-    setName(map.name)
+  const closeRename = () => {
+    if (renameMutation.isPending) return
+    setRenameOpen(false)
+    setRenameTrigger(null)
     setRenameError('')
-    setEditing(true)
+  }
+  const saveRename = () => {
+    const nextName = name.trim()
+    if (!nextName) {
+      setRenameError('请输入地图名称。')
+      return
+    }
+    renameMutation.mutate(nextName)
   }
 
   return (
@@ -81,50 +156,24 @@ export function MapDetailPage() {
           <button className="guide-button guide-button-text editor-back" type="button" onClick={() => navigate('/maps')}>
             <ArrowLeft aria-hidden="true" size={16} strokeWidth={1.8} />返回地图列表
           </button>
-          {editing ? (
-            <form className="map-rename-form" onSubmit={(event) => { event.preventDefault(); if (name.trim()) renameMutation.mutate(name.trim()) }}>
-              <h1 id="map-detail-title">{map.name}</h1>
-              <label className="editor-field"><span>地图名称</span><input autoFocus aria-label="地图名称" value={name || map.name} maxLength={120} onChange={(event) => setName(event.target.value)} /></label>
-              <div className="map-rename-actions">
-                <button className="guide-button guide-button-secondary" type="button" onClick={() => setEditing(false)} disabled={renameMutation.isPending}>取消</button>
-                <button className="guide-button guide-button-primary" type="submit" disabled={renameMutation.isPending || !(name || map.name).trim()}>{renameMutation.isPending ? '保存中' : '保存'}</button>
-              </div>
-              {renameError ? <p className="map-form-error" role="alert">{renameError}</p> : null}
-            </form>
-          ) : (
-            <div><h1 id="map-detail-title">{map.name}</h1><p className="page-summary">创建于 {detailDateFormatter.format(new Date(map.createdAt))}</p></div>
-          )}
+          <div><h1 id="map-detail-title">{map.name}</h1><p className="page-summary">创建于 {detailDateFormatter.format(new Date(map.createdAt))}</p></div>
         </div>
-        {!editing ? (
-          <div className="persona-detail-actions">
-            <button className="guide-button guide-button-secondary" type="button" onClick={beginRename}><Pencil aria-hidden="true" size={16} strokeWidth={1.8} />编辑名称</button>
-            <MapActionsMenu mapName={map.name} onDelete={(trigger) => { setDeleteTrigger(trigger); setConfirmingDelete(true) }} />
-          </div>
-        ) : null}
+        <div className="detail-heading-actions">
+          <button className="guide-button guide-button-secondary" type="button" onClick={(event) => { setRenameTrigger(event.currentTarget); setRenameOpen(true) }}><Pencil aria-hidden="true" size={16} strokeWidth={1.8} />编辑名称</button>
+          <button className="guide-button guide-button-danger-outline" type="button" onClick={(event) => { setDeleteTrigger(event.currentTarget); setConfirmingDelete(true) }}><Trash2 aria-hidden="true" size={16} strokeWidth={1.8} />删除</button>
+        </div>
       </div>
 
       <div className="map-detail-layout">
         <section className="map-preview-section" aria-labelledby="map-preview-title">
-          <div className="map-section-heading"><div><h2 id="map-preview-title">二维地图</h2><p>{map.preview ? `${map.preview.width} × ${map.preview.height} px` : '当前资源没有可用预览'}</p></div><FileImage aria-hidden="true" size={20} strokeWidth={1.8} /></div>
-          <div className="map-preview-frame">
+          <div className="map-section-heading"><div><h2 id="map-preview-title">二维地图</h2></div></div>
+          <div className={`map-preview-frame${isSquarePreview ? ' is-square' : ''}`}>
             {map.preview ? <img src={mapPreviewUrl(map.preview.url)} alt={`${map.name} 二维地图预览`} /> : <div className="map-preview-unavailable">预览不可用</div>}
           </div>
         </section>
 
-        <section className="map-metadata-section" aria-labelledby="map-file-title">
-          <h2 id="map-file-title">文件与配准</h2>
-          <dl className="map-metadata-list">
-            <div><dt>PCD 文件</dt><dd title={map.pcd.fileName}>{map.pcd.fileName}</dd></div>
-            <div><dt>PCD 编码</dt><dd>{map.pcdEncoding ?? '待识别'}</dd></div>
-            <div><dt>文件大小</dt><dd>{formatFileSize(map.pcd.sizeBytes)}</dd></div>
-            <div><dt>关联任务</dt><dd>{map.referencedTaskCount} 个</dd></div>
-            <div><dt>坐标系</dt><dd>{registration?.frameId ?? '未提供'}</dd></div>
-            <div><dt>分辨率</dt><dd>{registration ? `${registration.resolution} m/px` : '未提供'}</dd></div>
-            <div><dt>地图原点</dt><dd>{registration ? `${registration.origin.x}, ${registration.origin.y}, ${registration.origin.yaw}` : '未提供'}</dd></div>
-            <div><dt>更新时间</dt><dd>{detailDateFormatter.format(new Date(map.updatedAt))}</dd></div>
-          </dl>
-        </section>
       </div>
+      <MapRenameDialog open={renameOpen} name={name} error={renameError} pending={renameMutation.isPending} trigger={renameTrigger} onNameChange={(nextName) => { setName(nextName); setRenameError('') }} onSave={saveRename} onClose={closeRename} />
     </section>
   )
 }

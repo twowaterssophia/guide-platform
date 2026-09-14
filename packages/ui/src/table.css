@@ -5,7 +5,8 @@
 }
 
 .guide-table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   color: var(--guide-color-text);
   font-family: var(--guide-font-sans);
   min-width: 760px;
@@ -13,6 +14,7 @@
 }
 
 .guide-table-head .guide-table-row {
+  background: #f5f5f7;
   height: 42px;
 }
 
@@ -20,9 +22,13 @@
   height: 64px;
 }
 
+.guide-table-body .guide-table-row:not(:last-child) .guide-table-cell {
+  border-bottom: 1px solid var(--guide-color-table-divider);
+}
+
 .guide-table-header-cell,
 .guide-table-cell {
-  border-bottom: var(--guide-border-width-table) solid var(--guide-color-border-strong);
+  border-bottom: 0;
   padding: 0 var(--guide-space-4);
   text-align: left;
   vertical-align: middle;
@@ -34,6 +40,9 @@
   font-weight: 500;
   line-height: var(--guide-type-caption-line-height);
 }
+
+.guide-table-head .guide-table-header-cell:first-child { border-radius: 8px 0 0 8px; }
+.guide-table-head .guide-table-header-cell:last-child { border-radius: 0 8px 8px 0; }
 
 .guide-table-cell {
   color: var(--guide-color-text);
@@ -55,7 +64,7 @@
 .guide-table-cell-end,
 .guide-table-cell-actions,
 .guide-table-header-cell-actions {
-  text-align: right;
+  text-align: center;
 }
 
 .guide-table-body .guide-table-row:hover {

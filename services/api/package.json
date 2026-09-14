@@ -8,7 +8,7 @@
     "start": "node dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src prisma",
-    "test": "tsx --test test/request-id.test.ts test/api-exception.filter.test.ts test/demo-skill-catalog.provider.test.ts test/personas.service.test.ts test/map-file-validation.test.ts test/map-storage.provider.test.ts test/tour-tasks.service.test.ts test/legacy-migration.service.test.ts test/agent.service.test.ts",
+    "test": "tsx --test test/request-id.test.ts test/api-exception.filter.test.ts test/demo-skill-catalog.provider.test.ts test/demo-data.service.test.ts test/personas.service.test.ts test/map-file-validation.test.ts test/map-storage.provider.test.ts test/tour-tasks.service.test.ts test/legacy-migration.service.test.ts test/agent.service.test.ts test/mcp-plugins.service.test.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
@@ -30,12 +30,14 @@
     "fastify": "5.11.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "yauzl": "^3.4.0",
     "zod": "^3.24.4"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.10",
     "@nestjs/schematics": "^11.0.7",
     "@types/node": "^24.3.1",
+    "@types/yauzl": "^3.4.0",
     "prisma": "^6.16.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.5"

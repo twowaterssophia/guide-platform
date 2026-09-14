@@ -10,15 +10,15 @@ export class AgentController {
   constructor(@Inject(AgentService) private readonly agentService: AgentService) {}
 
   @Get()
-  @ApiOperation({ summary: '列出设备可用的已发布导览任务' })
-  @ApiOkResponse({ description: '包含设备下载状态和发布版本。' })
+  @ApiOperation({ summary: '列出设备可用的导览任务' })
+  @ApiOkResponse({ description: '包含设备同步状态和云端资源版本。' })
   list(@Query() query: AgentDeviceQueryDto) {
     return this.agentService.list(query.deviceId)
   }
 
   @Post(':taskId/download')
   @HttpCode(200)
-  @ApiOperation({ summary: '下载已发布导览任务包' })
+  @ApiOperation({ summary: '下载导览任务资源包' })
   @ApiOkResponse({ description: '包含任务编排、地图 PCD、PNG 和配准元数据。' })
   download(@Param('taskId') taskId: string, @Body() input: AgentDeviceInputDto) {
     return this.agentService.download(taskId, input.deviceId)
