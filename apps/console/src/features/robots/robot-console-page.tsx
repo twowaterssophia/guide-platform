@@ -1,27 +1,24 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft, ArrowRight, Check, ChevronDown,
-  Mic, Minus, Monitor, Move, Pause, Play, Plus, RotateCcw, RotateCw,
+  Mic, Minus, Monitor, Pause, Play, Plus, RotateCcw, RotateCw,
   Send, Signal, Trash2, X, ZoomIn, ZoomOut,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import type { MapAssetDetail, RobotPosition, RobotRuntimeState, RobotSummary, RobotTaskSummary, TourTaskDetail } from '@guide/contracts'
+import type { MapAssetDetail, RobotPosition, RobotRuntimeState, RobotSummary, RobotTaskSummary, TaskAction, TourTaskDetail } from '@guide/contracts'
 import { mapPreviewUrl } from '../maps/maps-api'
-import { useToastStackController } from '../../ui-adapters'
+import { useConfirmModalController, useToastStackController } from '../../ui-adapters'
 import { robotConsoleApi, robotConsoleQueryKey, robotPlatformTasksQueryKey } from './robot-console-api'
 import type { PlatformTaskList } from './robot-console-api'
+import { RobotTourFlow } from './robot-tour-flow'
+import type { TourFlowEntry } from './robot-tour-flow'
 import './robot-console.css'
 
-type FlowEntry = {
-  id: string
-  kind: 'ARRIVAL' | 'ACTION' | 'MOVE'
-  pointName: string
-  pointIndex: number
-  target: RobotPosition
-  actionType?: string
-  title: string
-  description?: string
+function getActionContent(action: TaskAction) {
+  if (action.type === 'SPEECH') return action.narration
+  if (action.type === 'SKILL') return action.skillName ?? '技能动作'
+  return action.interactionPrompt || '语音问答'
 }
 
 function getActionLabel(action: { type: string; narration?: string; skillName?: string; interactionPrompt?: string | null }) {
@@ -30,18 +27,18 @@ function getActionLabel(action: { type: string; narration?: string; skillName?: 
   return `语音互动${action.interactionPrompt ? `「${action.interactionPrompt.slice(0, 10)}…」` : ''}`
 }
 
-function buildFlow(task: TourTaskDetail): FlowEntry[] {
-  const entries: FlowEntry[] = []
+function buildFlow(task: TourTaskDetail): TourFlowEntry[] {
+  const entries: TourFlowEntry[] = []
   task.points.forEach((point, pointIndex) => {
     const target = { x: point.x, y: point.y, angle: point.angle }
-    if (point.actions.length === 0) entries.push({ id: `${point.id}:arrival`, kind: 'ARRIVAL', pointName: point.name, pointIndex, target, title: `抵达${point.name}` })
-    point.actions.forEach((action) => entries.push({ id: action.id, kind: 'ACTION', pointName: point.name, pointIndex, target, actionType: action.type, title: getActionLabel(action) }))
+    if (point.actions.length === 0) entries.push({ id: `${point.id}:arrival`, kind: 'ARRIVAL', stage: 'POINT', pointName: point.name, pointIndex, target, content: point.name, title: `抵达${point.name}` })
+    point.actions.forEach((action) => entries.push({ id: action.id, kind: 'ACTION', stage: 'POINT', pointName: point.name, pointIndex, target, actionType: action.type, content: getActionContent(action), title: getActionLabel(action) }))
     const nextPoint = task.points[pointIndex + 1]
     if (nextPoint) {
       const path = task.paths.find((item) => item.fromPointId === point.id && item.toPointId === nextPoint.id)
       const nextTarget = { x: nextPoint.x, y: nextPoint.y, angle: nextPoint.angle }
-      entries.push({ id: path?.id ?? `move:${point.id}:${nextPoint.id}`, kind: 'MOVE', pointName: point.name, pointIndex, target: nextTarget, title: `移动至${nextPoint.name}`, description: `${point.name} → ${nextPoint.name}` })
-      path?.actions.forEach((action) => entries.push({ id: action.id, kind: 'ACTION', pointName: point.name, pointIndex, target: nextTarget, actionType: action.type, title: getActionLabel(action), description: '途中播报' }))
+      entries.push({ id: path?.id ?? `move:${point.id}:${nextPoint.id}`, kind: 'MOVE', stage: 'PATH', pointName: point.name, pointIndex, target: nextTarget, content: `移动至${nextPoint.name}`, title: `移动至${nextPoint.name}`, description: `${point.name} → ${nextPoint.name}` })
+      path?.actions.forEach((action) => entries.push({ id: action.id, kind: 'ACTION', stage: 'PATH', pointName: point.name, pointIndex, target: nextTarget, actionType: action.type, content: getActionContent(action), title: getActionLabel(action), description: '途中播报' }))
     }
   })
   return entries
@@ -217,7 +214,7 @@ function MapCanvas({ task, map, runtime, picking, pickedPosition, onPick, onConf
   }
 
   return (
-    <div className="rc-map-shell">
+    <><div className="rc-map-shell">
       <div className="rc-map-tools" role="group" aria-label="地图视图控制"><button type="button" className="guide-button guide-button-icon" aria-label="缩小地图" title="缩小" onClick={() => setZoom((value) => Math.max(0.65, value - 0.15))}><ZoomOut size={16} /></button><button type="button" className="guide-button guide-button-icon" aria-label="放大地图" title="放大" onClick={() => setZoom((value) => Math.min(2.5, value + 0.15))}><ZoomIn size={16} /></button><button type="button" className="guide-button guide-button-icon" aria-label="旋转地图" title="旋转" onClick={() => setRotation((value) => value + 15)}><RotateCw size={15} /></button><button type="button" className="guide-button guide-button-icon" aria-label="重置地图视图" title="重置视图" onClick={() => { setZoom(1); setRotation(0); setPan({ x: 0, y: 0 }) }}><RotateCcw size={15} /></button></div>
       <div className={`rc-map-viewport${picking ? ' is-picking' : ''}`} onWheel={onWheel} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={() => { drag.current = null }} onContextMenu={(event) => event.preventDefault()} role="application" aria-label="导览地图，可拖动和缩放">
         <div className="rc-map-layer" style={{ transform: `translate(${pan.x}px,${pan.y}px) scale(${zoom}) rotate(${rotation}deg)` }}>
@@ -231,8 +228,9 @@ function MapCanvas({ task, map, runtime, picking, pickedPosition, onPick, onConf
         </div>
         {!picking ? <div className="rc-map-scale">左键拖动 · 滚轮缩放 · 右键旋转</div> : null}
       </div>
-      {picking ? <div className="rc-map-pick-controls"><p role="status">请在地图上标识机器人所在位置</p><div><button type="button" className="guide-button guide-button-secondary" onClick={onCancel}>取消</button><button type="button" className="guide-button guide-button-primary" disabled={!pickedPosition || disabled} onClick={onConfirm}>确定</button></div></div> : null}
     </div>
+      {picking ? <div className="rc-map-pick-controls"><p role="status">请在地图上标识机器人所在位置</p><div><button type="button" className="guide-button guide-button-secondary" onClick={onCancel}>取消</button><button type="button" className="guide-button guide-button-primary" disabled={!pickedPosition || disabled} onClick={onConfirm}>确定</button></div></div> : null}
+    </>
   )
 }
 
@@ -268,12 +266,13 @@ function RobotDetailPage({ robotId }: { robotId: string }) {
   const [dispatchPending, setDispatchPending] = useState(false)
   const [dispatchProgress, setDispatchProgress] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<RobotTaskSummary | null>(null)
-  const [showFlow, setShowFlow] = useState(true)
+  const [showFlow, setShowFlow] = useState(false)
   const [cameraClock, setCameraClock] = useState('')
   const [agentStarting, setAgentStarting] = useState(false)
   const [taskLoading, setTaskLoading] = useState(false)
   const [picking, setPicking] = useState(false)
   const [pickedPosition, setPickedPosition] = useState<RobotPosition | null>(null)
+  const [relocalizeTrigger, setRelocalizeTrigger] = useState<HTMLElement | null>(null)
   const controlColumn = useRef<HTMLElement | null>(null)
   const tasksQueryKey = [...robotConsoleQueryKey, robotId, 'tasks']
   const robotQuery = useQuery({ queryKey: [...robotConsoleQueryKey, robotId, 'detail'], queryFn: () => robotConsoleApi.getRobot(robotId), refetchInterval: 5000 })
@@ -300,6 +299,24 @@ function RobotDetailPage({ robotId }: { robotId: string }) {
     try { await robotConsoleApi.updateRuntime(robotId, patch); await refreshState(); return true }
     catch (reason) { showToast({ variant: 'error', title: '操作未完成', message: reason instanceof Error ? reason.message : '请检查机器人状态。' }); return false }
   }, [robotId, refreshState, showToast])
+
+  useConfirmModalController({
+    open: Boolean(relocalizeTrigger),
+    title: '重新定位？',
+    description: '确认后将清除当前定位状态，请重新选择一键定位或选点定位。',
+    confirmLabel: '确认重新定位',
+    trigger: relocalizeTrigger,
+    danger: false,
+    onConfirm: () => {
+      setRelocalizeTrigger(null)
+      if (connected && !activeExecution && runtime?.localization === 'LOCALIZED') void updateRuntime({ localization: 'UNLOCALIZED' })
+    },
+    onCancel: () => setRelocalizeTrigger(null),
+  })
+
+  useEffect(() => {
+    if (!showDetail || !connected || activeExecution || runtime?.localization !== 'LOCALIZED') setRelocalizeTrigger(null)
+  }, [showDetail, connected, activeExecution, runtime?.localization])
 
   useEffect(() => {
     const updateClock = () => setCameraClock(new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date()))
@@ -339,6 +356,7 @@ function RobotDetailPage({ robotId }: { robotId: string }) {
   }, [runtime?.localization, runtime?.localizationRequest?.startedAt, connected, updateRuntime, showToast])
 
   useEffect(() => {
+    setShowFlow(false)
     setPicking(false)
     setPickedPosition(null)
     controlColumn.current?.scrollTo({ top: 0 })
@@ -437,7 +455,7 @@ function RobotDetailPage({ robotId }: { robotId: string }) {
   const hasTasks = (downloadedQuery.data?.length ?? 0) > 0
   const canStart = Boolean(selected && !picking && robot.agent === 'ACTIVE' && connected && runtime.localization === 'LOCALIZED' && runtime.execution !== 'RUNNING' && runtime.execution !== 'PAUSED')
   const localizationDisabled = !connected || runtime.localization === 'LOCALIZING' || activeExecution
-  const currentDescription = runtime.execution === 'RUNNING' && currentFlow ? currentFlow.kind === 'MOVE' ? `正在从 ${currentFlow.description}` : `正在进行 ${currentFlow.pointName} - ${currentFlow.title}` : runtime.execution === 'PAUSED' ? '导览已暂停' : runtime.execution === 'ENDED' ? '本次导览已结束' : '导览尚未开始'
+  const currentDescription = runtime.execution === 'RUNNING' && currentFlow ? currentFlow.kind === 'MOVE' ? `正在从 ${currentFlow.description}` : `正在进行 ${currentFlow.pointName} - ${currentFlow.title}` : '导览已暂停'
 
   return (
     <main className="rc-monitor-page">
@@ -460,7 +478,7 @@ function RobotDetailPage({ robotId }: { robotId: string }) {
           </div> : !hasTasks ? <div className="rc-control-placeholder">
             <p>当前机器人上没有导览任务</p>
             <button className="guide-button guide-button-primary" type="button" disabled={!connected || activeExecution} onClick={() => setDispatchOpen(true)}>下发任务</button>
-          </div> : !showDetail ? <section className="rc-task-list-section"><div className="rc-section-title"><h2>导览任务列表 <span className="rc-task-count">{downloadedQuery.data?.length ?? 0}</span></h2><button className="guide-button guide-button-secondary rc-add-task" type="button" disabled={!connected || activeExecution} onClick={() => setDispatchOpen(true)}>下发任务</button></div>
+          </div> : !showDetail ? <section className="rc-task-list-section"><div className="rc-section-title"><h2>导览任务列表 <span className="rc-task-count">{downloadedQuery.data?.length ?? 0}</span></h2><button className="guide-button guide-button-secondary rc-add-task" type="button" disabled={!connected || activeExecution} onClick={() => setDispatchOpen(true)}><Plus aria-hidden="true" size={16} />下发任务</button></div>
             <div className="rc-download-list">{downloadedQuery.data?.map((item) => {
               const latest = platformTasks.find((task) => task.id === item.taskId)
               const outdated = latest && latest.version !== item.taskVersion
@@ -468,20 +486,24 @@ function RobotDetailPage({ robotId }: { robotId: string }) {
               return <div className="rc-downloaded-row" key={item.taskId}><button type="button" className="rc-downloaded-select" disabled={taskLoading || (!currentTask && (!connected || activeExecution || Boolean(outdated)))} onClick={() => void selectTask(item.taskId)}><span><strong>{item.name}</strong><small>{outdated ? '需重新下发' : currentTask && activeExecution ? '当前导览任务' : item.mapName}</small></span><ArrowRight size={16} /></button><button type="button" className="guide-button guide-button-icon rc-remove-task" title={`删除 ${item.name}`} aria-label={`删除 ${item.name}`} disabled={!connected || activeExecution || runtime.localization === 'LOCALIZING'} onClick={() => setDeleteTarget(item)}><Trash2 size={16} /></button></div>
             })}</div>
           </section> : selected ? <>
-            <section className="rc-map-section"><div className="rc-section-title"><h2 title={selected.task.map.name}>{selected.task.map.name}</h2><button className="guide-button guide-button-text rc-back-tasks" type="button" onClick={() => setSearchParams({})}><ArrowLeft size={14} />返回任务列表</button></div>
+            <section className="rc-map-section"><div className="rc-section-title"><button className="guide-button guide-button-icon rc-back-tasks" type="button" title="返回任务列表" aria-label="返回任务列表" onClick={() => setSearchParams({})}><ArrowLeft aria-hidden="true" size={18} /></button><h2 title={selected.task.name}>{selected.task.name}</h2></div>
               <MapCanvas key={selected.task.id} task={selected.task} map={selected.map} runtime={runtime} picking={picking} pickedPosition={pickedPosition} onPick={setPickedPosition} onConfirm={() => { if (pickedPosition) void locate(pickedPosition) }} onCancel={() => { setPicking(false); setPickedPosition(null) }} disabled={localizationDisabled} />
-              <div className="rc-location-controls"><span className={`rc-localization-tag is-${runtime.localization.toLowerCase()}`} role="status"><i />{runtime.localization === 'LOCALIZED' ? '定位正常' : runtime.localization === 'LOCALIZING' ? '定位中' : runtime.localization === 'FAILED' ? '定位失败' : '未定位'}</span><div className="rc-location-actions"><button className="guide-button guide-button-primary" type="button" disabled={localizationDisabled || picking} onClick={() => void locate()}>{runtime.localization === 'UNLOCALIZED' ? '一键定位' : runtime.localization === 'LOCALIZING' ? '定位中…' : '重新定位'}</button>{runtime.localization !== 'LOCALIZED' && runtime.localization !== 'LOCALIZING' ? <button className="guide-button guide-button-secondary" type="button" disabled={localizationDisabled || picking} onClick={() => { setPickedPosition(null); setPicking(true) }}>选点定位</button> : null}</div></div>
+              <div className="rc-location-controls">
+                <span className={`rc-localization-tag is-${runtime.localization.toLowerCase()}`} role="status"><i />{runtime.localization === 'LOCALIZED' ? '定位正常' : runtime.localization === 'LOCALIZING' ? '定位中' : runtime.localization === 'FAILED' ? '定位失败' : '未定位'}</span>
+                <div className="rc-location-actions">
+                  {runtime.localization === 'LOCALIZED' ? <button className="guide-button guide-button-icon rc-relocalize" type="button" title="重新定位" aria-label="重新定位" disabled={localizationDisabled} onClick={(event) => setRelocalizeTrigger(event.currentTarget)}><RotateCcw aria-hidden="true" size={16} /></button> : <>
+                    <button className="guide-button guide-button-primary" type="button" disabled={localizationDisabled || picking} onClick={() => void locate()}>一键定位</button>
+                    <button className="guide-button guide-button-secondary" type="button" disabled={localizationDisabled || picking} onClick={() => { setPickedPosition(null); setPicking(true) }}>选点定位</button>
+                  </>}
+                </div>
+              </div>
             </section>
 
-            <section className="rc-execution-section"><div className="rc-section-title"><div><span className="rc-eyebrow">任务操控</span><h2>{selected.task.name}</h2></div><span className={`rc-execution-tag is-${runtime.execution.toLowerCase()}`}>{runtime.execution === 'RUNNING' ? '执行中' : runtime.execution === 'PAUSED' ? '已暂停' : runtime.execution === 'ENDED' ? '已结束' : '待开始'}</span></div>
-              <p className={`rc-current-state${runtime.execution === 'RUNNING' ? ' is-running' : ''}`} role="status">{runtime.voiceTakeover && runtime.execution === 'RUNNING' && currentFlow?.actionType === 'SPEECH' ? '人工接管中 · 自动播报暂停，路线继续执行' : currentDescription}</p>
-              <div className="rc-execution-controls">{runtime.execution === 'RUNNING' ? <><button className="guide-button guide-button-secondary" type="button" disabled={!connected} onClick={() => void runControl('PAUSE')}><Pause size={15} />暂停导览</button><button className="guide-button guide-button-secondary" type="button" disabled={!connected} onClick={() => void runControl('NEXT')}>下一步<ArrowRight size={15} /></button><button className="guide-button guide-button-danger" type="button" disabled={!connected} onClick={() => void runControl('END')}><X size={15} />结束导览</button></> : runtime.execution === 'PAUSED' ? <><button className="guide-button guide-button-primary" type="button" disabled={!connected} onClick={() => void runControl('RESUME')}><Play size={15} />继续导览</button><button className="guide-button guide-button-secondary" type="button" disabled={!connected} onClick={() => void runControl('NEXT')}>下一步<ArrowRight size={15} /></button><button className="guide-button guide-button-danger" type="button" disabled={!connected} onClick={() => void runControl('END')}><X size={15} />结束导览</button></> : <button className="guide-button guide-button-primary" type="button" disabled={!canStart} onClick={() => void runControl('START')}><Play size={15} />{runtime.execution === 'ENDED' ? '再次开始' : '开始导览'}</button>}</div>
-              <div className="rc-flow-header"><div><strong>导览流程</strong><span>{flow.length} 个步骤</span></div><button type="button" className="guide-button guide-button-text" aria-expanded={showFlow} onClick={() => setShowFlow((value) => !value)}>{showFlow ? '收起流程' : '展开流程'}<ChevronDown className={showFlow ? 'is-expanded' : ''} size={16} /></button></div>
-              {showFlow ? <div className="rc-flow-list">{flow.map((entry, index) => {
-                const complete = runtime.execution === 'ENDED' || index < runtime.currentFlowIndex
-                const current = runtime.execution !== 'ENDED' && index === runtime.currentFlowIndex && runtime.execution !== 'IDLE'
-                return <div className={`rc-flow-item${complete ? ' is-complete' : ''}${current ? ' is-current' : ''}`} key={entry.id}><span className="rc-flow-marker">{complete ? <Check size={12} /> : entry.kind === 'MOVE' ? <Move size={12} /> : index + 1}</span><span className="rc-flow-copy"><strong>{entry.kind === 'MOVE' ? entry.description : entry.pointName}</strong><small>{entry.title}{entry.description && entry.kind !== 'MOVE' ? ` · ${entry.description}` : ''}</small></span>{current ? <span className="rc-flow-now">进行中</span> : null}</div>
-              })}</div> : null}
+            <section className="rc-execution-section" aria-label="导览控制">
+              {activeExecution ? <p className={`rc-current-state${runtime.execution === 'RUNNING' ? ' is-running' : ''}`} role="status">{runtime.voiceTakeover && runtime.execution === 'RUNNING' && currentFlow?.actionType === 'SPEECH' ? '人工接管中 · 自动播报暂停，路线继续执行' : currentDescription}</p> : null}
+              <div className="rc-execution-controls">{runtime.execution === 'RUNNING' ? <><button className="guide-button guide-button-secondary" type="button" disabled={!connected} onClick={() => void runControl('PAUSE')}><Pause size={15} />暂停导览</button><button className="guide-button guide-button-secondary" type="button" disabled={!connected} onClick={() => void runControl('NEXT')}>下一步<ArrowRight size={15} /></button><button className="guide-button guide-button-danger" type="button" disabled={!connected} onClick={() => void runControl('END')}><X size={15} />结束导览</button></> : runtime.execution === 'PAUSED' ? <><button className="guide-button guide-button-primary" type="button" disabled={!connected} onClick={() => void runControl('RESUME')}><Play size={15} />继续导览</button><button className="guide-button guide-button-secondary" type="button" disabled={!connected} onClick={() => void runControl('NEXT')}>下一步<ArrowRight size={15} /></button><button className="guide-button guide-button-danger" type="button" disabled={!connected} onClick={() => void runControl('END')}><X size={15} />结束导览</button></> : <button className="guide-button guide-button-primary" type="button" disabled={!canStart} onClick={() => void runControl('START')}><Play size={15} />开始导览</button>}</div>
+              <div className="rc-flow-header"><div><h2>导览流程</h2><span>{flow.length} 个步骤</span></div><button type="button" className="guide-button guide-button-text" aria-expanded={showFlow} aria-controls="rc-tour-flow" onClick={() => setShowFlow((value) => !value)}>{showFlow ? '收起流程' : '展开流程'}<ChevronDown aria-hidden="true" className={showFlow ? 'is-expanded' : ''} size={16} /></button></div>
+              {showFlow ? <RobotTourFlow task={selected.task} flow={flow} runtime={runtime} /> : null}
             </section>
           </> : null}
         </section>

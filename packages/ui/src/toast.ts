@@ -90,7 +90,7 @@ export function createToast({
   variant = 'info',
   title,
   duration = defaultDuration,
-  dismissible = true,
+  dismissible = false,
   pauseOnHover = true,
   pauseOnFocus = true,
   closeLabel = '关闭通知',
@@ -120,10 +120,13 @@ export function createToast({
     content.append(titleElement)
   }
 
-  const messageElement = document.createElement('div')
-  messageElement.className = toastClasses.message
-  appendContent(messageElement, message)
-  content.append(messageElement)
+  const hasMessage = typeof message === 'string' ? message.trim().length > 0 : true
+  if (hasMessage) {
+    const messageElement = document.createElement('div')
+    messageElement.className = toastClasses.message
+    appendContent(messageElement, message)
+    content.append(messageElement)
+  }
   toast.append(content)
 
   let closeButton: HTMLButtonElement | undefined
