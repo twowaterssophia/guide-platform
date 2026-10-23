@@ -1,5 +1,5 @@
 :root {
-  /* Hi Chat Design -> 导览后台：design-spec.md v1.6 */
+  /* Hi Chat Design -> 导览后台：design-spec.md v1.12 */
 
   /* Color */
   --guide-color-page: #ffffff;
@@ -18,24 +18,45 @@
   --guide-color-text-placeholder: #8a8a8a;
   --guide-color-text-secondary: var(--guide-color-text-muted);
   --guide-color-text-tertiary: var(--guide-color-text-placeholder);
+  --guide-color-text-inverse: #ffffff;
   --guide-color-border-strong: rgb(188 188 188 / 16%);
   --guide-color-border: #d9d9d9;
+  --guide-color-border-hover: #a6a6a6;
+  --guide-color-illustration: #bdbdbd;
+  --guide-color-illustration-detail: #8c8c8c;
   --guide-color-divider: #ededed;
   --guide-color-table-divider: #f0f0f2;
   --guide-color-surface-subtle: #f8f8f8;
   --guide-color-surface-hover: #f3f3f3;
+  --guide-color-table-head: #f5f5f7;
+  --guide-color-table-hover: #fafafa;
+  --guide-color-surface-overlay: rgb(255 255 255 / 92%);
+  --guide-color-surface-translucent: rgb(255 255 255 / 62%);
   --guide-color-accent: #6e63ff;
   --guide-color-accent-soft: rgb(110 99 255 / 15%);
   --guide-color-primary: var(--guide-color-accent);
   --guide-color-primary-hover: #5b52e8;
   --guide-color-primary-soft: var(--guide-color-accent-soft);
+  --guide-color-primary-tint: #f9f8ff;
   --guide-color-focus: var(--guide-color-accent);
   --guide-color-danger: #b42318;
   --guide-color-danger-hover: #8f1d14;
+  --guide-color-danger-soft: #fef3f2;
+  --guide-color-danger-focus: rgb(180 35 24 / 16%);
   --guide-color-success: #2f7d4a;
+  --guide-color-success-soft: rgb(47 125 74 / 12%);
+  --guide-color-warning: #8a4b08;
+  --guide-color-warning-soft: #fff7e6;
+  --guide-color-info: #175cd3;
+  --guide-color-info-soft: #eff8ff;
   --guide-color-disabled: #999999;
   --guide-color-disabled-surface: #e5e5e5;
   --guide-color-backdrop: rgb(0 0 0 / 32%);
+  /* Media overlays remain dark for legibility over footage. */
+  --guide-color-media-background: #1c1c1c;
+  --guide-color-media-overlay: rgb(0 0 0 / 65%);
+  --guide-color-media-text: rgb(255 255 255 / 76%);
+  --guide-color-media-border: rgb(255 255 255 / 48%);
 
   /* Typography */
   --guide-font-sans: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -93,4 +114,7 @@
   --guide-shadow-popover: 0 10px 24px rgb(0 0 0 / 10%);
   --guide-shadow-modal: 0 20px 60px rgb(0 0 0 / 12%);
   --guide-shadow-toast: 0 10px 30px rgb(0 0 0 / 12%);
+  --guide-shadow-control: 0 1px 3px rgb(0 0 0 / 20%);
+  --guide-shadow-map-marker: 0 2px 7px rgb(0 0 0 / 22%);
+  --guide-shadow-navigation: 0 2px 8px rgb(34 28 64 / 5%);
 }

@@ -56,10 +56,12 @@ export function PersonaListPage() {
           <h1 id="personas-title">人设</h1>
           <p className="page-summary">设置导览时机器人的说话方式</p>
         </div>
-        {showHeaderAction ? <button className="guide-button guide-button-primary" type="button" onClick={() => navigate('/voice/personas/new')}>
-          <Plus aria-hidden="true" size={16} strokeWidth={2.2} />
-          新建人设
-        </button> : null}
+        <div className="page-heading-actions">
+          {showHeaderAction ? <button className="guide-button guide-button-primary" type="button" onClick={() => navigate('/voice/personas/new')}>
+            <Plus aria-hidden="true" size={16} strokeWidth={2.2} />
+            新建人设
+          </button> : null}
+        </div>
       </div>
       {personasQuery.isLoading ? <div className="state-panel">正在加载人设</div> : null}
       {personasQuery.isError ? <div className="state-panel state-error">暂时无法加载人设，请检查本地服务。</div> : null}

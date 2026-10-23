@@ -341,6 +341,69 @@ export const agentTaskPackageSchema = z.object({
 })
 export type AgentTaskPackage = z.infer<typeof agentTaskPackageSchema>
 
+export const robotConnectionSchema = z.enum(['CONNECTED', 'DISCONNECTED'])
+export type RobotConnection = z.infer<typeof robotConnectionSchema>
+
+export const tourAgentStateSchema = z.enum(['NOT_ACTIVE', 'ACTIVE'])
+export type TourAgentState = z.infer<typeof tourAgentStateSchema>
+
+export const robotDispatchStateSchema = z.enum(['DISPATCHED'])
+export type RobotDispatchState = z.infer<typeof robotDispatchStateSchema>
+
+export const robotExecutionStateSchema = z.enum(['IDLE', 'RUNNING', 'PAUSED', 'ENDED'])
+export type RobotExecutionState = z.infer<typeof robotExecutionStateSchema>
+
+export const robotLocalizationStateSchema = z.enum(['UNLOCALIZED', 'LOCALIZING', 'LOCALIZED', 'FAILED'])
+export type RobotLocalizationState = z.infer<typeof robotLocalizationStateSchema>
+
+export const robotPositionSchema = z.object({ x: z.number().finite(), y: z.number().finite(), angle: z.number().finite().default(0) })
+export type RobotPosition = z.infer<typeof robotPositionSchema>
+
+export const robotTaskSummarySchema = z.object({
+  taskId: z.string(),
+  name: z.string(),
+  mapId: z.string(),
+  mapName: z.string(),
+  taskVersion: z.number().int().positive(),
+  dispatchState: robotDispatchStateSchema,
+  downloadedAt: z.string().datetime(),
+})
+export type RobotTaskSummary = z.infer<typeof robotTaskSummarySchema>
+
+export const robotRuntimeStateSchema = z.object({
+  selectedTaskId: z.string().nullable(),
+  position: robotPositionSchema.nullable(),
+  localization: robotLocalizationStateSchema,
+  localizationRequest: z.object({
+    mode: z.enum(['START', 'POINT']),
+    target: robotPositionSchema,
+    startedAt: z.number().finite(),
+  }).nullable().default(null),
+  execution: robotExecutionStateSchema,
+  currentFlowIndex: z.number().int().nonnegative(),
+  voiceTakeover: z.boolean(),
+  voice: z.enum(['MALE', 'FEMALE']),
+  volume: z.number().int().min(0).max(100),
+  muted: z.boolean(),
+})
+export type RobotRuntimeState = z.infer<typeof robotRuntimeStateSchema>
+
+export const robotSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  connection: robotConnectionSchema,
+  batteryPercent: z.number().int().min(0).max(100),
+  tourTaskCount: z.number().int().nonnegative(),
+})
+export type RobotSummary = z.infer<typeof robotSummarySchema>
+
+export const robotDetailSchema = robotSummarySchema.extend({
+  agent: tourAgentStateSchema,
+  video: z.enum(['AVAILABLE', 'UNAVAILABLE']),
+  runtime: robotRuntimeStateSchema,
+})
+export type RobotDetail = z.infer<typeof robotDetailSchema>
+
 export const pluginAuthTypeSchema = z.enum(['NONE', 'BEARER', 'API_KEY', 'BASIC'])
 export type PluginAuthType = z.infer<typeof pluginAuthTypeSchema>
 

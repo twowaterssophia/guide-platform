@@ -1,9 +1,9 @@
 .guide-tag {
   align-items: center;
   background: var(--guide-color-surface-subtle);
-  border: 1px solid #dedede;
+  border: 1px solid var(--guide-color-border);
   border-radius: var(--guide-radius-sm);
-  color: #565656;
+  color: var(--guide-color-text);
   display: inline-flex;
   font-family: var(--guide-font-sans);
   font-size: var(--guide-type-caption-size);
@@ -21,25 +21,25 @@
 
 .guide-tag-default {
   background: var(--guide-color-surface-subtle);
-  color: #565656;
+  color: var(--guide-color-text);
 }
 
 .guide-tag-success {
-  background: rgb(47 125 74 / 12%);
+  background: var(--guide-color-success-soft);
   color: var(--guide-color-success);
 }
 
 .guide-tag-warning {
-  background: #fff7e6;
-  color: #8a4b08;
+  background: var(--guide-color-warning-soft);
+  color: var(--guide-color-warning);
 }
 
 .guide-tag-danger {
-  background: #fef3f2;
+  background: var(--guide-color-danger-soft);
   color: var(--guide-color-danger);
 }
 
 .guide-tag-info {
-  background: #eff8ff;
-  color: #175cd3;
+  background: var(--guide-color-info-soft);
+  color: var(--guide-color-info);
 }

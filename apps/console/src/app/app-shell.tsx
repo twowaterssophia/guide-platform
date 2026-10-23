@@ -1,18 +1,53 @@
-import { BookOpen, Map, MapPinned, MicVocal, Puzzle, RotateCcw, Route, UserRound } from 'lucide-react'
+import { BookOpen, FolderOpen, Map, MapPinned, Plug, RotateCcw, Route, UserRound } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { resetDemoData } from './demo-data-api'
 import { useConfirmModalController, useToastStackController } from '../ui-adapters'
+import { RobotIcon } from '../ui/robot-icon'
 
 const operationGuideUrl = 'https://booster.feishu.cn/wiki/T8uaws69pi6dEbkU2L6cUNhonbc'
 
 const navItems = [
   { label: '导览任务', to: '/tour-tasks', icon: Route },
-  { label: '地图', to: '/maps', icon: Map },
-  { label: '人设', to: '/voice/personas', icon: MicVocal },
+  { label: '机器人', to: '/robots', icon: RobotIcon },
 ]
+
+const resourceItems = [
+  { label: '地图', to: '/maps', icon: Map, prefixes: ['/maps'] },
+  { label: '人设', to: '/voice/personas', icon: UserRound, prefixes: ['/voice/personas'] },
+  { label: '知识库', to: '/knowledge-bases', icon: BookOpen, prefixes: ['/knowledge-bases'] },
+  { label: '插件管理', to: '/voice/plugins', icon: Plug, prefixes: ['/voice/plugins'] },
+]
+
+function matchesSection(pathname: string, prefix: string) {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`)
+}
+
+function TourSidebar({ pathname }: { pathname: string }) {
+  const resourcesActive = resourceItems.some(({ prefixes }) => prefixes.some((prefix) => matchesSection(pathname, prefix)))
+
+  return (
+    <nav className="tour-subnav" aria-label="导览任务侧边导航">
+      <NavLink to="/tour-tasks"><Route aria-hidden="true" size={17} strokeWidth={1.8} /><span>流程配置</span></NavLink>
+      <div
+        className={`tour-resource-heading${resourcesActive ? ' is-active' : ''}`}
+        id="tour-resource-heading"
+      >
+        <FolderOpen aria-hidden="true" size={17} strokeWidth={1.8} />
+        <span>资源管理</span>
+      </div>
+      <div className="tour-resource-links" role="group" aria-labelledby="tour-resource-heading">
+        {resourceItems.map(({ label, to, icon: Icon, prefixes }) => (
+          <Link key={to} to={to} aria-current={prefixes.some((prefix) => matchesSection(pathname, prefix)) ? 'page' : undefined}>
+            <Icon aria-hidden="true" size={17} strokeWidth={1.8} /><span>{label}</span>
+          </Link>
+        ))}
+      </div>
+    </nav>
+  )
+}
 
 function AccountMenu() {
   const navigate = useNavigate()
@@ -107,8 +142,10 @@ function AccountMenu() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation()
-  const isVoiceRoute = location.pathname.startsWith('/voice')
-  const isVoiceEditorRoute = /^\/voice\/(personas|plugins)\/(new|[^/]+\/edit)$/.test(location.pathname)
+  const isRobotMonitor = /^\/robots\/[^/]+$/.test(location.pathname)
+  const isRobotRoute = matchesSection(location.pathname, '/robots')
+
+  if (isRobotMonitor) return <div className="robot-standalone-shell">{children}</div>
 
   return (
     <div className="app-shell">
@@ -121,24 +158,21 @@ export function AppShell({ children }: { children: ReactNode }) {
         </NavLink>
         <nav className="primary-nav" aria-label="主要导航">
           {navItems.map(({ label, to, icon: Icon }) => (
-            <NavLink key={to} className={({ isActive }) => `nav-link${isActive ? ' is-active' : ''}`} to={to}>
+            <Link key={to} className={`nav-link${(to === '/robots' ? isRobotRoute : !isRobotRoute) ? ' is-active' : ''}`} aria-current={(to === '/robots' ? isRobotRoute : !isRobotRoute) ? 'page' : undefined} to={to}>
               <Icon aria-hidden="true" size={16} strokeWidth={1.8} />
               {label}
-            </NavLink>
+            </Link>
           ))}
         </nav>
         <div className="account-area">
           <AccountMenu />
         </div>
       </header>
-      <main className={`page-content${isVoiceEditorRoute ? ' voice-editor-shell' : ''}`}>
-        {isVoiceRoute && !isVoiceEditorRoute ? (
-          <div className="voice-layout">
-            <nav className="voice-subnav" aria-label="语音功能">
-              <NavLink to="/voice/personas"><UserRound aria-hidden="true" size={17} strokeWidth={1.8} /><span>人设</span></NavLink>
-              <NavLink to="/voice/plugins"><Puzzle aria-hidden="true" size={17} strokeWidth={1.8} /><span>插件</span></NavLink>
-            </nav>
-            <div className="voice-content">{children}</div>
+      <main className="page-content">
+        {!isRobotRoute ? (
+          <div className="tour-layout">
+            <TourSidebar key={location.pathname} pathname={location.pathname} />
+            <div className="tour-content">{children}</div>
           </div>
         ) : children}
       </main>

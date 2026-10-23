@@ -10,21 +10,94 @@ test('GUIDE HUB brand returns to the tour task list', async ({ page }) => {
   await expect(page).toHaveURL(/\/tour-tasks$/)
 })
 
-test('voice routes provide a persistent secondary navigation', async ({ page }) => {
+test('tour resources share the two-tab primary navigation and nested sidebar', async ({ page }) => {
   await page.goto('/voice/personas')
 
-  const subnav = page.getByRole('navigation', { name: '语音功能' })
+  const primary = page.getByRole('navigation', { name: '主要导航' })
+  await expect(primary.getByRole('link')).toHaveText(['导览任务', '机器人'])
+  await expect(primary.getByRole('link', { name: '导览任务' })).toHaveAttribute('aria-current', 'page')
+  const subnav = page.getByRole('navigation', { name: '导览任务侧边导航' })
   await expect(subnav).toBeVisible()
+  await expect(subnav.getByRole('link')).toHaveText(['流程配置', '地图', '人设', '知识库', '插件管理'])
   await expect(subnav.getByRole('link', { name: '人设' })).toHaveAttribute('aria-current', 'page')
-  await expect(subnav.getByRole('link', { name: '插件' })).toBeVisible()
+  await expect(subnav.getByRole('group', { name: '资源管理' })).toBeVisible()
+  await expect(subnav.getByRole('button')).toHaveCount(0)
 })
 
-test('persona and plugin editor routes use their own full-page layout', async ({ page }) => {
-  for (const path of ['/voice/personas/new', '/voice/plugins/new']) {
+test('editors retain the tour navigation and highlight the owning section', async ({ page }) => {
+  for (const [path, section] of [['/tour-tasks/new', '流程配置'], ['/voice/personas/new', '人设'], ['/voice/plugins/new', '插件管理']]) {
     await page.goto(path)
-    await expect(page.getByRole('navigation', { name: '语音功能' })).toHaveCount(0)
+
+    await expect(page.getByRole('navigation', { name: '主要导航' }).getByRole('link', { name: '导览任务' })).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByRole('navigation', { name: '导览任务侧边导航' }).getByRole('link', { name: section })).toHaveAttribute('aria-current', 'page')
     await expect(page.locator('.page-section')).toBeVisible()
   }
+})
+
+test('resource group stays expanded while navigating between resources', async ({ page }) => {
+  await page.goto('/tour-tasks')
+  const subnav = page.getByRole('navigation', { name: '导览任务侧边导航' })
+  const resources = subnav.getByRole('group', { name: '资源管理' })
+  await expect(resources.getByRole('link')).toHaveCount(4)
+  await expect(subnav.getByRole('link', { name: '地图' })).toBeVisible()
+
+  await subnav.getByRole('link', { name: '地图' }).click()
+  await expect(page).toHaveURL(/\/maps$/)
+  await expect(subnav.getByRole('link', { name: '地图' })).toHaveAttribute('aria-current', 'page')
+  await expect(subnav.getByRole('link', { name: '流程配置' })).not.toHaveAttribute('aria-current', 'page')
+  await subnav.getByRole('link', { name: '知识库' }).click()
+  await expect(page).toHaveURL(/\/knowledge-bases$/)
+  await expect(page.getByRole('heading', { name: '知识库', exact: true })).toBeVisible()
+  await expect(subnav.getByRole('link', { name: '知识库' })).toHaveAttribute('aria-current', 'page')
+  await page.reload()
+  await expect(resources).toBeVisible()
+  await expect(resources.getByRole('link')).toHaveCount(4)
+  await expect(subnav.getByRole('link', { name: '知识库' })).toHaveAttribute('aria-current', 'page')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+})
+
+test('plugin management has its own resource navigation entry', async ({ page }) => {
+  await page.goto('/voice/personas')
+  const subnav = page.getByRole('navigation', { name: '导览任务侧边导航' })
+  await expect(page.locator('.page-heading').getByRole('link', { name: '插件管理' })).toHaveCount(0)
+  await subnav.getByRole('link', { name: '插件管理', exact: true }).click()
+  await expect(page).toHaveURL(/\/voice\/plugins$/)
+  await expect(page.getByRole('heading', { name: '插件', exact: true })).toBeVisible()
+  await expect(subnav.getByRole('link', { name: '插件管理' })).toHaveAttribute('aria-current', 'page')
+  await expect(subnav.getByRole('link', { name: '人设' })).not.toHaveAttribute('aria-current', 'page')
+  await subnav.getByRole('link', { name: '人设' }).click()
+  await expect(page).toHaveURL(/\/voice\/personas$/)
+})
+
+test('robot list and standalone monitor keep their navigation boundaries', async ({ page }) => {
+  await page.goto('/knowledge-bases')
+  const primary = page.getByRole('navigation', { name: '主要导航' })
+  await primary.getByRole('link', { name: '机器人' }).click()
+  await expect(primary.getByRole('link', { name: '机器人' })).toHaveAttribute('aria-current', 'page')
+  await expect(page.getByRole('navigation', { name: '导览任务侧边导航' })).toHaveCount(0)
+  const robot = page.getByRole('row', { name: '查看机器人 T2 V1.2 - 999', exact: true })
+  await robot.getByRole('button', { name: '下发任务', exact: true }).click()
+  await expect(page.getByRole('dialog', { name: '下发导览任务' })).toBeVisible()
+  await expect(page).toHaveURL(/\/robots$/)
+  await page.getByRole('button', { name: '取消', exact: true }).click()
+  await robot.getByText('T2 V1.2 - 999', { exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'T2 V1.2 - 999', exact: true })).toBeVisible()
+  await expect(primary).toHaveCount(0)
+  await page.getByRole('button', { name: '返回机器人列表' }).click()
+  await robot.focus()
+  await robot.press('Enter')
+  await expect(page.getByRole('heading', { name: 'T2 V1.2 - 999', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '返回机器人列表' }).click()
+  const dispatch = robot.getByRole('button', { name: '下发任务', exact: true })
+  await expect(dispatch).toHaveAttribute('title', '下发任务')
+  await expect(dispatch).toHaveText('')
+  await dispatch.focus()
+  await dispatch.press('Space')
+  await expect(page.getByRole('dialog', { name: '下发导览任务' })).toBeVisible()
+  await expect(page).toHaveURL(/\/robots$/)
+  await page.getByRole('button', { name: '取消', exact: true }).click()
+  await primary.getByRole('link', { name: '导览任务' }).click()
+  await expect(page.getByRole('navigation', { name: '导览任务侧边导航' }).getByRole('link', { name: '流程配置' })).toHaveAttribute('aria-current', 'page')
 })
 
 test('map, persona, and task empty states reuse the legacy illustrations', async ({ page }) => {
@@ -144,7 +217,7 @@ test('core D3-01 routes render without console errors', async ({ page }) => {
   })
   page.on('pageerror', (error) => errors.push(error.message))
 
-  for (const path of ['/tour-tasks', '/voice/personas', '/maps']) {
+  for (const path of ['/tour-tasks', '/voice/personas', '/voice/plugins', '/maps', '/knowledge-bases', '/robots']) {
     await page.goto(path)
     await expect(page.getByRole('main')).toBeVisible()
   }

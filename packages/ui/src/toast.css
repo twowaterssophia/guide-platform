@@ -80,12 +80,12 @@
 }
 
 .guide-toast-warning {
-  background: #fff7e6;
-  border-left-color: #8a4b08;
+  background: var(--guide-color-warning-soft);
+  border-left-color: var(--guide-color-warning);
 }
 
 .guide-toast-error {
-  background: #fef3f2;
+  background: var(--guide-color-danger-soft);
   border-left-color: var(--guide-color-danger);
 }
 
