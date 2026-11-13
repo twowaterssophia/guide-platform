@@ -133,9 +133,6 @@ export class TourTasksService {
 
   private async resolvePersonaId(input: TourTaskWriteInput) {
     if (input.personaId) return input.personaId
-    const hasVoiceTask = input.points.some((point) => point.actions.some((action) => action.type === 'SPEECH' || action.type === 'INTERACTION'))
-      || input.paths.some((path) => path.actions.some((action) => action.type === 'SPEECH' || action.type === 'INTERACTION'))
-    if (!hasVoiceTask) return null
     const defaultPersona = await this.prisma.persona.findFirst({ where: { isSystemDefault: true }, select: { id: true } })
     if (!defaultPersona) throw new ConflictException({ code: 'SYSTEM_PERSONA_MISSING', message: '系统默认人设不可用' })
     return defaultPersona.id

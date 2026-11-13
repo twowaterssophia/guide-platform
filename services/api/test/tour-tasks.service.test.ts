@@ -119,6 +119,24 @@ test('tour task CRUD preserves ownership, ordering, versions, and cascades', asy
     }), BadRequestException)
   })
 
+  await context.test('assigns the system persona when creating or updating a task without voice actions', async () => {
+    const defaultPersona = await prisma.persona.findFirst({ where: { isSystemDefault: true } })
+    assert.ok(defaultPersona, 'the seeded system persona must be available')
+    const input: TourTaskWriteInput = {
+      ...writeInput,
+      personaId: null,
+      points: writeInput.points.map((point) => ({ ...point, actions: [] })),
+      paths: writeInput.paths.map((path) => ({ ...path, actions: [] })),
+    }
+    const created = await service.create(input)
+    assert.equal(created.persona?.id, defaultPersona.id)
+
+    const custom = await service.update(created.id, { ...input, personaId: persona.id, expectedVersion: created.version })
+    assert.equal(custom.persona?.id, persona.id)
+    const updated = await service.update(created.id, { ...input, expectedVersion: custom.version })
+    assert.equal(updated.persona?.id, defaultPersona.id)
+  })
+
   await context.test('detects a stale version after one successful update', async () => {
     const created = await service.create({ ...writeInput, name: 'Versioned tour' })
     const updated = await service.update(created.id, {
